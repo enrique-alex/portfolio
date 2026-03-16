@@ -189,7 +189,7 @@ function ToolCard({ tool }: { tool: MarqueeTool }) {
   const IconComp = tool.icon;
   return (
     <div 
-      className="tool-card group relative flex flex-shrink-0 items-center gap-3 rounded-2xl border border-black/[0.06] bg-white/60 px-5 py-3.5 backdrop-blur-sm transition-all duration-500 hover:scale-105 dark:border-white/[0.08] dark:bg-white/[0.03]"
+      className="tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] bg-white/60 px-4 py-2.5 sm:px-5 sm:py-3.5 backdrop-blur-sm transition-all duration-500 hover:scale-105 dark:border-white/[0.08] dark:bg-white/[0.03]"
       style={{
         // @ts-expect-error CSS custom properties
         '--brand': tool.brandColor,
@@ -204,7 +204,7 @@ function ToolCard({ tool }: { tool: MarqueeTool }) {
         }}
       />
       {/* Icon wrapper with brand color pulse */}
-      <div className="relative z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.04] bg-black/[0.02] transition-all duration-500 group-hover:border-transparent dark:border-white/[0.06] dark:bg-white/[0.04]"
+      <div className="relative z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-black/[0.04] bg-black/[0.02] transition-all duration-500 group-hover:border-transparent dark:border-white/[0.06] dark:bg-white/[0.04]"
         style={{
           // Hover will be driven by the parent group
         }}
@@ -222,7 +222,7 @@ function ToolCard({ tool }: { tool: MarqueeTool }) {
           style={{ background: tool.brandColor }}
         />
       </div>
-      <span className="relative z-10 text-sm font-medium whitespace-nowrap text-zinc-600 transition-colors duration-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white">
+      <span className="relative z-10 text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-600 transition-colors duration-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white">
         {tool.name}
       </span>
     </div>
@@ -446,7 +446,7 @@ export default function SkillsSection() {
           <div className="relative z-10">
             <div className="mb-8 flex flex-col items-center">
               <div className="mb-3 h-px w-16 bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-600" />
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-600 dark:text-zinc-400">
                 Outils & Technologies
               </p>
               <p className="mt-1 text-[11px] text-zinc-400/60 dark:text-zinc-500/50">

@@ -83,7 +83,7 @@ export default function Home() {
 
             {/* Titre Principal (Scramble Hardware Reveal) */}
             <h1 className="z-10 w-full text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4rem] tracking-tighter leading-[1.05] font-extrabold">
-              <div className={`flex flex-col ${displayText !== TARGET_TEXT ? "font-mono font-normal tracking-tight text-3xl sm:text-5xl md:text-5xl lg:text-6xl" : ""}`}>
+              <div className={`flex flex-col ${displayText !== TARGET_TEXT ? "font-mono font-normal tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl" : ""}`}>
                 {displayText ? displayText.split('\n').map((line, i) => (
                   <span 
                     key={i} 
@@ -106,7 +106,7 @@ export default function Home() {
               </div>
             </h1>
             
-            <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-zinc-600 md:text-xl dark:text-white/50">
+            <p className="mt-8 max-w-2xl text-base font-light leading-relaxed text-zinc-600 md:text-xl dark:text-white/50">
               <span className="font-semibold text-zinc-900 dark:text-white/80">Élève Ingénieur en Énergie & Industrie du Futur (Polytech Lille).</span><br/>
               Actuellement Ingénieur Apprenti en Automatisme et Informatique Industrielle chez <span className="font-medium text-brand-blue dark:text-[#8AB4F8]">Minakem Dunkerque</span>. Je conçois et déploie des solutions reliant l'intelligence logicielle (C/C++, Python) aux architectures matérielles et industrielles critiques.
             </p>

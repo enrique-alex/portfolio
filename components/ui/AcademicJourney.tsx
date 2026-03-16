@@ -138,9 +138,9 @@ export default function AcademicJourney() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: false, margin: "-20%" }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className={`flex-1 w-full pl-20 md:pl-0 ${isEven ? "md:text-right" : "md:text-left"}`}
+                  className={`flex-1 w-full pl-16 sm:pl-20 md:pl-0 ${isEven ? "md:text-right" : "md:text-left"}`}
                 >
-                   <h3 className="text-6xl md:text-7xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter" 
+                   <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter" 
                        style={{ WebkitTextStroke: "1.5px currentColor", color: "transparent" }}>
                      <span className="text-zinc-900/20 dark:text-white/20 select-none">
                        {item.year.split(" - ")[0]}

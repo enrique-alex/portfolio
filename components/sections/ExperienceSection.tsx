@@ -97,7 +97,7 @@ export default function ExperienceSection() {
                 <button
                   onClick={() => toggleExpand(exp.id)}
                   className={`
-                    relative z-10 flex w-full flex-col items-start gap-4 border-l-[3px] bg-black/[0.01] px-6 py-6 
+                    relative z-10 flex w-full flex-col items-start gap-4 border-l-[3px] bg-black/[0.01] px-4 py-5 sm:px-6 sm:py-6 
                     text-left transition-all duration-500 hover:bg-black/[0.03] 
                     dark:bg-white/[0.01] dark:hover:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between
                     ${isExpanded ? 'backdrop-blur-sm' : ''}
@@ -173,7 +173,7 @@ export default function ExperienceSection() {
                       className="overflow-hidden"
                     >
                       <div className={`
-                        border-l-[3px] px-6 py-8 backdrop-blur-md sm:px-8
+                        border-l-[3px] px-4 py-6 sm:px-8 sm:py-8 backdrop-blur-md
                         ${isActive ? 'border-emerald-500/50 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]' : 'border-zinc-300 bg-black/[0.02] dark:border-zinc-700 dark:bg-white/[0.02]'}
                       `}>
                         <div className="grid gap-10 md:grid-cols-3">
