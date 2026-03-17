@@ -43,7 +43,7 @@ export default function ExperienceSection() {
   };
 
   return (
-    <section id="experience" className="relative w-full py-24 lg:py-32">
+    <section id="experience" className="relative w-full py-24 lg:py-32 scroll-mt-32">
       {/* Background Grid & Blur */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.02] dark:opacity-[0.03]"
         style={{

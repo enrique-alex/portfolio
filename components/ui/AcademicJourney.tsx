@@ -62,7 +62,7 @@ export default function AcademicJourney() {
   const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <section ref={containerRef} id="academic" className="relative w-full max-w-7xl mx-auto py-32 px-4 sm:px-8 overflow-hidden z-10">
+    <section ref={containerRef} id="academic" className="relative w-full max-w-7xl mx-auto py-32 px-4 sm:px-8 overflow-hidden z-10 scroll-mt-32">
       
       {/* HEADER - System Process Monitor Style */}
       <motion.div 

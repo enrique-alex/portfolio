@@ -277,7 +277,7 @@ export default function SkillsSection() {
   const bottomRow = MARQUEE_TOOLS.slice(Math.ceil(MARQUEE_TOOLS.length / 2));
 
   return (
-    <section id="skills" className="relative w-full overflow-hidden py-32 lg:py-40">
+    <section id="skills" className="relative w-full overflow-hidden py-32 lg:py-40 scroll-mt-32">
       {/* Background grid subtile */}
       <div 
         className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.04]"

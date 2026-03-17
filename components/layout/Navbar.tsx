@@ -11,7 +11,6 @@ const NAV_LINKS = [
   { name: 'Expérience', href: '#experience' },
   { name: 'Projets', href: '#projects' },
   { name: 'Compétences', href: '#skills' },
-  { name: 'Contact', href: '#contact' },
 ];
 
 export default function Navbar() {
@@ -34,7 +33,33 @@ export default function Navbar() {
     
     handleScroll();
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Intersection Observer to update active navigation segment on scroll
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const matchingLink = NAV_LINKS.find((l) => l.href === `#${entry.target.id}`);
+            if (matchingLink) {
+              setActiveSegment(matchingLink.name);
+            }
+          }
+        });
+      },
+      { rootMargin: '-30% 0px -70% 0px' } 
+    );
+
+    setTimeout(() => {
+      NAV_LINKS.forEach((link) => {
+        const sect = document.querySelector(link.href);
+        if (sect) observer.observe(sect);
+      });
+    }, 100);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   // Animate pill position to active link

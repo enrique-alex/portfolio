@@ -107,7 +107,7 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contact" className="relative w-full py-24 lg:py-32 overflow-hidden">
+    <section id="contact" className="relative w-full py-24 lg:py-32 overflow-hidden scroll-mt-32">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/5 via-transparent to-transparent opacity-50 dark:from-brand-blue/10"></div>
