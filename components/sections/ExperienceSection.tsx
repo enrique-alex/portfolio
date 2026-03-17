@@ -74,7 +74,7 @@ export default function ExperienceSection() {
             Expérience Professionnelle
           </h2>
           <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-            {'>'} Initializing historical data routines...
+            {'>'} Chargement des données historiques...
           </p>
         </motion.div>
 
@@ -128,12 +128,12 @@ export default function ExperienceSection() {
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                             </span>
-                            ACTIVE
+                            EN COURS
                           </>
                         ) : (
                           <>
                             <CheckCircle2 className="h-3 w-3" />
-                            COMPLETED
+                            TERMINÉ
                           </>
                         )}
                       </div>
