@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { name: 'Expérience', href: '#experience' },
   { name: 'Projets', href: '#projects' },
   { name: 'Compétences', href: '#skills' },
+  { name: 'Contact', href: '#contact' },
 ];
 
 export default function Navbar() {
