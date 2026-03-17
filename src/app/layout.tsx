@@ -2,6 +2,7 @@ import "./globals.css";
 import CursorFluid from "@/components/animations/CursorFluid";
 import Navbar from "@/components/layout/Navbar";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import Preloader from "@/components/ui/Preloader";
 
 export const metadata = {
   title: "Portfolio Engineering",
@@ -18,6 +19,9 @@ export default function RootLayout({
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
       <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          {/* L'animation d'ouverture 2026 */}
+          <Preloader />
+
           {/* L'animation WebGL Fluide en arrière-plan */}
           <CursorFluid />
           
