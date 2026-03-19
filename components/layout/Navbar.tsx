@@ -141,7 +141,7 @@ export default function Navbar() {
                 href={link.href}
                 data-segment={link.name}
                 onClick={() => setActiveSegment(link.name)}
-                className={`relative z-10 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                className={`relative z-10 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                   activeSegment === link.name 
                     ? 'text-zinc-900 dark:text-white' 
                     : 'text-zinc-500 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white'
