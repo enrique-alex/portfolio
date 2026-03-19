@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
   { name: 'Accueil', href: '#home' },
+  { name: 'À Propos', href: '#profile' },
   { name: 'Parcours', href: '#academic' },
   { name: 'Expérience', href: '#experience' },
   { name: 'Projets', href: '#projects' },
@@ -114,7 +115,7 @@ export default function Navbar() {
           </a>
 
           {/* NAVIGATION DESKTOP — Liquid Glass Segmented Control */}
-          <nav ref={navRef} className="hidden items-center gap-0.5 md:flex relative">
+          <nav ref={navRef} className="hidden items-center gap-2 md:flex relative">
             {/* Sliding Pill Indicator (animated) */}
             <motion.div 
               className="absolute top-0 h-full rounded-full z-0"
