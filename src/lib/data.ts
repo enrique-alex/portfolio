@@ -1,9 +1,11 @@
+import { useLanguage } from '@/components/theme/LanguageProvider';
+
 export interface Project {
     id: string;
     title: string;
     slug: string;
     year: number;
-    category: 'Systèmes Embarqués' | 'Développement Logiciel' | 'Algorithmie';
+    category: string;
     shortDescription: string;
     detailedDescription: string;
     technicalChallenges: string;
@@ -12,7 +14,7 @@ export interface Project {
     githubUrl?: string;
 }
 
-export const projectsData: Project[] = [
+export const projectsDataFallback: Project[] = [
     {
         id: "robotino",
         title: "Robotino – Hockey Autonome",
@@ -110,3 +112,78 @@ export const projectsData: Project[] = [
         themeColor: { r: 39, g: 174, b: 96 }
     }
 ];
+
+export function useProjectsData(): Project[] {
+    const { locale } = useLanguage();
+
+    if (locale === 'fr') {
+        return projectsDataFallback;
+    }
+
+    return [
+        {
+            ...projectsDataFallback[0],
+            title: "Robotino – Autonomous Hockey",
+            category: "Embedded Systems",
+            shortDescription: "Programming an omnidirectional mobile robot for a fully autonomous hockey match: vision, navigation, and shooting.",
+            detailedDescription: "Complete design of the control system of a Robotino 2 for a robotic hockey match. The robot had to locate a puck via embedded vision, navigate to the goal while avoiding opponents, detect the metallic goal line via inductive sensor, and trigger an accurate shot. The control architecture relies on a hierarchical Grafcet orchestrating navigation, real-time obstacle avoidance, and shooting sequence.",
+            technicalChallenges: "Initial colorimetric detection in RGB space generated target losses opposite to light variations. Switching to the HSV space isolated the hue from the brightness for robust tracking. The very short range of the inductive sensor (4 mm) led to target overshoots due to inertia. Braking anticipation via odometry and vision solved the problem. The reliable infrared zone (15-45 cm) was modeled to avoid false positives at a distance."
+        },
+        {
+            ...projectsDataFallback[1],
+            title: "Awale - C Strategy",
+            category: "Algorithms",
+            shortDescription: "Development of the traditional board game in C language focused on data structure efficiency.",
+            detailedDescription: "Architectural design and formal implementation in C language of the combinatorial mechanics of the Awale board game. This project focuses on pure algorithmic performance, deterministic memory management, and continuous asymmetric state logic.",
+            technicalChallenges: "The major difficulty lay in the mathematical modeling of a strictly cyclic game board without causing dynamic memory overflows in RAM. The engineering approach consisted of encapsulating the board in contiguous data structures continuously manipulated via modular arithmetic and robust function pointers."
+        },
+        {
+            ...projectsDataFallback[2],
+            title: "PyGroove - Music Assistant",
+            category: "Software Engineering",
+            shortDescription: "Intelligent Python music player with voice recognition and synchronous audio rendering.",
+            detailedDescription: "Creation of an intelligent multimedia playback environment programmed entirely in Python. The system orchestrates a complex vector interface under Tkinter, delegates low-level rendering to the Pygame engine, integrates the Speech-Recognition protocol, and parses audio metadata via the Pydub and Mutagen algorithms.",
+            technicalChallenges: "Managing the critical concurrency of simultaneous hardware accesses between the visual event loop, the asynchronous network listening thread, and the sound card's hardware DMA buffer. The software solution involved an I/O separation within a strict multi-threaded architecture to isolate real-time instructions from the asynchronous wrapper."
+        },
+        {
+            ...projectsDataFallback[3],
+            title: "Unix Shell - C Interpreter",
+            category: "Embedded Systems",
+            shortDescription: "Full native development of a terminal emulator in C relying on Unix/Linux calls.",
+            detailedDescription: "Reverse engineering of a standard application shell by intimately manipulating system calls at the Kernel Space level. This project requires a deep understanding of paged memory (Heap), system process duplication, and file descriptor interfacing.",
+            technicalChallenges: "Asynchronous and unpredictable inter-process communication caused instabilities in I/O streams during hardware signal propagation. Secure execution was ensured by deploying a deterministic signal handler and methodical management of RAM pipelines (fork, execvp, and dup2)."
+        },
+        {
+            ...projectsDataFallback[4],
+            title: "C++ Farm Simulator",
+            category: "Software Engineering",
+            shortDescription: "C++ modeled application demonstrating the rigor of major OOP design patterns.",
+            detailedDescription: "C++ modeling of a simulated systemic environment. The Object-Oriented paradigm is exploited thoroughly to ensure strict separation of responsibilities through interface inheritance, application polymorphism, and spatial compartmentalization of activity objects.",
+            technicalChallenges: "The instability inherent to dangling pointers within a strong circular topology initially compromised the destruction of entities by the current process. Modern C++ engineering remedied the conflict by deploying an ecosystem of smart pointers structurally managing the memory lifecycle via reference counting."
+        },
+        {
+            ...projectsDataFallback[5],
+            title: "Snake - C++ Arcade Engine",
+            category: "Algorithms",
+            shortDescription: "C++ architectural design framing the complexity of a real-time video loop.",
+            detailedDescription: "Functional development of an arcade engine limiting microprocessor overload according to strict OOP principles. Isolated implementation of the main game loop, abstraction of the hardware input module, and algorithmic refinement for 2D collision verification.",
+            technicalChallenges: "Frame rate drops caused silent errors in the register of high-velocity vector intersection checks. The fix dictated the adoption of an interpolated Delta-time scaling guaranteeing arithmetic consistency mathematically independent of the local processor bandwidth."
+        },
+        {
+            ...projectsDataFallback[6],
+            title: "Python Finance Analytics",
+            category: "Software Engineering",
+            shortDescription: "Algorithmic script automating the systematic processing of vast cohorts of monthly statistical data.",
+            detailedDescription: "Design and writing of a robust data pipeline in Python. This module operates through complex analysis libraries to extract, standardize, and mathematically generate interactive graphic plots for predictive syntheses.",
+            technicalChallenges: "The systemic compilation slowness generated by the looped traversal of massive historical records limited the instantaneous use of the interface view. The IT restructuring introduced a strict matrix vectorization of all manipulations, combined with off-site saving of the plot in pre-rendered SVG/Canvas buffers."
+        },
+        {
+            ...projectsDataFallback[7],
+            title: "Bluetooth Mobile Robot",
+            category: "Embedded Systems",
+            shortDescription: "Deployed as Project Manager of a hardware system controlled via Arduino (C/C++).",
+            detailedDescription: "Complete integrated engineering, covering CAD analysis and modeling via CATIA V5, in formal tandem with parametric 3D printing of the asymmetric mobility frame. Microcontrolled development in C/C++ (Arduino) of the motor regulation chain as well as the logical bidirectional Bluetooth RX/TX communication antenna.",
+            technicalChallenges: "An extraordinary intensity solicitation upon starting the motor units caused significant capacitive voltage sags directly disrupting embedded logic calculations (hardware brownouts). The architecture was solidified through partial galvanic isolation by optocoupler and the mathematical optimization of power routing via PWM (Pulse Width Modulation) control signals."
+        }
+    ];
+}

@@ -4,8 +4,49 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Terminal, Mail, Github, Linkedin, Phone, Copy, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import Magnetic from '@/components/ui/Magnetic';
+import { useLanguage } from '../theme/LanguageProvider';
+
+function useSocialLinks() {
+  const { t } = useLanguage();
+  return [
+    {
+      name: 'GitHub',
+      value: 'enrique-alex',
+      url: 'https://github.com/enrique-alex',
+      icon: Github,
+      color: 'rgba(255, 255, 255, 0.9)',
+      brandColor: '#ffffff'
+    },
+    {
+      name: 'LinkedIn',
+      value: 'alex-ndjakou',
+      url: 'https://www.linkedin.com/in/alex-ndjakou/',
+      icon: Linkedin,
+      color: 'rgba(10, 102, 194, 0.9)',
+      brandColor: '#0a66c2'
+    },
+    {
+      name: 'Email',
+      value: 'enriquekemayou@gmail.com',
+      url: 'mailto:enriquekemayou@gmail.com',
+      icon: Mail,
+      color: 'rgba(234, 67, 53, 0.9)',
+      brandColor: '#ea4335'
+    },
+    {
+      name: t('contact.social.phone'),
+      value: '+33 6 44 79 60 57',
+      url: 'tel:+33644796057',
+      icon: Phone,
+      color: 'rgba(52, 168, 83, 0.9)',
+      brandColor: '#34a853'
+    }
+  ];
+}
 
 export default function ContactSection() {
+  const { t } = useLanguage();
+  const socialLinks = useSocialLinks();
   const [copiedText, setCopiedText] = useState<string | null>(null);
   
   // Form States
@@ -71,41 +112,6 @@ export default function ContactSection() {
     }
   };
 
-  const socialLinks = [
-    {
-      name: 'GitHub',
-      value: 'enrique-alex',
-      url: 'https://github.com/enrique-alex',
-      icon: Github,
-      color: 'rgba(255, 255, 255, 0.9)',
-      brandColor: '#ffffff'
-    },
-    {
-      name: 'LinkedIn',
-      value: 'alex-ndjakou',
-      url: 'https://www.linkedin.com/in/alex-ndjakou/',
-      icon: Linkedin,
-      color: 'rgba(10, 102, 194, 0.9)',
-      brandColor: '#0a66c2'
-    },
-    {
-      name: 'Email',
-      value: 'enriquekemayou@gmail.com',
-      url: 'mailto:enriquekemayou@gmail.com',
-      icon: Mail,
-      color: 'rgba(234, 67, 53, 0.9)',
-      brandColor: '#ea4335'
-    },
-    {
-      name: 'Téléphone',
-      value: '+33 6 44 79 60 57',
-      url: 'tel:+33644796057',
-      icon: Phone,
-      color: 'rgba(52, 168, 83, 0.9)',
-      brandColor: '#34a853'
-    }
-  ];
-
   return (
     <section id="contact" className="relative w-full py-24 lg:py-32 overflow-hidden scroll-mt-32">
       
@@ -129,10 +135,10 @@ export default function ContactSection() {
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
-            Initialiser le Contact
+            {t('contact.header.title')}
           </h2>
           <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-            {'>'} Waiting for incoming signals...
+            {t('contact.header.subtitle')}
           </p>
         </motion.div>
 
@@ -166,7 +172,7 @@ export default function ContactSection() {
                 
                 <div className="group relative">
                   <label htmlFor="name" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue">
-                    Identifiant
+                    {t('contact.form.name.label')}
                   </label>
                   <input 
                     type="text" 
@@ -174,7 +180,7 @@ export default function ContactSection() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Votre nom..."
+                    placeholder={t('contact.form.name.placeholder')}
                     className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-brand-blue disabled:opacity-50"
                     disabled={isSubmitting}
                   />
@@ -182,7 +188,7 @@ export default function ContactSection() {
 
                 <div className="group relative">
                   <label htmlFor="email" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue">
-                    Adresse_Retour
+                    {t('contact.form.email.label')}
                   </label>
                   <input 
                     type="email" 
@@ -190,7 +196,7 @@ export default function ContactSection() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="votre@email.com"
+                    placeholder={t('contact.form.email.placeholder')}
                     className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-brand-blue disabled:opacity-50"
                     disabled={isSubmitting}
                   />
@@ -198,7 +204,7 @@ export default function ContactSection() {
 
                 <div className="group relative">
                   <label htmlFor="message" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue">
-                    Payload
+                    {t('contact.form.message.label')}
                   </label>
                   <textarea 
                     id="message" 
@@ -206,7 +212,7 @@ export default function ContactSection() {
                     rows={4}
                     value={formData.message}
                     onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                    placeholder="Entrez votre message ici..."
+                    placeholder={t('contact.form.message.placeholder')}
                     className="w-full resize-none rounded-lg border border-black/10 bg-white/50 p-4 font-mono text-sm text-zinc-900 transition-all focus:border-brand-blue/50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-blue/10 dark:border-white/10 dark:bg-black/50 dark:text-white dark:focus:border-brand-blue/50 dark:focus:bg-black disabled:opacity-50"
                     disabled={isSubmitting}
                   ></textarea>
@@ -239,9 +245,9 @@ export default function ContactSection() {
                       }`}
                     >
                       <span className="relative z-10 font-mono tracking-widest text-xs uppercase">
-                        {submitStatus === 'success' ? 'Message Sent' :
-                         submitStatus === 'error' ? 'Retry' :
-                         isSubmitting ? 'Sending...' : 'Send_Transmission'}
+                        {submitStatus === 'success' ? t('contact.form.submit.sent') :
+                         submitStatus === 'error' ? t('contact.form.submit.retry') :
+                         isSubmitting ? t('contact.form.submit.sending') : t('contact.form.submit')}
                       </span>
                       {submitStatus === 'success' ? (
                         <CheckCircle2 className="relative z-10 h-3.5 w-3.5" />
@@ -265,7 +271,7 @@ export default function ContactSection() {
           >
             <div>
               <h3 className="mb-6 font-mono text-sm font-bold uppercase tracking-widest text-zinc-900 dark:text-zinc-100">
-                <span className="text-brand-blue">//</span> Nodes de Communication
+                <span className="text-brand-blue">//</span> {t('contact.social.title')}
               </h3>
               
               <div className="flex flex-col gap-4">
@@ -318,7 +324,7 @@ export default function ContactSection() {
 
             {/* Quick Copy Feature */}
             <div className="mt-4 rounded-xl border border-black/5 bg-black/[0.02] p-6 dark:border-white/5 dark:bg-white/[0.01]">
-              <p className="mb-4 font-mono text-xs text-zinc-500 dark:text-zinc-400">Cliquez pour copier l'adresse email principale :</p>
+              <p className="mb-4 font-mono text-xs text-zinc-500 dark:text-zinc-400">{t('contact.copy.label')}</p>
               <button 
                 onClick={() => handleCopy('enriquekemayou@gmail.com')}
                 className="group flex w-full items-center justify-between rounded-lg border border-black/10 bg-white px-4 py-3 transition-colors hover:border-brand-blue hover:bg-zinc-50 dark:border-white/10 dark:bg-black/50 dark:hover:border-brand-blue dark:hover:bg-black"

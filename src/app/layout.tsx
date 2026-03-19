@@ -3,6 +3,7 @@ import CursorFluid from "@/components/animations/CursorFluid";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import Preloader from "@/components/ui/Preloader";
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
       <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <LanguageProvider>
           {/* L'animation d'ouverture 2026 */}
           <Preloader />
 
@@ -34,6 +36,7 @@ export default function RootLayout({
 
           {/* Le Pied de page Système */}
           <Footer />
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

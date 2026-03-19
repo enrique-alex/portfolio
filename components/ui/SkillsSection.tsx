@@ -36,65 +36,70 @@ interface SkillCategory {
   skills: Skill[];
 }
 
-const SKILL_CATEGORIES: SkillCategory[] = [
-  {
-    id: 'languages',
-    title: 'Langages',
-    subtitle: 'Programmation bas & haut niveau',
-    color: { r: 59, g: 130, b: 246 },
-    skills: [
-      { name: 'C', level: 75, icon: SiC },
-      { name: 'C++', level: 65, icon: SiCplusplus },
-      { name: 'Python', level: 70, icon: SiPython },
-      { name: 'JavaScript / TypeScript', level: 50, icon: SiTypescript },
-      { name: 'SQL', level: 45, icon: SiPostgresql },
-    ],
-  },
-  {
-    id: 'embedded',
-    title: 'Systèmes Embarqués',
-    subtitle: 'Hardware & protocoles industriels',
-    color: { r: 16, g: 185, b: 129 },
-    skills: [
-      { name: 'Arduino / µContrôleurs', level: 70, icon: SiArduino },
-      { name: 'Robotino / Automates', level: 60, icon: Bot },
-      { name: 'Grafcet / GEMMA', level: 65, icon: FaProjectDiagram },
-      { name: 'MATLAB', level: 60, icon: Activity },
-      { name: 'Simulink', level: 55, icon: Workflow },
-      { name: 'TIA Portal', level: 55, icon: Settings },
-      { name: 'Ignition (SCADA)', level: 50, icon: Monitor },
-      { name: 'Capteurs Industriels', level: 62, icon: Gauge },
-      { name: 'Logisim', level: 55, icon: CircuitBoard },
-      { name: 'CATIA V5 / CAO', level: 50, icon: Ruler },
-    ],
-  },
-  {
-    id: 'software',
-    title: 'Génie Logiciel',
-    subtitle: 'Architecture & outils modernes',
-    color: { r: 168, g: 85, b: 247 },
-    skills: [
-      { name: 'Linux / Shell Unix', level: 68, icon: SiLinux },
-      { name: 'Git / GitHub', level: 65, icon: SiGit },
-      { name: 'React / Next.js', level: 45, icon: SiReact },
-      { name: 'POO / Design Patterns', level: 65, icon: Code },
-      { name: 'Algorithmique', level: 70, icon: Brain },
-    ],
-  },
-  {
-    id: 'transversal',
-    title: 'Compétences Transversales',
-    subtitle: 'Soft skills & méthodologie',
-    color: { r: 245, g: 158, b: 11 },
-    skills: [
-      { name: 'Gestion de Projet', level: 65, icon: ClipboardList },
-      { name: 'Travail en Équipe', level: 75, icon: Users },
-      { name: 'Communication Technique', level: 60, icon: Target },
-      { name: 'Résolution de Problèmes', level: 72, icon: Lightbulb },
-      { name: 'Anglais Technique (B1+)', level: 55, icon: Globe },
-    ],
-  },
-];
+import { useLanguage } from '../theme/LanguageProvider';
+
+function useSkillCategories(): SkillCategory[] {
+  const { t } = useLanguage();
+  return [
+    {
+      id: 'languages',
+      title: t('skills.cat.languages'),
+      subtitle: t('skills.cat.languages.sub'),
+      color: { r: 59, g: 130, b: 246 },
+      skills: [
+        { name: 'C', level: 75, icon: SiC },
+        { name: 'C++', level: 65, icon: SiCplusplus },
+        { name: 'Python', level: 70, icon: SiPython },
+        { name: 'JavaScript / TypeScript', level: 50, icon: SiTypescript },
+        { name: 'SQL', level: 45, icon: SiPostgresql },
+      ],
+    },
+    {
+      id: 'embedded',
+      title: t('skills.cat.embedded'),
+      subtitle: t('skills.cat.embedded.sub'),
+      color: { r: 16, g: 185, b: 129 },
+      skills: [
+        { name: 'Arduino / µContrôleurs', level: 70, icon: SiArduino },
+        { name: 'Robotino / Automates', level: 60, icon: Bot },
+        { name: 'Grafcet / GEMMA', level: 65, icon: FaProjectDiagram },
+        { name: 'MATLAB', level: 60, icon: Activity },
+        { name: 'Simulink', level: 55, icon: Workflow },
+        { name: 'TIA Portal', level: 55, icon: Settings },
+        { name: 'Ignition (SCADA)', level: 50, icon: Monitor },
+        { name: 'Capteurs Industriels', level: 62, icon: Gauge },
+        { name: 'Logisim', level: 55, icon: CircuitBoard },
+        { name: 'CATIA V5 / CAO', level: 50, icon: Ruler },
+      ],
+    },
+    {
+      id: 'software',
+      title: t('skills.cat.software'),
+      subtitle: t('skills.cat.software.sub'),
+      color: { r: 168, g: 85, b: 247 },
+      skills: [
+        { name: 'Linux / Shell Unix', level: 68, icon: SiLinux },
+        { name: 'Git / GitHub', level: 65, icon: SiGit },
+        { name: 'React / Next.js', level: 45, icon: SiReact },
+        { name: 'POO / Design Patterns', level: 65, icon: Code },
+        { name: 'Algorithmique', level: 70, icon: Brain },
+      ],
+    },
+    {
+      id: 'transversal',
+      title: t('skills.cat.transversal'),
+      subtitle: t('skills.cat.transversal.sub'),
+      color: { r: 245, g: 158, b: 11 },
+      skills: [
+        { name: 'Gestion de Projet', level: 65, icon: ClipboardList },
+        { name: 'Travail en Équipe', level: 75, icon: Users },
+        { name: 'Communication Technique', level: 60, icon: Target },
+        { name: 'Résolution de Problèmes', level: 72, icon: Lightbulb },
+        { name: 'Anglais Technique (B1+)', level: 55, icon: Globe },
+      ],
+    },
+  ];
+}
 
 // ─── MARQUEE : Outils & Technos défilantes ───────────────
 interface MarqueeTool {
@@ -251,7 +256,7 @@ function InfiniteMarquee({ tools, direction = 'left', speed = 35 }: { tools: Mar
       </div>
 
       {/* CSS Keyframes injected inline */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes marquee-left {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
@@ -263,13 +268,15 @@ function InfiniteMarquee({ tools, direction = 'left', speed = 35 }: { tools: Mar
         .marquee-container:hover .marquee-track {
           animation-play-state: paused;
         }
-      `}</style>
+      `}} />
     </div>
   );
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────
 export default function SkillsSection() {
+  const { t } = useLanguage();
+  const SKILL_CATEGORIES = useSkillCategories();
   const [activeCategory, setActiveCategory] = useState(SKILL_CATEGORIES[0].id);
   const active = SKILL_CATEGORIES.find(c => c.id === activeCategory)!;
 
@@ -307,10 +314,10 @@ export default function SkillsSection() {
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
-            Compétences
+            {t('skills.header.title')}
           </h2>
           <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-            {'>'} Stack technique forgée entre les bancs de Polytech et le terrain industriel.
+            {t('skills.header.subtitle')}
           </p>
         </motion.div>
 
@@ -447,10 +454,10 @@ export default function SkillsSection() {
             <div className="mb-8 flex flex-col items-center">
               <div className="mb-3 h-px w-16 bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-600" />
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-600 dark:text-zinc-400">
-                Outils & Technologies
+                {t('skills.marquee.title')}
               </p>
               <p className="mt-1 text-[11px] text-zinc-400/60 dark:text-zinc-500/50">
-                Survolez pour explorer • Le défilement se met en pause
+                {t('skills.marquee.subtitle')}
               </p>
             </div>
             <div className="flex flex-col gap-5">

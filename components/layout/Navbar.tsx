@@ -2,22 +2,28 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Languages } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../theme/LanguageProvider';
 
-const NAV_LINKS = [
-  { name: 'Accueil', href: '#home' },
-  { name: 'À Propos', href: '#profile' },
-  { name: 'Parcours', href: '#academic' },
-  { name: 'Expérience', href: '#experience' },
-  { name: 'Projets', href: '#projects' },
-  { name: 'Compétences', href: '#skills' },
-];
+function useNavLinks() {
+  const { t } = useLanguage();
+  return [
+    { name: t('nav.home'), href: '#home' },
+    { name: t('nav.about'), href: '#profile' },
+    { name: t('nav.academic'), href: '#academic' },
+    { name: t('nav.experience'), href: '#experience' },
+    { name: t('nav.projects'), href: '#projects' },
+    { name: t('nav.skills'), href: '#skills' },
+  ];
+}
 
 export default function Navbar() {
+  const NAV_LINKS = useNavLinks();
+  const { locale, setLocale, t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSegment, setActiveSegment] = useState('Accueil');
+  const [activeSegment, setActiveSegment] = useState(t('nav.home'));
   
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -89,7 +95,7 @@ export default function Navbar() {
         <div 
           className={`mx-auto flex items-center justify-between transition-all duration-700 ease-out ${
             isScrolled 
-              ? 'max-w-5xl gap-4 lg:gap-8 rounded-[22px] px-5 py-2.5' 
+              ? 'max-w-6xl gap-4 lg:gap-8 rounded-[22px] px-6 py-2.5' 
               : 'max-w-7xl bg-transparent px-6 lg:px-12 py-2'
           }`}
           style={isScrolled ? {
@@ -196,8 +202,31 @@ export default function Navbar() {
             >
               {/* Specular light sweep on hover */}
               <span className="absolute inset-0 -translate-x-full rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100" />
-              <span className="relative z-10 whitespace-nowrap">Me contacter</span>
+              <span className="relative z-10 whitespace-nowrap">{t('nav.contact')}</span>
             </a>
+          </div>
+
+          {/* LANGUAGE TOGGLE - DESKTOP */}
+          <div className="hidden md:flex items-center">
+            <button
+              onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+              className="group relative flex h-9 items-center gap-1.5 overflow-hidden rounded-full px-3 text-zinc-500 transition-all duration-300 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+              style={{
+                background: mounted && theme === 'dark'
+                  ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
+                  : 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%)',
+                border: mounted && theme === 'dark'
+                  ? '1px solid rgba(255,255,255,0.08)'
+                  : '1px solid rgba(0,0,0,0.06)',
+                backdropFilter: 'blur(12px)',
+              }}
+              aria-label="Toggle Language"
+            >
+              <Languages className="h-3.5 w-3.5" />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
+                {locale === 'fr' ? 'EN' : 'FR'}
+              </span>
+            </button>
           </div>
 
           {/* BURGER MOBILE */}
@@ -267,12 +296,24 @@ export default function Navbar() {
                   </button>
                 )}
 
+                {/* Language toggle mobile */}
+                <button
+                  onClick={() => {
+                    setLocale(locale === 'fr' ? 'en' : 'fr');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 text-lg font-medium text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
+                >
+                  <Languages className="h-5 w-5" />
+                  {locale === 'fr' ? 'English' : 'Français'}
+                </button>
+
                 <a
                   href="#contact"
                   className="mt-8 rounded-full bg-zinc-900 px-8 py-4 text-lg font-medium text-white shadow-[0_0_40px_rgba(0,0,0,0.1)] transition-transform active:scale-95 dark:bg-white dark:text-black dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Prendre Contact
+                  {t('nav.contact')}
                 </a>
               </nav>
             </motion.div>

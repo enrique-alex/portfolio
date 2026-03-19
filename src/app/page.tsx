@@ -7,9 +7,11 @@ import Magnetic from "@/components/ui/Magnetic";
 import AcademicJourney from "@/components/ui/AcademicJourney";
 import SkillsSection from "@/components/ui/SkillsSection";
 import ExperienceSection from "@/components/sections/ExperienceSection";
+import ProfileSection from "@/components/sections/ProfileSection";
 import ContactSection from "@/components/sections/ContactSection";
-import { Database } from "lucide-react";
+import { Database, Download } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/components/theme/LanguageProvider";
 
 const TARGET_TEXT = "Enrique Alex\nNDJAKOU KEMAYOU";
 const CYCLES_PER_LETTER = 3; // Augmenté pour ralentir le décryptage par lettre
@@ -48,6 +50,9 @@ export default function Home() {
 
     return () => clearTimeout(timeout);
   }, []);
+
+  const { t } = useLanguage();
+
   return (
     <main className="relative flex flex-col items-center justify-center overflow-hidden">
       
@@ -77,7 +82,7 @@ export default function Home() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60"></span>
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)]"></span>
                   </span>
-                  <span className="tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">System Online <span className="mx-1">•</span> En poste chez Minakem</span>
+                  <span className="tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('hero.badge')} <span className="mx-1">•</span> {t('hero.badge.company')}</span>
                 </div>
               </Magnetic>
             </div>
@@ -108,22 +113,33 @@ export default function Home() {
             </h1>
             
             <p className="mt-8 max-w-2xl text-base font-light leading-relaxed text-zinc-600 md:text-xl dark:text-white/50">
-              <span className="font-semibold text-zinc-900 dark:text-white/80">Élève Ingénieur en Énergie & Industrie du Futur (Polytech Lille).</span><br/>
-              Actuellement Ingénieur Apprenti en Automatisme et Informatique Industrielle chez <span className="font-medium text-brand-blue dark:text-[#8AB4F8]">Minakem Dunkerque</span>. Je conçois et déploie des solutions reliant l'intelligence logicielle (C/C++, Python) aux architectures matérielles et industrielles critiques.
+              <span className="font-semibold text-zinc-900 dark:text-white/80">{t('hero.subtitle.line1')}</span><br/>
+              {t('hero.subtitle.line2')} <span className="font-medium text-brand-blue dark:text-[#8AB4F8]">{t('hero.subtitle.company')}</span>{t('hero.subtitle.line3')}
             </p>
 
-            {/* CTA d'Exploration */}
-            <div className="mt-12 flex items-center justify-center lg:justify-start">
+            {/* CTAs d'Exploration */}
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <Magnetic intensity={0.25}>
                 <button 
                   onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} 
                   className="group relative flex items-center gap-4 overflow-hidden rounded-full bg-zinc-900 px-8 py-4 font-semibold text-white transition-all hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
                 >
-                  <span className="relative z-10 tracking-wide uppercase text-sm">Séquence d'Amorçage</span>
+                  <span className="relative z-10 tracking-wide uppercase text-sm">{t('hero.cta.explore')}</span>
                   <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 dark:bg-black/10 transition-transform group-hover:translate-x-1">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
                 </button>
+              </Magnetic>
+
+              <Magnetic intensity={0.2}>
+                <a 
+                  href="/cv-enrique-ndjakou.pdf"
+                  download="CV_Enrique_Ndjakou.pdf"
+                  className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-black/10 bg-black/5 px-8 py-4 font-semibold text-zinc-900 transition-all hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                >
+                  <Download className="h-4 w-4 transition-transform group-hover:-translate-y-1" />
+                  <span className="font-mono text-xs uppercase tracking-widest">{t('hero.cta.cv')}</span>
+                </a>
               </Magnetic>
             </div>
           </div>
@@ -160,6 +176,19 @@ export default function Home() {
 
         </div>
       </section>
+
+      {/* 
+       * LIGNE LASER ANIMÉE (Séparateur Technologique)
+       */}
+      <div className="relative h-[1px] w-full bg-gradient-to-r from-transparent via-brand-blue/50 to-transparent dark:via-brand-blue/30">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[2px] w-[150px] bg-brand-blue blur-[2px]"></div>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[4px] w-[50px] bg-white blur-[4px] dark:bg-brand-blue/80"></div>
+      </div>
+
+      {/* 
+       * SECTION À PROPOS (Profile / Operator ID Card)
+       */}
+      <ProfileSection />
 
       {/* 
        * LIGNE LASER ANIMÉE (Séparateur Technologique)
@@ -228,14 +257,14 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
               <Database className="h-4 w-4" />
               <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
-                System.Process.Monitor
+                {t('projects.header.tag')}
               </span>
             </div>
             <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
-              Mes Projets
+              {t('projects.header.title')}
             </h2>
             <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-              {'>'} 8 modules logiciels et matériels conçus du sol au plafond.
+              {t('projects.header.subtitle')}
             </p>
           </motion.div>
           

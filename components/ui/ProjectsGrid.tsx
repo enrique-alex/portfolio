@@ -2,7 +2,7 @@
 
 import { motion, Variants } from 'framer-motion';
 import MagneticProjectCard from './MagneticProjectCard';
-import { projectsData, Project } from '@/lib/data';
+import { useProjectsData, Project } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 
 const containerVariants: Variants = {
@@ -22,6 +22,7 @@ const itemVariants: Variants = {
 
 export default function ProjectsGrid() {
     const router = useRouter();
+    const projectsData = useProjectsData();
 
     const handleProjectClick = (project: Project) => {
         // Redirection vers la page détaillée pour le Shared Layout (Morphing Spatial)

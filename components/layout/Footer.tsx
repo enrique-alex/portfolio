@@ -3,8 +3,10 @@
 import { motion } from 'framer-motion';
 import { ArrowUp, Github, Linkedin, Mail } from 'lucide-react';
 import Magnetic from '../ui/Magnetic';
+import { useLanguage } from '../theme/LanguageProvider';
 
 export default function Footer() {
+  const { t } = useLanguage();
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -25,7 +27,7 @@ export default function Footer() {
             System Online © 2026
           </span>
           <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            Enrique Alex Ndjakou Kemayou. All rights reserved.
+            {t('footer.rights')}
           </span>
         </div>
 
@@ -76,7 +78,7 @@ export default function Footer() {
                 <ArrowUp className="h-4 w-4 text-zinc-500 transition-transform group-hover:-translate-y-1 group-hover:text-brand-blue dark:text-zinc-400 dark:group-hover:text-brand-blue" />
               </div>
               <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-brand-blue dark:text-zinc-500 dark:group-hover:text-brand-blue">
-                Uplink
+                {t('footer.uplink')}
               </span>
             </button>
           </Magnetic>

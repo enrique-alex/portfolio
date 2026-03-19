@@ -2,18 +2,21 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { projectsData } from '@/lib/data';
+import { useProjectsData } from '@/lib/data';
 import {ArrowLeft, AlertTriangle, Lightbulb} from 'lucide-react';
+import { useLanguage } from '@/components/theme/LanguageProvider';
 
 export default function ProjectDetail() {
     const params = useParams();
     const router = useRouter();
+    const { t } = useLanguage();
     const slug = params?.slug as string;
     
+    const projectsData = useProjectsData();
     const project = projectsData.find((p) => p.slug === slug);
 
     if (!project) {
-        return <div className="flex min-h-screen items-center justify-center text-zinc-500">Projet introuvable</div>;
+        return <div className="flex min-h-screen items-center justify-center text-zinc-500">{t('projects.detail.notfound')}</div>;
     }
 
     // Gradient dynamique basé sur la couleur du projet
@@ -28,7 +31,7 @@ export default function ProjectDetail() {
                 className="absolute top-8 left-8 z-50 flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-4 py-2 text-sm font-medium backdrop-blur-md transition-hover hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
             >
                 <ArrowLeft size={16} />
-                Retour
+                {t('projects.detail.back')}
             </button>
 
             {/* Arrière-plan coloré (Glow lointain) basé sur la couleur du projet */}
@@ -81,7 +84,7 @@ export default function ProjectDetail() {
                             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-200 text-zinc-700 dark:bg-white/10 dark:text-zinc-300">
                                 <AlertTriangle size={16} />
                             </span>
-                            Analyse de l'Ingénierie & Solutions
+                            {t('projects.detail.analysis')}
                         </h3>
                         <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
                             {project.technicalChallenges}
@@ -99,10 +102,10 @@ export default function ProjectDetail() {
                 <footer className="mt-8 flex items-center justify-between">
                     {project.githubUrl ? (
                          <a href={project.githubUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-brand-blue hover:underline">
-                             Voir le repo GitHub →
+                             {t('projects.detail.github')}
                          </a>
                     ) : (
-                         <span className="text-sm italic text-zinc-500">Source privée / académique</span>
+                         <span className="text-sm italic text-zinc-500">{t('projects.detail.private')}</span>
                     )}
                 </footer>
 

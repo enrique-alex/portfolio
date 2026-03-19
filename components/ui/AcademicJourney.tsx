@@ -4,28 +4,35 @@ import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { GraduationCap } from 'lucide-react';
 
-const journeyData = [
-  {
-    year: "2025 - 2028",
-    title: "Cycle Ingénieur - Énergie et Industrie du Futur",
-    school: "Polytech Lille",
-    description: "Formation d'ingénierie avancée spécialisée en automatisme, électronique, traitement du signal et programmation C/C++ et Python. En alternance."
-  },
-  {
-    year: "2023 - 2025",
-    title: "Classe Préparatoire Intégrée (CPI) EISINe",
-    school: "Université de Reims Champagne Ardenne (Charleville-Mézières)",
-    description: "Formation scientifique exigeante avec un socle solide en mathématiques, physique, informatique, chimie et sciences de l'ingénieur."
-  },
-  {
-    year: "2021 - 2022",
-    title: "Baccalauréat Scientifique",
-    school: "COSACOM (Yaoundé, Cameroun)",
-    description: "Obtention du socle scientifique fondamental."
-  }
-];
+import { useLanguage } from '../theme/LanguageProvider';
+
+function useJourneyData() {
+  const { t } = useLanguage();
+  return [
+    {
+      year: "2025 - 2028",
+      title: t('academic.0.title'),
+      school: t('academic.0.school'),
+      description: t('academic.0.desc')
+    },
+    {
+      year: "2023 - 2025",
+      title: t('academic.1.title'),
+      school: t('academic.1.school'),
+      description: t('academic.1.desc')
+    },
+    {
+      year: "2021 - 2022",
+      title: t('academic.2.title'),
+      school: t('academic.2.school'),
+      description: t('academic.2.desc')
+    }
+  ];
+}
 
 export default function AcademicJourney() {
+  const { t } = useLanguage();
+  const journeyData = useJourneyData();
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgHeight, setSvgHeight] = useState(0);
 
@@ -79,10 +86,10 @@ export default function AcademicJourney() {
           </span>
         </div>
         <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
-          Parcours Académique
+          {t('academic.header.title')}
         </h2>
         <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-          {'>'} Extraction des données de formation initiale et avancée...
+          {t('academic.header.subtitle')}
         </p>
       </motion.div>
 

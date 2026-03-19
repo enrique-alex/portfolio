@@ -14,28 +14,35 @@ interface ExperienceData {
   skills: string[];
 }
 
-const experiencesData: ExperienceData[] = [
-  {
-    id: 'minakem',
-    title: 'Ingénieur Apprenti en Automatisme et Informatique Industrielle',
-    company: 'Minakem Dunkerque',
-    period: 'Actuellement',
-    status: 'ACTIVE',
-    missions: 'Déploiement, maintenance et optimisation de solutions d\'informatique industrielle. Création de passerelles entre l\'intelligence logicielle et les architectures matérielles critiques de production.',
-    skills: ['Automatisme', 'Informatique Industrielle', 'C/C++', 'Python']
-  },
-  {
-    id: 'carrefour',
-    title: 'Assistant Vente Drive',
-    company: 'Carrefour (Charleville-Mézières)',
-    period: 'Depuis février 2024',
-    status: 'COMPLETED',
-    missions: 'Gestion logistique rigoureuse en flux tendu. Collaboration en équipe pour l\'optimisation des processus de préparation de commandes lors des pics de charge. Développement de compétences organisationnelles en environnement dynamique.',
-    skills: ['Logistique', 'Travail en équipe', 'Gestion du stress', 'Optimisation des flux']
-  }
-];
+import { useLanguage } from '../theme/LanguageProvider';
+
+function useExperienceData(): ExperienceData[] {
+  const { t } = useLanguage();
+  return [
+    {
+      id: 'minakem',
+      title: t('experience.0.title'),
+      company: t('experience.0.company'),
+      period: t('experience.0.period'),
+      status: 'ACTIVE',
+      missions: t('experience.0.missions'),
+      skills: ['Automatisme', 'Informatique Industrielle', 'C/C++', 'Python']
+    },
+    {
+      id: 'carrefour',
+      title: t('experience.1.title'),
+      company: t('experience.1.company'),
+      period: t('experience.1.period'),
+      status: 'COMPLETED',
+      missions: t('experience.1.missions'),
+      skills: ['Logistique', 'Travail en équipe', 'Gestion du stress', 'Optimisation des flux']
+    }
+  ];
+}
 
 export default function ExperienceSection() {
+  const { t } = useLanguage();
+  const experiencesData = useExperienceData();
   const [expandedId, setExpandedId] = useState<string | null>(experiencesData[0].id);
 
   const toggleExpand = (id: string) => {
@@ -71,10 +78,10 @@ export default function ExperienceSection() {
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
-            Expérience Professionnelle
+            {t('experience.header.title')}
           </h2>
           <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-            {'>'} Chargement des données historiques...
+            {t('experience.header.subtitle')}
           </p>
         </motion.div>
 
@@ -128,12 +135,12 @@ export default function ExperienceSection() {
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                             </span>
-                            EN COURS
+                            {t('experience.status.active')}
                           </>
                         ) : (
                           <>
                             <CheckCircle2 className="h-3 w-3" />
-                            TERMINÉ
+                            {t('experience.status.completed')}
                           </>
                         )}
                       </div>
