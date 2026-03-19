@@ -19,12 +19,21 @@ export const metadata = {
     siteName: "Portfolio · Enrique Alex Ndjakou",
     locale: "fr_FR",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1024,
+        height: 1024,
+        alt: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
     description:
       "Élève Ingénieur en Systèmes Embarqués (Polytech Lille) · Automatisme & Informatique Industrielle.",
+    images: ["/og-image.png"],
   },
   keywords: [
     "Enrique Alex Ndjakou",
