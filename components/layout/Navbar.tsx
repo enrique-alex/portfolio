@@ -89,7 +89,7 @@ export default function Navbar() {
         <div 
           className={`mx-auto flex items-center justify-between transition-all duration-700 ease-out ${
             isScrolled 
-              ? 'max-w-4xl rounded-[22px] px-5 py-2.5' 
+              ? 'max-w-5xl gap-4 lg:gap-8 rounded-[22px] px-5 py-2.5' 
               : 'max-w-7xl bg-transparent px-6 lg:px-12 py-2'
           }`}
           style={isScrolled ? {
@@ -196,7 +196,7 @@ export default function Navbar() {
             >
               {/* Specular light sweep on hover */}
               <span className="absolute inset-0 -translate-x-full rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100" />
-              <span className="relative z-10">Me contacter</span>
+              <span className="relative z-10 whitespace-nowrap">Me contacter</span>
             </a>
           </div>
 
