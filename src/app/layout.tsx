@@ -5,6 +5,8 @@ import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import Preloader from "@/components/ui/Preloader";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
@@ -75,6 +77,8 @@ export default function RootLayout({
           <Footer />
           </LanguageProvider>
         </ThemeProvider>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
