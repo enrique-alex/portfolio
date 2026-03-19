@@ -14,10 +14,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     // ─── Hero ───
     'hero.badge': 'System Online',
     'hero.badge.company': 'En poste chez Minakem',
-    'hero.subtitle.line1': 'Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille).',
-    'hero.subtitle.line2': 'Actuellement Ingénieur Apprenti en Automatisme et Informatique Industrielle chez',
+    'hero.subtitle.line1': 'Élève Ingénieur en Systèmes Embarqués (Polytech Lille).',
+    'hero.subtitle.line2': 'Ingénieur Apprenti en Automatisme et Informatique Industrielle chez',
     'hero.subtitle.company': 'Minakem Dunkerque',
-    'hero.subtitle.line3': '. Je conçois et déploie des solutions reliant l\'intelligence logicielle (C/C++, Python) aux architectures matérielles et industrielles critiques.',
+    'hero.subtitle.line3': '.',
     'hero.cta.explore': 'Séquence d\'Amorçage',
     'hero.cta.cv': 'Extract.Resume_Data [PDF]',
 
@@ -44,7 +44,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // ─── Academic ───
     'academic.header.title': 'Parcours Académique',
     'academic.header.subtitle': '> Extraction des données de formation initiale et avancée...',
-    'academic.0.title': 'Cycle Ingénieur - Génie Électrique et Mécatronique',
+    'academic.0.title': 'Cycle Ingénieur - Systèmes Embarqués',
     'academic.0.school': 'Polytech Lille',
     'academic.0.desc': 'Formation d\'ingénierie avancée spécialisée en automatisme, électronique, traitement du signal et programmation C/C++ et Python. En alternance.',
     'academic.1.title': 'Classe Préparatoire Intégrée (CPI) EISINe',
@@ -126,10 +126,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     // ─── Hero ───
     'hero.badge': 'System Online',
     'hero.badge.company': 'Currently at Minakem',
-    'hero.subtitle.line1': 'Engineering Student in Electrical Engineering and Mechatronics (Polytech Lille).',
-    'hero.subtitle.line2': 'Currently working as an Apprentice Engineer in Automation and Industrial Computing at',
+    'hero.subtitle.line1': 'Engineering Student in Embedded Systems (Polytech Lille).',
+    'hero.subtitle.line2': 'Apprentice Engineer in Automation & Industrial Computing at',
     'hero.subtitle.company': 'Minakem Dunkerque',
-    'hero.subtitle.line3': '. I design and deploy solutions bridging software intelligence (C/C++, Python) with critical hardware and industrial architectures.',
+    'hero.subtitle.line3': '.',
     'hero.cta.explore': 'Boot Sequence',
     'hero.cta.cv': 'Extract.Resume_Data [PDF]',
 
@@ -156,7 +156,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // ─── Academic ───
     'academic.header.title': 'Academic Journey',
     'academic.header.subtitle': '> Extracting educational data routines...',
-    'academic.0.title': 'Engineering Cycle - Electrical Engineering and Mechatronics',
+    'academic.0.title': 'Engineering Cycle - Embedded Systems',
     'academic.0.school': 'Polytech Lille',
     'academic.0.desc': 'Advanced engineering program specializing in automation, electronics, signal processing, and C/C++ & Python programming. Work-study program.',
     'academic.1.title': 'Integrated Preparatory Class (CPI) EISINe',
