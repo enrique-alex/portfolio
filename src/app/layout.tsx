@@ -1,6 +1,7 @@
 import "./globals.css";
 import CursorFluid from "@/components/animations/CursorFluid";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import Preloader from "@/components/ui/Preloader";
 
@@ -30,6 +31,9 @@ export default function RootLayout({
           
           {/* Le contenu des pages (qui pourra scroller en dessous de la navbar) */}
           {children}
+
+          {/* Le Pied de page Système */}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
