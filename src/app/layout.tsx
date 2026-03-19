@@ -7,8 +7,36 @@ import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import Preloader from "@/components/ui/Preloader";
 
 export const metadata = {
-  title: "Portfolio Engineering",
-  description: "Portfolio d'étudiant ingénieur",
+  title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+  description:
+    "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Systèmes Embarqués à Polytech Lille, Apprenti chez Minakem. C/C++, Python, Automatisme, Électronique.",
+  metadataBase: new URL("https://enrique-alex.vercel.app"),
+  openGraph: {
+    title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+    description:
+      "Élève Ingénieur en Systèmes Embarqués (Polytech Lille) · Apprenti Automatisme & Informatique Industrielle chez Minakem Dunkerque.",
+    url: "https://enrique-alex.vercel.app",
+    siteName: "Portfolio · Enrique Alex Ndjakou",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+    description:
+      "Élève Ingénieur en Systèmes Embarqués (Polytech Lille) · Automatisme & Informatique Industrielle.",
+  },
+  keywords: [
+    "Enrique Alex Ndjakou",
+    "Ingénieur",
+    "Systèmes Embarqués",
+    "Polytech Lille",
+    "Automatisme",
+    "C++",
+    "Python",
+    "Mécatronique",
+    "Portfolio",
+  ],
 };
 
 export default function RootLayout({
