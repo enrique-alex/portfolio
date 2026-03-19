@@ -24,31 +24,39 @@ export default function Home() {
   useEffect(() => {
     let pos = 0;
     let frame = 0;
+    let intervalId: ReturnType<typeof setInterval>;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
-    // Délai initial court pour laisser le temps au rendu WebGL de s'afficher
-    const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
-        if (frame >= TARGET_TEXT.length * CYCLES_PER_LETTER) {
-          clearInterval(interval);
-          setDisplayText(TARGET_TEXT);
-          return;
-        }
+    const startAnimation = () => {
+      // Petit délai pour laisser la transition de sortie du preloader se terminer
+      timeoutId = setTimeout(() => {
+        intervalId = setInterval(() => {
+          if (frame >= TARGET_TEXT.length * CYCLES_PER_LETTER) {
+            clearInterval(intervalId);
+            setDisplayText(TARGET_TEXT);
+            return;
+          }
 
-        const scramble = TARGET_TEXT.split("").map((char, index) => {
-          if (char === '\n') return '\n'; // Ne jamais mélanger le saut de ligne
-          if (pos >= index) return TARGET_TEXT[index];
-          return CHARS[Math.floor(Math.random() * CHARS.length)];
-        }).join("");
+          const scramble = TARGET_TEXT.split("").map((char, index) => {
+            if (char === '\n') return '\n';
+            if (pos >= index) return TARGET_TEXT[index];
+            return CHARS[Math.floor(Math.random() * CHARS.length)];
+          }).join("");
 
-        setDisplayText(scramble);
-        frame++;
-        if (frame % CYCLES_PER_LETTER === 0) pos++;
-      }, SHUFFLE_TIME);
-      
-      return () => clearInterval(interval);
-    }, 300);
+          setDisplayText(scramble);
+          frame++;
+          if (frame % CYCLES_PER_LETTER === 0) pos++;
+        }, SHUFFLE_TIME);
+      }, 600); // Attend la fin de la transition de sortie du preloader (0.8s)
+    };
 
-    return () => clearTimeout(timeout);
+    window.addEventListener('preloader-complete', startAnimation);
+
+    return () => {
+      window.removeEventListener('preloader-complete', startAnimation);
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
   }, []);
 
   const { t } = useLanguage();

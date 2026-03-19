@@ -19,6 +19,7 @@ export default function CursorFluid() {
         if (!mounted || !canvasRef.current || typeof window === 'undefined') return;
 
         let WebGLFluid: any;
+        let cleaned = false;
         
         // Garde silencieuse: l'handler touchend de webgl-fluid appelle rt(undefined) si un
         // touch point ne se trouve pas dans le tableau. On l'intercepte globalement.
@@ -36,6 +37,7 @@ export default function CursorFluid() {
         
         // Import dynamique pour s'assurer que ça ne tourne que côté client
         const loadFluid = async () => {
+            if (cleaned) return;
             try {
                 WebGLFluid = (await import('./webgl-fluid.js')).default || await import('./webgl-fluid.js');
 
@@ -69,7 +71,9 @@ export default function CursorFluid() {
             }
         };
 
-        loadFluid();
+        // Attendre la fin du preloader avant de lancer l'effet WebGL
+        const onPreloaderComplete = () => loadFluid();
+        window.addEventListener('preloader-complete', onPreloaderComplete);
 
         // Résonance WebGL via Custom Event
         const handleResonance = (e: Event) => {
@@ -85,6 +89,8 @@ export default function CursorFluid() {
         window.addEventListener('webgl-resonance', handleResonance);
 
         return () => {
+             cleaned = true;
+             window.removeEventListener('preloader-complete', onPreloaderComplete);
              window.removeEventListener('webgl-resonance', handleResonance);
              window.removeEventListener('error', silentErrorGuard as EventListener);
         };

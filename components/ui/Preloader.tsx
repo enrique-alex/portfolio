@@ -23,7 +23,10 @@ export default function Preloader() {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(() => setIsComplete(true), 800); // Small pause at 100%
+          setTimeout(() => {
+            setIsComplete(true);
+            window.dispatchEvent(new CustomEvent('preloader-complete'));
+          }, 800); // Small pause at 100%
           return 100;
         }
         // Random increment to simulate real loading

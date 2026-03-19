@@ -68,10 +68,7 @@ export default function ProfileSection() {
 
               {/* Holographic Photo Frame */}
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-black/10 bg-zinc-200 dark:border-white/10 dark:bg-zinc-800">
-                <div className="absolute inset-0 mix-blend-overlay opacity-50 z-10 
-                  bg-[linear-gradient(transparent_0%,rgba(0,0,0,0.1)_50%,transparent_100%)] 
-                  bg-[length:100%_4px] group-hover:animate-[scan_2s_linear_infinite]"
-                />
+                <div className="absolute inset-0 mix-blend-overlay opacity-50 z-10 bg-[linear-gradient(transparent_0%,rgba(0,0,0,0.1)_50%,transparent_100%)] bg-[length:100%_4px] group-hover:animate-[scan_2s_linear_infinite]" />
                 <Image 
                   src="/photo.jpeg"
                   alt="Enrique Alex Ndjakou"
