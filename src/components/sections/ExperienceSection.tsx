@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { ChevronDown, Terminal, Activity, CheckCircle2, Cpu, Network } from 'lucide-react';
 
 interface ExperienceData {
@@ -41,6 +41,7 @@ function useExperienceData(): ExperienceData[] {
 }
 
 export default function ExperienceSection() {
+  const shouldReduceMotion = useReducedMotion();
   const { t } = useLanguage();
   const experiencesData = useExperienceData();
   const [expandedId, setExpandedId] = useState<string | null>(experiencesData[0].id);
@@ -67,9 +68,10 @@ export default function ExperienceSection() {
         {/* Header - System Process Monitor Style */}
         <motion.div 
           className="mb-16 flex flex-col items-start border-b border-black/10 pb-6 dark:border-white/10"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: shouldReduceMotion ? 0 : undefined }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
             <Activity className="h-4 w-4" />
@@ -94,10 +96,10 @@ export default function ExperienceSection() {
             return (
               <motion.div
                 key={exp.id}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1, type: 'spring', stiffness: 100 }}
+                transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : index * 0.1, type: shouldReduceMotion ? false : 'spring', stiffness: 100 }}
                 className="group relative flex flex-col"
               >
                 {/* Accordion Header Row */}
@@ -162,7 +164,7 @@ export default function ExperienceSection() {
                   <div className="mt-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-black/5 bg-black/[0.02] text-zinc-400 transition-all duration-300 group-hover:border-black/10 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/5 dark:bg-white/[0.02] dark:group-hover:border-white/10 dark:group-hover:bg-white/[0.04] dark:group-hover:text-white sm:mt-0">
                     <motion.div
                       animate={{ rotate: isExpanded ? 180 : 0 }}
-                      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 200, damping: 20 }}
                     >
                       <ChevronDown className="h-5 w-5" />
                     </motion.div>
@@ -176,7 +178,7 @@ export default function ExperienceSection() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 100, damping: 20 }}
                       className="overflow-hidden"
                     >
                       <div className={`

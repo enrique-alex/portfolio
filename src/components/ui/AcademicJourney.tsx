@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { GraduationCap } from 'lucide-react';
 
 import { useLanguage } from '../theme/LanguageProvider';
@@ -31,6 +31,7 @@ function useJourneyData() {
 }
 
 export default function AcademicJourney() {
+  const shouldReduceMotion = useReducedMotion();
   const { t } = useLanguage();
   const journeyData = useJourneyData();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,10 +75,10 @@ export default function AcademicJourney() {
       {/* HEADER - System Process Monitor Style */}
       <motion.div 
         className="mb-16 flex w-full flex-col items-start border-b border-black/10 pb-6 dark:border-white/10 lg:mb-20"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
       >
         <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
           <GraduationCap className="h-4 w-4" />
@@ -118,7 +119,7 @@ export default function AcademicJourney() {
                       strokeWidth="2"
                       className="stroke-brand-blue drop-shadow-[0_0_8px_rgba(138,180,248,0.8)]"
                       style={{
-                          pathLength: pathLength,
+                          pathLength: shouldReduceMotion ? 1 : pathLength,
                       }}
                   />
               </svg>
@@ -141,10 +142,10 @@ export default function AcademicJourney() {
                 
                 {/* Typographie Géante (Stroke) - Année */}
                 <motion.div 
-                  initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+                  initial={{ opacity: 0, x: shouldReduceMotion ? 0 : (isEven ? -50 : 50) }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: false, margin: "-20%" }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut" }}
                   className={`flex-1 w-full pl-16 sm:pl-20 md:pl-0 ${isEven ? "md:text-right" : "md:text-left"}`}
                 >
                    <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter" 
@@ -160,19 +161,19 @@ export default function AcademicJourney() {
 
                 {/* Point de connexion matériel (Node) */}
                 <motion.div 
-                  initial={{ scale: 0 }}
+                  initial={{ scale: shouldReduceMotion ? 1 : 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: false, margin: "-20%" }}
-                  transition={{ duration: 0.5, delay: 0.2, type: "spring", stiffness: 200 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: shouldReduceMotion ? 0 : 0.2, type: shouldReduceMotion ? false : "spring", stiffness: 200 }}
                   className="absolute left-8 md:left-1/2 w-4 h-4 rounded-full bg-zinc-900 border-2 border-brand-blue shadow-[0_0_15px_rgba(138,180,248,0.6)] -translate-x-1/2 mt-2 md:mt-0 dark:bg-[#050505]"
                 ></motion.div>
 
                 {/* Données d'Ingénierie - Titre & Détails */}
                 <motion.div 
-                  initial={{ opacity: 0, x: isEven ? 50 : -50 }}
+                  initial={{ opacity: 0, x: shouldReduceMotion ? 0 : (isEven ? 50 : -50) }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: false, margin: "-20%" }}
-                  transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut", delay: shouldReduceMotion ? 0 : 0.1 }}
                   className={`flex-1 w-full pl-20 md:pl-0 ${isEven ? "md:text-left" : "md:text-right"}`}
                 >
                    <h4 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 leading-tight tracking-tight">

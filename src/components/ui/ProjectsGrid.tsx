@@ -1,28 +1,31 @@
 'use client';
 
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, useReducedMotion } from 'framer-motion';
 import MagneticProjectCard from './MagneticProjectCard';
 import { useProjectsData, Project } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 
-const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.15, // Effet d'apparition en cascade
-        }
-    }
-};
-
-const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 50, filter: 'blur(10px)' },
-    show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 100, damping: 20 } }
-};
+// Les variants sont définis dans le composant pour accéder à shouldReduceMotion
 
 export default function ProjectsGrid() {
+    const shouldReduceMotion = useReducedMotion();
     const router = useRouter();
     const projectsData = useProjectsData();
+
+    const containerVariants: Variants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: shouldReduceMotion ? 0 : 0.15, // Effet d'apparition en cascade
+            }
+        }
+    };
+
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 50, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(10px)' },
+        show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 100, damping: 20 } }
+    };
 
     const handleProjectClick = (project: Project) => {
         // Redirection vers la page détaillée pour le Shared Layout (Morphing Spatial)
@@ -34,7 +37,7 @@ export default function ProjectsGrid() {
             variants={containerVariants}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, margin: "-100px" }}
+            viewport={{ once: true, margin: "-100px" }}
             className="grid w-full auto-rows-[380px] grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:auto-rows-[420px]"
         >
             {projectsData.map((project) => {

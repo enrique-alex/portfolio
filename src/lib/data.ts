@@ -1,4 +1,5 @@
 import { useLanguage } from '@/components/theme/LanguageProvider';
+import { Locale } from '@/lib/i18n';
 
 export interface Project {
     id: string;
@@ -113,8 +114,7 @@ export const projectsDataFallback: Project[] = [
     }
 ];
 
-export function useProjectsData(): Project[] {
-    const { locale } = useLanguage();
+export function getProjectsData(locale: Locale): Project[] {
 
     if (locale === 'fr') {
         return projectsDataFallback;
@@ -186,4 +186,9 @@ export function useProjectsData(): Project[] {
             technicalChallenges: "An extraordinary intensity solicitation upon starting the motor units caused significant capacitive voltage sags directly disrupting embedded logic calculations (hardware brownouts). The architecture was solidified through partial galvanic isolation by optocoupler and the mathematical optimization of power routing via PWM (Pulse Width Modulation) control signals."
         }
     ];
+}
+
+export function useProjectsData(): Project[] {
+    const { locale } = useLanguage();
+    return getProjectsData(locale);
 }

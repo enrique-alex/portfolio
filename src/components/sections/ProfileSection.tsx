@@ -1,12 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import { Fingerprint, Terminal, Crosshair, MapPin, Code2, Zap } from 'lucide-react';
 import Magnetic from '../ui/Magnetic';
 import { useLanguage } from '../theme/LanguageProvider';
 
 export default function ProfileSection() {
+  const shouldReduceMotion = useReducedMotion();
   const { t } = useLanguage();
 
   return (
@@ -27,9 +28,10 @@ export default function ProfileSection() {
         {/* Header Block */}
         <motion.div 
           className="mb-16 flex flex-col items-start border-b border-black/10 pb-6 dark:border-white/10"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: shouldReduceMotion ? 0 : undefined }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
             <Fingerprint className="h-4 w-4" />
@@ -47,10 +49,10 @@ export default function ProfileSection() {
           {/* LEFT COLUMN: Operator ID Card */}
           <motion.div 
             className="w-full max-w-sm shrink-0"
-            initial={{ opacity: 0, x: -30, rotateY: 15 }}
+            initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -30, rotateY: shouldReduceMotion ? 0 : 15 }}
             whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
             viewport={{ once: true }}
-            transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+            transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', damping: 20, stiffness: 100 }}
           >
             <div className="group relative w-full overflow-hidden rounded-2xl border border-black/10 bg-black/5 p-4 shadow-2xl backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
               
@@ -97,10 +99,10 @@ export default function ProfileSection() {
             
             <motion.div 
               className="flex flex-col gap-6"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+              transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : 0.2 }}
             >
               
               <div className="border-l-2 border-brand-blue pl-6">
@@ -118,10 +120,10 @@ export default function ProfileSection() {
             {/* Technical Parameters Grid */}
             <motion.div 
               className="grid gap-4 sm:grid-cols-2"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
+              transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : 0.4 }}
             >
               
               {[

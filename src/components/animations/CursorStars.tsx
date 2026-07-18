@@ -173,6 +173,7 @@ class SilkRibbon {
 export default function CursorStars() {
     const { resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [shouldRender, setShouldRender] = useState(false);
     
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ribbonsRef = useRef<SilkRibbon[]>([]);
@@ -182,7 +183,14 @@ export default function CursorStars() {
     const themeRef = useRef(resolvedTheme || 'dark');
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobileOrTouch = window.matchMedia('(pointer: coarse)').matches;
+        
+        if (!prefersReducedMotion && !isMobileOrTouch) {
+            setShouldRender(true);
+        }
     }, []);
 
     useEffect(() => {
@@ -190,6 +198,7 @@ export default function CursorStars() {
     }, [resolvedTheme]);
 
     useEffect(() => {
+        if (!shouldRender) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d', { alpha: true });
@@ -247,7 +256,9 @@ export default function CursorStars() {
             window.removeEventListener('mousemove', onMouseMove);
             cancelAnimationFrame(animationId);
         };
-    }, []);
+    }, [shouldRender]);
+
+    if (!shouldRender) return null;
 
     return (
         <canvas

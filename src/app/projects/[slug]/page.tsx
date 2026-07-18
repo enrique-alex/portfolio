@@ -101,7 +101,7 @@ export default function ProjectDetail() {
 
                 <footer className="mt-8 flex items-center justify-between">
                     {project.githubUrl ? (
-                         <a href={project.githubUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-brand-blue hover:underline">
+                         <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-brand-blue hover:underline">
                              {t('projects.detail.github')}
                          </a>
                     ) : (

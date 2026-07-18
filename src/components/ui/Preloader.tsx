@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const LOADING_PHRASES = [
   "Initializing System Subroutines...",
@@ -13,6 +13,7 @@ const LOADING_PHRASES = [
 ];
 
 export default function Preloader() {
+  const shouldReduceMotion = useReducedMotion();
   const [progress, setProgress] = useState(0);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
@@ -84,7 +85,7 @@ export default function Preloader() {
               <motion.svg
                 viewBox="0 0 100 100"
                 className="absolute inset-0 h-full w-full text-zinc-300 dark:text-zinc-800"
-                animate={{ rotate: 360 }}
+                animate={{ rotate: shouldReduceMotion ? 0 : 360 }}
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
               >
                 <circle
@@ -102,7 +103,7 @@ export default function Preloader() {
               <motion.svg
                 viewBox="0 0 100 100"
                 className="absolute inset-2 h-full w-full text-brand-blue/30"
-                animate={{ rotate: -360 }}
+                animate={{ rotate: shouldReduceMotion ? 0 : -360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
               >
                 <circle
@@ -131,7 +132,7 @@ export default function Preloader() {
                   strokeLinecap="round"
                   initial={{ strokeDasharray: "0 251" }}
                   animate={{ strokeDasharray: `${(progress / 100) * 251} 251` }}
-                  transition={{ ease: "easeOut" }}
+                  transition={{ duration: shouldReduceMotion ? 0 : undefined, ease: "easeOut" }}
                 />
               </svg>
 
@@ -141,8 +142,8 @@ export default function Preloader() {
                   className="flex h-16 w-16 items-center justify-center border border-zinc-900/10 bg-white/50 backdrop-blur-md dark:border-white/10 dark:bg-black/50"
                   style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}
                   initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: [0.8, 1, 0.8], opacity: 1 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  animate={{ scale: shouldReduceMotion ? 1 : [0.8, 1, 0.8], opacity: 1 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 2, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <span className="font-mono text-[10px] font-bold tracking-widest text-zinc-900 dark:text-white">
                     CORE
@@ -156,9 +157,9 @@ export default function Preloader() {
               <div className="flex items-end gap-2 overflow-hidden h-16">
                 <motion.span 
                   className="font-mono text-5xl font-black tracking-tighter text-zinc-900 dark:text-white sm:text-7xl"
-                  initial={{ y: 50 }}
+                  initial={{ y: shouldReduceMotion ? 0 : 50 }}
                   animate={{ y: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : "spring", stiffness: 200, damping: 20 }}
                 >
                   {progress}
                 </motion.span>

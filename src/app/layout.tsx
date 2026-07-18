@@ -5,19 +5,17 @@ import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import Preloader from "@/components/ui/Preloader";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
   description:
     "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Systèmes Embarqués à Polytech Lille, Apprenti chez Minakem. C/C++, Python, Automatisme, Électronique.",
-  metadataBase: new URL("https://enrique-alex.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://enrique-alex.pages.dev"),
   openGraph: {
     title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
     description:
       "Élève Ingénieur en Systèmes Embarqués (Polytech Lille) · Apprenti Automatisme & Informatique Industrielle chez Minakem Dunkerque.",
-    url: "https://enrique-alex.vercel.app",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://enrique-alex.pages.dev",
     siteName: "Portfolio · Enrique Alex Ndjakou",
     locale: "fr_FR",
     type: "website",
@@ -77,8 +75,6 @@ export default function RootLayout({
           <Footer />
           </LanguageProvider>
         </ThemeProvider>
-        <SpeedInsights />
-        <Analytics />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants, useReducedMotion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 
 // ─── react-icons : icônes de marques réelles ─────────────
@@ -22,6 +22,10 @@ import {
 } from 'lucide-react';
 
 // ─── DATA ─────────────────────────────────────────────────
+interface CSSPropertiesWithVars extends React.CSSProperties {
+  [key: `--${string}`]: string | number | undefined;
+}
+
 interface Skill {
   name: string;
   level: number;
@@ -134,32 +138,18 @@ const MARQUEE_TOOLS: MarqueeTool[] = [
   { name: 'PostgreSQL', icon: SiPostgresql, brandColor: '#336791' },
 ];
 
-// ─── Animation Variants ───────────────────────────────────
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
-  show: { 
-    opacity: 1, y: 0, filter: 'blur(0px)',
-    transition: { type: 'spring', stiffness: 120, damping: 20 } 
-  },
-};
+// Les Variants sont maintenant définis à l'intérieur du composant pour accéder à useReducedMotion
 
 // ─── Animated Skill Bar ───────────────────────────────────
 function SkillBar({ skill, color, index }: { skill: Skill; color: { r: number; g: number; b: number }; index: number }) {
+  const shouldReduceMotion = useReducedMotion();
   const IconComponent = skill.icon;
   return (
     <motion.div 
       className="group flex flex-col gap-2"
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.07, type: 'spring', stiffness: 150, damping: 20 }}
+      transition={{ delay: shouldReduceMotion ? 0 : index * 0.07, duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 150, damping: 20 }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -178,7 +168,7 @@ function SkillBar({ skill, color, index }: { skill: Skill; color: { r: number; g
           className="absolute inset-y-0 left-0 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${skill.level}%` }}
-          transition={{ delay: 0.3 + index * 0.1, duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ delay: shouldReduceMotion ? 0 : 0.3 + index * 0.1, duration: shouldReduceMotion ? 0 : 1, ease: [0.25, 0.46, 0.45, 0.94] }}
           style={{ 
             background: `linear-gradient(90deg, rgb(${color.r},${color.g},${color.b}), rgba(${color.r},${color.g},${color.b},0.6))`,
             boxShadow: `0 0 12px rgba(${color.r},${color.g},${color.b},0.3)`
@@ -196,9 +186,8 @@ function ToolCard({ tool }: { tool: MarqueeTool }) {
     <div 
       className="tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] bg-white/60 px-4 py-2.5 sm:px-5 sm:py-3.5 backdrop-blur-sm transition-all duration-500 hover:scale-105 dark:border-white/[0.08] dark:bg-white/[0.03]"
       style={{
-        // @ts-expect-error CSS custom properties
         '--brand': tool.brandColor,
-      }}
+      } as CSSPropertiesWithVars}
     >
       {/* Glow border on hover */}
       <div 
@@ -254,27 +243,13 @@ function InfiniteMarquee({ tools, direction = 'left', speed = 35 }: { tools: Mar
           <ToolCard key={`${tool.name}-${i}`} tool={tool} />
         ))}
       </div>
-
-      {/* CSS Keyframes injected inline */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes marquee-left {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        @keyframes marquee-right {
-          from { transform: translateX(-50%); }
-          to { transform: translateX(0); }
-        }
-        .marquee-container:hover .marquee-track {
-          animation-play-state: paused;
-        }
-      `}} />
     </div>
   );
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────
 export default function SkillsSection() {
+  const shouldReduceMotion = useReducedMotion();
   const { t } = useLanguage();
   const SKILL_CATEGORIES = useSkillCategories();
   const [activeCategory, setActiveCategory] = useState(SKILL_CATEGORIES[0].id);
@@ -302,10 +277,10 @@ export default function SkillsSection() {
         {/* HEADER - System Process Monitor Style */}
         <motion.div 
           className="mb-16 flex w-full flex-col items-start border-b border-black/10 pb-6 dark:border-white/10 lg:mb-20"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
             <Activity className="h-4 w-4" />
@@ -327,7 +302,13 @@ export default function SkillsSection() {
           {/* CATEGORY TABS (vertical) */}
           <motion.div 
             className="flex flex-row gap-2 overflow-x-auto pb-4 scrollbar-hide lg:flex-col lg:gap-3 lg:pb-0"
-            variants={containerVariants}
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: shouldReduceMotion ? 0 : 0.08 },
+              },
+            }}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
@@ -337,7 +318,13 @@ export default function SkillsSection() {
               return (
                 <motion.button
                   key={cat.id}
-                  variants={itemVariants}
+                  variants={{
+                    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 30, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(8px)' },
+                    show: { 
+                      opacity: 1, y: 0, filter: 'blur(0px)',
+                      transition: { duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 120, damping: 20 } 
+                    },
+                  }}
                   onClick={() => setActiveCategory(cat.id)}
                   className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-all duration-300 lg:w-full ${
                     isActive 
@@ -374,10 +361,10 @@ export default function SkillsSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeCategory}
-                initial={{ opacity: 0, y: 15, filter: 'blur(6px)' }}
+                initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 15, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(6px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -15, filter: 'blur(6px)' }}
-                transition={{ duration: 0.35, ease: 'easeInOut' }}
+                exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -15, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(6px)' }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeInOut' }}
                 className="rounded-3xl border border-black/5 bg-black/[0.02] p-8 backdrop-blur-sm dark:border-white/5 dark:bg-white/[0.02] lg:p-10"
                 style={{
                   boxShadow: `0 0 0 0.5px rgba(${active.color.r},${active.color.g},${active.color.b},0.1), 0 8px 32px rgba(0,0,0,0.04)`,
@@ -438,10 +425,10 @@ export default function SkillsSection() {
         {/* ─── TOOLBOX MARQUEE (Premium) ─── */}
         <motion.div 
           className="relative mt-24 w-full"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.3, duration: 0.7 }}
+          transition={{ delay: shouldReduceMotion ? 0 : 0.3, duration: shouldReduceMotion ? 0 : 0.7 }}
         >
           {/* Radial glow backdrop */}
           <div className="pointer-events-none absolute -inset-x-20 -top-16 -bottom-16 z-0 opacity-30 dark:opacity-20" 

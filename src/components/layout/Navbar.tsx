@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Sun, Moon, Languages } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../theme/LanguageProvider';
 
 function useNavLinks() {
@@ -19,6 +19,7 @@ function useNavLinks() {
 }
 
 export default function Navbar() {
+  const shouldReduceMotion = useReducedMotion();
   const NAV_LINKS = useNavLinks();
   const { locale, setLocale, t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,6 +34,7 @@ export default function Navbar() {
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -126,7 +128,7 @@ export default function Navbar() {
             <motion.div 
               className="absolute top-0 h-full rounded-full z-0"
               animate={{ left: pillStyle.left, width: pillStyle.width }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
+              transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
               style={{
                 background: mounted && theme === 'dark'
                   ? 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)'
@@ -257,7 +259,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
               className="fixed inset-0 z-40 flex flex-col items-center justify-center md:hidden"
               style={{
                 background: mounted && theme === 'dark'
@@ -271,9 +273,9 @@ export default function Navbar() {
                   <motion.a
                     key={link.name}
                     href={link.href}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : i * 0.08 }}
                     className="text-3xl font-light tracking-tight text-zinc-600 transition-colors hover:text-zinc-900 dark:text-white/70 dark:hover:text-white"
                     onClick={() => {
                       setActiveSegment(link.name);

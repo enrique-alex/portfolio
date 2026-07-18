@@ -2,23 +2,64 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTheme } from 'next-themes';
+import { usePathname } from 'next/navigation';
+
+interface WebGLFluidOptions {
+    TRIGGER?: 'hover' | 'click';
+    IMMEDIATE?: boolean;
+    NUM_SPLATS?: number;
+    CURL?: number;
+    SUNRAYS?: boolean;
+    SUNRAYS_RESOLUTION?: number;
+    SUNRAYS_WEIGHT?: number;
+    DENSITY_DISSIPATION?: number;
+    VELOCITY_DISSIPATION?: number;
+    PRESSURE?: number;
+    PRESSURE_ITERATIONS?: number;
+    SPLAT_RADIUS?: number;
+    SHADING?: boolean;
+    COLORFUL?: boolean;
+    COLOR_UPDATE_SPEED?: number;
+    BACK_COLOR?: { r: number; g: number; b: number };
+    TRANSPARENT?: boolean;
+    BLOOM?: boolean;
+    BLOOM_ITERATIONS?: number;
+    BLOOM_RESOLUTION?: number;
+    BLOOM_INTENSITY?: number;
+    BLOOM_THRESHOLD?: number;
+    BLOOM_SOFT_KNEE?: number;
+}
+
+type WebGLFluidInstance = unknown;
+type WebGLFluidFn = (canvas: HTMLCanvasElement, options: WebGLFluidOptions) => WebGLFluidInstance;
+
+declare global {
+    interface Window {
+        __webglResonanceColor: string | null;
+    }
+}
 
 export default function CursorFluid() {
     const { resolvedTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
+    const pathname = usePathname();
+    const [shouldRender, setShouldRender] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const fluidInstance = useRef<any>(null); // Référence pour l'instance WebGL fluide
+    const fluidInstance = useRef<WebGLFluidInstance>(null); // Référence pour l'instance WebGL fluide
 
-    // On s'assure que le composant est monté pour Next.js (Hydration)
     useEffect(() => {
-        setMounted(true);
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobileOrTouch = window.matchMedia('(pointer: coarse)').matches;
+        
+        if (!prefersReducedMotion && !isMobileOrTouch) {
+            setShouldRender(true);
+        }
     }, []);
 
     useEffect(() => {
-        if (!mounted || !canvasRef.current || typeof window === 'undefined') return;
+        if (!shouldRender || !canvasRef.current || typeof window === 'undefined') return;
 
-        let WebGLFluid: any;
+        let WebGLFluid: WebGLFluidFn | undefined;
         let cleaned = false;
         
         // Garde silencieuse: l'handler touchend de webgl-fluid appelle rt(undefined) si un
@@ -39,9 +80,10 @@ export default function CursorFluid() {
         const loadFluid = async () => {
             if (cleaned) return;
             try {
-                WebGLFluid = (await import('./webgl-fluid.js')).default || await import('./webgl-fluid.js');
+                WebGLFluid = ((await import('./webgl-fluid.js')).default || await import('./webgl-fluid.js')) as WebGLFluidFn;
 
-                fluidInstance.current = WebGLFluid(canvasRef.current, {
+                if (WebGLFluid) {
+                    fluidInstance.current = WebGLFluid(canvasRef.current!, {
                     TRIGGER: 'hover',
                     IMMEDIATE: true,
                     NUM_SPLATS: 3,
@@ -66,6 +108,7 @@ export default function CursorFluid() {
                     BLOOM_THRESHOLD: 0.6,
                     BLOOM_SOFT_KNEE: 0.7
                 });
+                }
             } catch (error) {
                 console.error("Erreur de chargement du shader WebGL :", error);
             }
@@ -80,9 +123,9 @@ export default function CursorFluid() {
             const customEvent = e as CustomEvent;
             const color = customEvent.detail?.color;
             if (color) {
-                (window as any).__webglResonanceColor = color;
+                window.__webglResonanceColor = color;
             } else {
-                (window as any).__webglResonanceColor = null;
+                window.__webglResonanceColor = null;
             }
         };
 
@@ -94,12 +137,9 @@ export default function CursorFluid() {
              window.removeEventListener('webgl-resonance', handleResonance);
              window.removeEventListener('error', silentErrorGuard as EventListener);
         };
-    }, [mounted]);
+    }, [pathname, shouldRender]);
 
-
-
-    // On attend l'hydratation avant d'afficher quoi que ce soit
-    if (!mounted) return null;
+    if (!shouldRender) return null;
 
     return (
         <div ref={containerRef} className="pointer-events-none fixed inset-0 z-0 h-full w-full overflow-hidden">
