@@ -1,5 +1,6 @@
 import "./globals.css";
-import CursorFluid from "@/components/animations/CursorFluid";
+import dynamic from "next/dynamic";
+const CursorFluid = dynamic(() => import("@/components/animations/CursorFluid"), { ssr: false });
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";

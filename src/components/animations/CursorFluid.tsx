@@ -50,9 +50,17 @@ export default function CursorFluid() {
     useEffect(() => {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const isMobileOrTouch = window.matchMedia('(pointer: coarse)').matches;
-        
-        if (!prefersReducedMotion && !isMobileOrTouch) {
-            setShouldRender(true);
+
+        if (prefersReducedMotion || isMobileOrTouch) return;
+
+        const enableFluid = () => setShouldRender(true);
+
+        if ('requestIdleCallback' in window) {
+            const idleId = window.requestIdleCallback(enableFluid, { timeout: 1500 });
+            return () => window.cancelIdleCallback(idleId);
+        } else {
+            const timeoutId = setTimeout(enableFluid, 500);
+            return () => clearTimeout(timeoutId);
         }
     }, []);
 
