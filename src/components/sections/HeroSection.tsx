@@ -153,7 +153,7 @@ export default function HeroSection() {
                     alt="Enrique Alex NDJAKOU KEMAYOU" 
                     fill 
                     className="object-cover z-20 grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"
-                    sizes="(max-width: 640px) 280px, 320px"
+                    sizes="(max-width: 768px) 100vw, 300px"
                     priority
                   />
 

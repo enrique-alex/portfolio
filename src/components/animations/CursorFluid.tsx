@@ -122,9 +122,10 @@ export default function CursorFluid() {
             }
         };
 
-        // Attendre la fin du preloader avant de lancer l'effet WebGL
-        const onPreloaderComplete = () => loadFluid();
-        window.addEventListener('preloader-complete', onPreloaderComplete);
+        // Démarrer l'initialisation WebGL IMMÉDIATEMENT en arrière-plan pendant que 
+        // le Preloader tourne. Cela permet de compiler les shaders lourds sans bloquer 
+        // le Main Thread au moment crucial où le Preloader disparaît et le Hero s'affiche.
+        loadFluid();
 
         // Résonance WebGL via Custom Event
         const handleResonance = (e: Event) => {
@@ -141,7 +142,6 @@ export default function CursorFluid() {
 
         return () => {
              cleaned = true;
-             window.removeEventListener('preloader-complete', onPreloaderComplete);
              window.removeEventListener('webgl-resonance', handleResonance);
              window.removeEventListener('error', silentErrorGuard as EventListener);
         };
