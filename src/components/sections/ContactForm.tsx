@@ -5,16 +5,37 @@ import { Terminal, Send, CheckCircle2 } from 'lucide-react';
 import Magnetic from '@/components/ui/Magnetic';
 import { useLanguage } from '../theme/LanguageProvider';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function ContactForm() {
   const { t } = useLanguage();
   // Form States
   const [formData, setFormData] = useState({ name: '', email: '', message: '', botcheck: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; message?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Honeypot: rejet silencieux si coché (un humain ne voit jamais cette case)
+    if (formData.botcheck) return;
+
     if (!formData.name || !formData.email || !formData.message) return;
+
+    // Validation email côté client
+    if (!EMAIL_REGEX.test(formData.email.trim())) {
+      setFieldErrors(prev => ({ ...prev, email: t('contact.form.email.invalid') }));
+      return;
+    }
+
+    // Validation longueur du message
+    if (formData.message.trim().length < 10) {
+      setFieldErrors(prev => ({ ...prev, message: t('contact.form.message.tooShort') }));
+      return;
+    }
+
+    setFieldErrors({});
     
     setIsSubmitting(true);
     setSubmitStatus('idle');
@@ -104,6 +125,7 @@ export default function ContactForm() {
             id="name" 
             required
             value={formData.name}
+            maxLength={100}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             placeholder={t('contact.form.name.placeholder')}
             className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-brand-blue disabled:opacity-50"
@@ -120,11 +142,22 @@ export default function ContactForm() {
             id="email" 
             required
             value={formData.email}
-            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            maxLength={100}
+            onChange={(e) => {
+              setFormData(prev => ({ ...prev, email: e.target.value }));
+              if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
+            }}
             placeholder={t('contact.form.email.placeholder')}
             className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-brand-blue disabled:opacity-50"
             disabled={isSubmitting}
+            aria-invalid={fieldErrors.email ? 'true' : undefined}
+            aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
+          {fieldErrors.email && (
+            <p id="email-error" role="alert" aria-live="assertive" className="mt-1 font-mono text-[10px] text-red-500">
+              {fieldErrors.email}
+            </p>
+          )}
         </div>
 
         <div className="group relative">
@@ -136,11 +169,23 @@ export default function ContactForm() {
             required
             rows={4}
             value={formData.message}
-            onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+            minLength={10}
+            maxLength={2000}
+            onChange={(e) => {
+              setFormData(prev => ({ ...prev, message: e.target.value }));
+              if (fieldErrors.message) setFieldErrors(prev => ({ ...prev, message: undefined }));
+            }}
             placeholder={t('contact.form.message.placeholder')}
             className="w-full resize-none rounded-lg border border-black/10 bg-white/50 p-4 font-mono text-sm text-zinc-900 transition-all focus:border-brand-blue/50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-blue/10 dark:border-white/10 dark:bg-black/50 dark:text-white dark:focus:border-brand-blue/50 dark:focus:bg-black disabled:opacity-50"
             disabled={isSubmitting}
+            aria-invalid={fieldErrors.message ? 'true' : undefined}
+            aria-describedby={fieldErrors.message ? 'message-error' : undefined}
           ></textarea>
+          {fieldErrors.message && (
+            <p id="message-error" role="alert" aria-live="assertive" className="mt-1 font-mono text-[10px] text-red-500">
+              {fieldErrors.message}
+            </p>
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-between">
