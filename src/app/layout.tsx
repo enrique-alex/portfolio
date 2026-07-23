@@ -7,14 +7,14 @@ import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import Preloader from "@/components/ui/Preloader";
 
 export const metadata = {
-  title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+  title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
-    "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Systèmes Embarqués à Polytech Lille, Apprenti chez Minakem. C/C++, Python, Automatisme, Électronique.",
+    "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Automatisme, SCADA, C/C++, Python, Électronique.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://enrique-alex.pages.dev"),
   openGraph: {
-    title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+    title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
     description:
-      "Élève Ingénieur en Systèmes Embarqués (Polytech Lille) · Apprenti Automatisme & Informatique Industrielle chez Minakem Dunkerque.",
+      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Apprenti Automatisme & Informatique Industrielle chez Minakem Dunkerque.",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://enrique-alex.pages.dev",
     siteName: "Portfolio · Enrique Alex Ndjakou",
     locale: "fr_FR",
@@ -24,26 +24,29 @@ export const metadata = {
         url: "/og-image.png",
         width: 1024,
         height: 1024,
-        alt: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+        alt: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Enrique Alex Ndjakou — Ingénieur Systèmes Embarqués",
+    title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
     description:
-      "Élève Ingénieur en Systèmes Embarqués (Polytech Lille) · Automatisme & Informatique Industrielle.",
+      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Automatisme & Informatique Industrielle.",
     images: ["/og-image.png"],
   },
   keywords: [
     "Enrique Alex Ndjakou",
     "Ingénieur",
-    "Systèmes Embarqués",
+    "Génie Électrique",
+    "Mécatronique",
     "Polytech Lille",
     "Automatisme",
+    "Automatisme Industriel",
+    "SCADA",
+    "Ignition",
     "C++",
     "Python",
-    "Mécatronique",
     "Portfolio",
   ],
 };

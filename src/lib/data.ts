@@ -13,9 +13,80 @@ export interface Project {
     technologies: string[];
     themeColor: { r: number; g: number; b: number };
     githubUrl?: string;
+    coverImage?: string;
+    gallery?: string[];
 }
 
 export const projectsDataFallback: Project[] = [
+    // ─── 4 NOUVEAUX PROJETS ACADÉMIQUES EN TÊTE ───
+    {
+        id: "controle-hydraulique",
+        title: "Contrôle-Commande Temps Réel, Procédé Hydraulique Bicuve",
+        slug: "controle-hydraulique-bicuve-2026",
+        year: 2026,
+        category: "Automatisme & Régulation",
+        shortDescription: "De la modélisation Matlab/Simulink au pilotage temps réel sur cible industrielle Speedgoat.",
+        detailedDescription: "Projet complet d'automatique portant sur un système hydraulique à deux cuves couplées. De la modélisation physique et l'analyse de stabilité jusqu'au déploiement d'un régulateur numérique en temps réel sur une cible Speedgoat, en passant par l'identification expérimentale et la synthèse de correcteurs continus et discrets.",
+        technicalChallenges: "Modélisation physique et analyse de stabilité (critère de Routh-Hurwitz). Identification expérimentale sur système réel (gain, constante de temps par réponse indicielle). Synthèse de régulateurs continus et numériques, en régulation cascade double boucle. Déploiement temps réel HIL sur cible Speedgoat (période d'échantillonnage 10ms). Résultats mesurés : temps de réponse divisé par 4 en boucle fermée, erreur statique annulée, robustesse validée face aux perturbations.",
+        technologies: ["Matlab/Simulink", "Régulation P/PI/PID/Cascade", "HIL Speedgoat"],
+        themeColor: { r: 99, g: 102, b: 241 },
+        coverImage: "/image/projects/controle-hydraulique-cover.webp",
+        gallery: [
+            "/image/projects/controle-hydraulique-cover.webp",
+            "/image/projects/controle-hydraulique-pi-discret.webp",
+            "/image/projects/controle-hydraulique-selecteur-config.webp",
+            "/image/projects/controle-hydraulique-selecteur-systeme.webp"
+        ]
+    },
+    {
+        id: "filtre-tchebychev",
+        title: "Filtre Passe-Bas Actif de Tchebychev",
+        slug: "filtre-tchebychev-2026",
+        year: 2026,
+        category: "Électronique",
+        shortDescription: "De l'équation à la carte électronique fonctionnelle, conception, simulation et fabrication d'un filtre analogique.",
+        detailedDescription: "Conception complète d'un filtre passe-bas actif d'ordre 4 de type Tchebychev, depuis la synthèse analytique jusqu'à la fabrication physique du PCB. Le projet inclut l'étude comparative Butterworth/Tchebychev, la simulation LTSpice, le routage KiCad complet et la caractérisation à l'oscilloscope du prototype final.",
+        technicalChallenges: "Synthèse analytique d'un filtre d'ordre 4 (comparaison Butterworth/Tchebychev) respectant un cahier des charges strict (bande passante 4,5 kHz, ondulation ≤1dB, atténuation 35dB à 13kHz). Simulation complète sous LTSpice avant fabrication. Routage KiCad de bout en bout : schéma, empreintes CMS, plan de masse, DRC, export Gerber. Fabrication physique : gravure CNC, soudure CMS, caractérisation à l'oscilloscope. Travail en binôme avec analyse comparative de deux réalisations indépendantes.",
+        technologies: ["LTSpice", "KiCad", "Cellules Sallen-Key", "Gravure CNC"],
+        themeColor: { r: 6, g: 182, b: 212 },
+        coverImage: "/image/projects/filtre-tchebychev-cover.webp"
+    },
+    {
+        id: "lyngk",
+        title: "Lyngk – Moteur de Jeu Hexagonal",
+        slug: "lyngk-moteur-jeu-c-2026",
+        year: 2026,
+        category: "Algorithmique",
+        shortDescription: "Moteur de jeu de plateau hexagonal en C, entre rigueur bas niveau et algorithmique combinatoire.",
+        detailedDescription: "Développement complet en langage C d'un moteur de jeu reproduisant fidèlement la mécanique du jeu de plateau Lyngk. L'architecture MVC stricte, avec modèle en Singleton, assure une séparation rigoureuse entre logique de jeu, rendu graphique SDL3 et gestion des entrées. Le plateau hexagonal est traité en coordonnées axiales avec un algorithme DFS pour le calcul de trajectoires.",
+        technicalChallenges: "Architecture MVC stricte (modèle en Singleton) pour un code maintenable. Optimisation bas niveau par bitmasking : 43 cases de plateau traitées en un seul cycle via registres 64 bits. Algorithme DFS pour le calcul de trajectoires en coordonnées axiales hexagonales. Gestion mémoire stricte : zéro fuite, compilation propre sous -Wall -Wextra. IA adverse (PvE) modélisée en machine d'état, sélection de coup en complexité O(1).",
+        technologies: ["C", "SDL3", "Architecture MVC", "DFS"],
+        themeColor: { r: 234, g: 179, b: 8 },
+        coverImage: "/image/projects/lyngk-cover.webp",
+        gallery: [
+            "/image/projects/lyngk-cover.webp",
+            "/image/projects/lyngk-code.webp",
+            "/image/projects/lyngk-victory.webp"
+        ]
+    },
+    {
+        id: "microprocesseurs",
+        title: "Microprocesseurs & Programmation Bas Niveau",
+        slug: "microprocesseurs-atmega2560-2026",
+        year: 2026,
+        category: "Informatique Bas Niveau",
+        shortDescription: "Trois systèmes embarqués en assembleur pur, sans aucune abstraction logicielle.",
+        detailedDescription: "Développement de trois systèmes embarqués complets programmés exclusivement en assembleur AVR8 sur microcontrôleur ATMEGA2560, sans aucune bibliothèque ni abstraction logicielle. Chaque système exploite directement les registres matériels, les interruptions et les périphériques du microcontrôleur.",
+        technicalChallenges: "Compteur piloté par interruptions, avec mode veille pour l'économie d'énergie (zéro polling). Capteur de température interrogeable à distance, combinant CAN + port parallèle + USART simultanément. Système de détection d'intrusion (capteurs de distance, clavier matriciel, gestion d'événements concurrents type IoT).",
+        technologies: ["ASM AVR8", "ATMEGA2560", "CAN", "USART"],
+        themeColor: { r: 239, g: 68, b: 68 },
+        coverImage: "/image/projects/microprocesseurs-cover.webp",
+        gallery: [
+            "/image/projects/microprocesseurs-cover.webp",
+            "/image/projects/microprocesseurs-temperature-ihm.webp"
+        ]
+    },
+    // ─── 8 PROJETS ORIGINAUX ───
     {
         id: "robotino",
         title: "Robotino – Hockey Autonome",
@@ -26,14 +97,15 @@ export const projectsDataFallback: Project[] = [
         detailedDescription: "Conception complète du système de contrôle d'un Robotino 2 pour un match de hockey robotisé. Le robot devait repérer un palet par vision embarquée, naviguer vers le but en évitant les robots adverses, détecter la ligne de but métallique par capteur inductif et déclencher un tir précis. L'architecture de contrôle repose sur un Grafcet hiérarchique orchestrant navigation, évitement d'obstacles temps réel et séquence de tir.",
         technicalChallenges: "La détection colorimétrique initiale en espace RGB générait des pertes de cible face aux variations lumineuses. Le basculement vers l'espace HSV a isolé la teinte de la luminosité pour un suivi robuste. La portée très courte du capteur inductif (4 mm) entraînait des dépassements de cible à cause de l'inertie. Une anticipation de freinage via odométrie (2000 impulsions/tour) et vision a résolu le problème. La zone fiable des infrarouges (15-45 cm) a été modélisée pour éviter les faux positifs au-delà de 50 cm.",
         technologies: ["Robotino 2", "Grafcet", "Vision par Ordinateur", "Capteurs Industriels", "Robotino View", "Automatique"],
-        themeColor: { r: 0, g: 122, b: 255 }
+        themeColor: { r: 0, g: 122, b: 255 },
+        coverImage: "/image/projects/robotino-cover.webp"
     },
     {
         id: "awale",
         title: "Awale - Stratégie en C",
         slug: "awale-jeu-c-2026",
         year: 2026,
-        category: "Algorithmie",
+        category: "Algorithmique",
         shortDescription: "Développement du jeu de société traditionnel en langage C axé sur l'efficacité des structures.",
         detailedDescription: "Conception architecturale et implémentation en langage formel C de la mécanique combinatoire du jeu de société Awale. Ce projet focalise principalement sur la performance algorithmique pure, la gestion déterministe de la mémoire et la logique d'état asymétrique continue.",
         technicalChallenges: "La difficulté majeure résidait dans la modélisation mathématique d'un plateau de jeu strictement cyclique sans causer de débordement dynamique en mémoire vive. L'approche d'ingénierie a consisté à encapsuler le plateau dans des structures de données contiguës, manipulées perpétuellement via l'arithmétique modulaire et des pointeurs de fonctions robustes.",
@@ -50,7 +122,8 @@ export const projectsDataFallback: Project[] = [
         detailedDescription: "Création d'un environnement de lecture multimédia intelligent programmé entièrement en Python. Le système orchestre une interface vectorielle complexe sous Tkinter, délègue le rendu bas niveau au moteur Pygame, intègre le protocole de reconnaissance vocale Speech-Recognition, et procède au parsing de métadonnées audio via les algorithmes Pydub et Mutagen.",
         technicalChallenges: "Gérer la concurrence critique d'accès matériels simultanés entre la boucle d'événements visuels, le thread d'écoute réseau asynchrone et le buffer DMA matériel de la carte son. La solution logicielle a impliqué une séparation d'E/S (Entrées/Sorties) au sein d'une architecture multi-threadée stricte pour isoler les instructions temps réel du wrapper asynchrone.",
         technologies: ["Python", "Tkinter", "Pygame", "Speech-Recognition", "Pydub", "Mutagen"],
-        themeColor: { r: 41, g: 128, b: 185 }
+        themeColor: { r: 41, g: 128, b: 185 },
+        coverImage: "/image/projects/pygroove-cover.webp"
     },
     {
         id: "terminal-c",
@@ -81,7 +154,7 @@ export const projectsDataFallback: Project[] = [
         title: "Snake - Moteur Arcade C++",
         slug: "moteur-jeu-snake-cpp-2024",
         year: 2024,
-        category: "Algorithmie",
+        category: "Algorithmique",
         shortDescription: "Conception architecturale en C++ encadrant la complexité d'une boucle vidéo temps réel.",
         detailedDescription: "Développement fonctionnel d'un moteur d'arcade limitant la surcharge du microprocesseur selon des principes stricts de la POO. Implémentation isolée de la game loop principale, abstraction du module des entrées matérielles, et raffinement algorithmique pour la vérification collisionnelle 2D.",
         technicalChallenges: "La chute du taux de rafraîchissement (frame rate drops) occasionnait des erreurs silencieuses dans le registre de vérifications d'intersections vectorielles à haute vélocité. Le correctif a dicté l'adoption d'un diviseur d'échelle temporel interpolé (Delta-time scaling) garantissant une cohérence arithmétique mathématiquement indépendante de la bande passante du processeur local.",
@@ -123,6 +196,38 @@ export function getProjectsData(locale: Locale): Project[] {
     return [
         {
             ...projectsDataFallback[0],
+            title: "Real-Time Control, Dual-Tank Hydraulic Process",
+            category: "Automation & Control",
+            shortDescription: "From Matlab/Simulink modeling to real-time control on an industrial Speedgoat target.",
+            detailedDescription: "Complete control engineering project on a coupled dual-tank hydraulic system. From physical modeling and stability analysis to deployment of a real-time digital controller on a Speedgoat target, through experimental identification and synthesis of continuous and discrete controllers.",
+            technicalChallenges: "Physical modeling and stability analysis (Routh-Hurwitz criterion). Experimental identification on a real system (gain, time constant via step response). Continuous and digital controller synthesis, in dual-loop cascade control. Real-time HIL deployment on Speedgoat target (10ms sampling period). Measured results: response time divided by 4 in closed loop, static error eliminated, robustness validated against disturbances."
+        },
+        {
+            ...projectsDataFallback[1],
+            title: "Chebyshev Active Low-Pass Filter",
+            category: "Electronics",
+            shortDescription: "From equation to working circuit board, design, simulation, and fabrication of an analog filter.",
+            detailedDescription: "Complete design of a 4th-order Chebyshev active low-pass filter, from analytical synthesis to physical PCB fabrication. The project includes a Butterworth/Chebyshev comparative study, LTSpice simulation, full KiCad routing, and oscilloscope characterization of the final prototype.",
+            technicalChallenges: "Analytical synthesis of a 4th-order filter (Butterworth/Chebyshev comparison) meeting strict specifications (4.5 kHz bandwidth, ≤1dB ripple, 35dB attenuation at 13kHz). Full simulation in LTSpice before fabrication. End-to-end KiCad routing: schematic, SMD footprints, ground plane, DRC, Gerber export. Physical fabrication: CNC milling, SMD soldering, oscilloscope characterization. Pair work with comparative analysis of two independent builds."
+        },
+        {
+            ...projectsDataFallback[2],
+            title: "Lyngk – Hexagonal Game Engine",
+            category: "Algorithms",
+            shortDescription: "Hexagonal board game engine in C, blending low-level rigor with combinatorial algorithms.",
+            detailedDescription: "Full development in C of a game engine faithfully reproducing the mechanics of the Lyngk board game. The strict MVC architecture, with a Singleton model, ensures rigorous separation between game logic, SDL3 graphical rendering, and input management. The hexagonal board is handled using axial coordinates with a DFS algorithm for trajectory computation.",
+            technicalChallenges: "Strict MVC architecture (Singleton model) for maintainable code. Low-level optimization via bitmasking: 43 board cells processed in a single cycle using 64-bit registers. DFS algorithm for trajectory computation in hexagonal axial coordinates. Strict memory management: zero leaks, clean compilation under -Wall -Wextra. Adversarial AI (PvE) modeled as a state machine, move selection in O(1) complexity."
+        },
+        {
+            ...projectsDataFallback[3],
+            title: "Microprocessors & Low-Level Programming",
+            category: "Low-Level Computing",
+            shortDescription: "Three embedded systems in pure assembly, without any software abstraction.",
+            detailedDescription: "Development of three complete embedded systems programmed exclusively in AVR8 assembly on ATMEGA2560 microcontroller, without any library or software abstraction. Each system directly exploits hardware registers, interrupts, and microcontroller peripherals.",
+            technicalChallenges: "Interrupt-driven counter with sleep mode for power saving (zero polling). Remotely queryable temperature sensor, combining ADC + parallel port + USART simultaneously. Intrusion detection system (distance sensors, matrix keypad, concurrent IoT-type event management)."
+        },
+        {
+            ...projectsDataFallback[4],
             title: "Robotino – Autonomous Hockey",
             category: "Embedded Systems",
             shortDescription: "Programming an omnidirectional mobile robot for a fully autonomous hockey match: vision, navigation, and shooting.",
@@ -130,7 +235,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "Initial colorimetric detection in RGB space generated target losses opposite to light variations. Switching to the HSV space isolated the hue from the brightness for robust tracking. The very short range of the inductive sensor (4 mm) led to target overshoots due to inertia. Braking anticipation via odometry and vision solved the problem. The reliable infrared zone (15-45 cm) was modeled to avoid false positives at a distance."
         },
         {
-            ...projectsDataFallback[1],
+            ...projectsDataFallback[5],
             title: "Awale - C Strategy",
             category: "Algorithms",
             shortDescription: "Development of the traditional board game in C language focused on data structure efficiency.",
@@ -138,7 +243,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "The major difficulty lay in the mathematical modeling of a strictly cyclic game board without causing dynamic memory overflows in RAM. The engineering approach consisted of encapsulating the board in contiguous data structures continuously manipulated via modular arithmetic and robust function pointers."
         },
         {
-            ...projectsDataFallback[2],
+            ...projectsDataFallback[6],
             title: "PyGroove - Music Assistant",
             category: "Software Engineering",
             shortDescription: "Intelligent Python music player with voice recognition and synchronous audio rendering.",
@@ -146,7 +251,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "Managing the critical concurrency of simultaneous hardware accesses between the visual event loop, the asynchronous network listening thread, and the sound card's hardware DMA buffer. The software solution involved an I/O separation within a strict multi-threaded architecture to isolate real-time instructions from the asynchronous wrapper."
         },
         {
-            ...projectsDataFallback[3],
+            ...projectsDataFallback[7],
             title: "Unix Shell - C Interpreter",
             category: "Embedded Systems",
             shortDescription: "Full native development of a terminal emulator in C relying on Unix/Linux calls.",
@@ -154,7 +259,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "Asynchronous and unpredictable inter-process communication caused instabilities in I/O streams during hardware signal propagation. Secure execution was ensured by deploying a deterministic signal handler and methodical management of RAM pipelines (fork, execvp, and dup2)."
         },
         {
-            ...projectsDataFallback[4],
+            ...projectsDataFallback[8],
             title: "C++ Farm Simulator",
             category: "Software Engineering",
             shortDescription: "C++ modeled application demonstrating the rigor of major OOP design patterns.",
@@ -162,7 +267,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "The instability inherent to dangling pointers within a strong circular topology initially compromised the destruction of entities by the current process. Modern C++ engineering remedied the conflict by deploying an ecosystem of smart pointers structurally managing the memory lifecycle via reference counting."
         },
         {
-            ...projectsDataFallback[5],
+            ...projectsDataFallback[9],
             title: "Snake - C++ Arcade Engine",
             category: "Algorithms",
             shortDescription: "C++ architectural design framing the complexity of a real-time video loop.",
@@ -170,7 +275,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "Frame rate drops caused silent errors in the register of high-velocity vector intersection checks. The fix dictated the adoption of an interpolated Delta-time scaling guaranteeing arithmetic consistency mathematically independent of the local processor bandwidth."
         },
         {
-            ...projectsDataFallback[6],
+            ...projectsDataFallback[10],
             title: "Python Finance Analytics",
             category: "Software Engineering",
             shortDescription: "Algorithmic script automating the systematic processing of vast cohorts of monthly statistical data.",
@@ -178,7 +283,7 @@ export function getProjectsData(locale: Locale): Project[] {
             technicalChallenges: "The systemic compilation slowness generated by the looped traversal of massive historical records limited the instantaneous use of the interface view. The IT restructuring introduced a strict matrix vectorization of all manipulations, combined with off-site saving of the plot in pre-rendered SVG/Canvas buffers."
         },
         {
-            ...projectsDataFallback[7],
+            ...projectsDataFallback[11],
             title: "Bluetooth Mobile Robot",
             category: "Embedded Systems",
             shortDescription: "Deployed as Project Manager of a hardware system controlled via Arduino (C/C++).",

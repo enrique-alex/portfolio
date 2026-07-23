@@ -9,12 +9,12 @@ import { useLanguage } from '../theme/LanguageProvider';
 function useNavLinks() {
   const { t } = useLanguage();
   return [
-    { name: t('nav.home'), href: '#home' },
-    { name: t('nav.about'), href: '#profile' },
-    { name: t('nav.academic'), href: '#academic' },
-    { name: t('nav.experience'), href: '#experience' },
-    { name: t('nav.projects'), href: '#projects' },
-    { name: t('nav.skills'), href: '#skills' },
+    { name: t('nav.home'), href: '/#home' },
+    { name: t('nav.about'), href: '/#profile' },
+    { name: t('nav.academic'), href: '/#academic' },
+    { name: t('nav.experience'), href: '/#experience' },
+    { name: t('nav.projects'), href: '/#projects' },
+    { name: t('nav.skills'), href: '/#skills' },
   ];
 }
 
@@ -48,7 +48,7 @@ export default function Navbar() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const matchingLink = NAV_LINKS.find((l) => l.href === `#${entry.target.id}`);
+            const matchingLink = NAV_LINKS.find((l) => l.href.replace('/', '') === `#${entry.target.id}`);
             if (matchingLink) {
               setActiveSegment(matchingLink.name);
             }
@@ -60,7 +60,9 @@ export default function Navbar() {
 
     setTimeout(() => {
       NAV_LINKS.forEach((link) => {
-        const sect = document.querySelector(link.href);
+        const hash = link.href.replace('/', '');
+        if (!hash.startsWith('#')) return;
+        const sect = document.querySelector(hash);
         if (sect) observer.observe(sect);
       });
     }, 100);
@@ -122,7 +124,7 @@ export default function Navbar() {
             <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-gradient-to-r from-brand-blue to-transparent transition-all duration-300 group-hover:w-full"></span>
           </a>
 
-          {/* NAVIGATION DESKTOP — Liquid Glass Segmented Control */}
+          {/* NAVIGATION DESKTOP, Liquid Glass Segmented Control */}
           <nav ref={navRef} className="hidden items-center gap-2 md:flex relative">
             {/* Sliding Pill Indicator (animated) */}
             <motion.div 

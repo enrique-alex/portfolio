@@ -2,11 +2,12 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import Image from 'next/image';
 import { Project } from '@/lib/data';
 
 // --- Mapping Categorie -> Icone SVG ---
 function CategoryIcon({ category }: { category: string }) {
-    if (category === 'Systèmes Embarqués') {
+    if (category === 'Systèmes Embarqués' || category === 'Embedded Systems') {
         // Chip / CPU
         return (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -23,7 +24,7 @@ function CategoryIcon({ category }: { category: string }) {
             </svg>
         );
     }
-    if (category === 'Algorithmie') {
+    if (category === 'Algorithmique' || category === 'Algorithms') {
         // Graph / Nodes
         return (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -36,7 +37,44 @@ function CategoryIcon({ category }: { category: string }) {
             </svg>
         );
     }
-    // Developpement Logiciel -> Code brackets
+    if (category === 'Électronique' || category === 'Electronics') {
+        // Circuit / Resistor
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+                <path d="M2 12h4l1.5-3 3 6 3-6 3 6 1.5-3h4" />
+                <circle cx="12" cy="12" r="10" strokeOpacity="0.2" />
+            </svg>
+        );
+    }
+    if (category === 'Automatisme & Régulation' || category === 'Automation & Control') {
+        // Feedback loop / Control
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+                <rect x="3" y="8" width="6" height="8" rx="1" />
+                <rect x="15" y="8" width="6" height="8" rx="1" />
+                <line x1="9" y1="12" x2="15" y2="12" />
+                <polyline points="13 10 15 12 13 14" />
+                <path d="M18 16v3H6v-3" strokeOpacity="0.5" />
+                <polyline points="8 19 6 16 4 19" strokeOpacity="0.5" />
+            </svg>
+        );
+    }
+    if (category === 'Informatique Bas Niveau' || category === 'Low-Level Computing') {
+        // Microprocessor / Register
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+                <rect x="5" y="5" width="14" height="14" rx="2" />
+                <line x1="8" y1="9" x2="16" y2="9" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+                <line x1="8" y1="15" x2="12" y2="15" />
+                <line x1="9" y1="2" x2="9" y2="5" />
+                <line x1="15" y1="2" x2="15" y2="5" />
+                <line x1="9" y1="19" x2="9" y2="22" />
+                <line x1="15" y1="19" x2="15" y2="22" />
+            </svg>
+        );
+    }
+    // Developpement Logiciel / Software Engineering -> Code brackets
     return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
             <polyline points="16 18 22 12 16 6" />
@@ -104,6 +142,7 @@ export default function MagneticProjectCard({
     }, [isHovered, project.themeColor]);
 
     const tc = project.themeColor;
+    const hasCover = Boolean(project.coverImage);
 
     return (
         <motion.div
@@ -124,9 +163,27 @@ export default function MagneticProjectCard({
                 : "border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] p-8 md:p-10"
             } backdrop-blur-xl transition-all duration-500 will-change-transform`}
         >
+            {/* COVER IMAGE (conditional) */}
+            {hasCover && (
+                <>
+                    <Image
+                        src={project.coverImage!}
+                        alt={project.title}
+                        fill
+                        className="object-cover z-0 transition-transform duration-700 group-hover:scale-105"
+                        sizes={isFeatured
+                            ? "(max-width: 768px) 100vw, 66vw"
+                            : "(max-width: 768px) 100vw, 33vw"
+                        }
+                    />
+                    {/* Dark gradient overlay for text readability */}
+                    <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/40 to-black/10 dark:from-black/90 dark:via-black/50 dark:to-black/20" />
+                </>
+            )}
+
             {/* 1. ACCENT VERTICAL GAUCHE (Theme Color, toujours visible) */}
             <div 
-                className="absolute left-0 top-0 h-full w-[3px] transition-all duration-500 group-hover:w-[5px] group-hover:shadow-lg"
+                className="absolute left-0 top-0 h-full w-[3px] transition-all duration-500 group-hover:w-[5px] group-hover:shadow-lg z-[2]"
                 style={{ 
                     background: `linear-gradient(180deg, rgb(${tc.r},${tc.g},${tc.b}), transparent)`,
                     opacity: isHovered ? 1 : 0.4,
@@ -135,36 +192,42 @@ export default function MagneticProjectCard({
             />
 
             {/* Glow ambiante au hover */}
-            <div 
-                className="absolute inset-0 rounded-[2rem] transition-opacity duration-700 pointer-events-none"
-                style={{
-                    background: `radial-gradient(ellipse at 0% 0%, rgba(${tc.r},${tc.g},${tc.b},0.06), transparent 60%)`,
-                    opacity: isHovered ? 1 : 0
-                }}
-            />
+            {!hasCover && (
+                <div 
+                    className="absolute inset-0 rounded-[2rem] transition-opacity duration-700 pointer-events-none"
+                    style={{
+                        background: `radial-gradient(ellipse at 0% 0%, rgba(${tc.r},${tc.g},${tc.b},0.06), transparent 60%)`,
+                        opacity: isHovered ? 1 : 0
+                    }}
+                />
+            )}
 
-            {/* Texture Noise SVG */}
-            <div 
-                className="absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
-                style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')" }}
-            ></div>
+            {/* Texture Noise SVG (only when no cover image) */}
+            {!hasCover && (
+                <div 
+                    className="absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
+                    style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')" }}
+                ></div>
+            )}
 
             {/* 2. ICONE DE CATEGORIE (arriere-plan, rotation au hover) */}
-            <motion.div 
-                className="absolute right-6 bottom-20 h-14 w-14 pointer-events-none z-0"
-                style={{ color: `rgb(${tc.r},${tc.g},${tc.b})` }}
-                animate={{ 
-                    rotate: isHovered ? 8 : 0,
-                    opacity: isHovered ? 0.5 : 0.2,
-                    scale: isHovered ? 1.1 : 1
-                }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            >
-                <CategoryIcon category={project.category} />
-            </motion.div>
+            {!hasCover && (
+                <motion.div 
+                    className="absolute right-6 bottom-20 h-14 w-14 pointer-events-none z-0"
+                    style={{ color: `rgb(${tc.r},${tc.g},${tc.b})` }}
+                    animate={{ 
+                        rotate: isHovered ? 8 : 0,
+                        opacity: isHovered ? 0.5 : 0.2,
+                        scale: isHovered ? 1.1 : 1
+                    }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                >
+                    <CategoryIcon category={project.category} />
+                </motion.div>
+            )}
 
             {/* 5. NUMERO DE SEQUENCE (Featured cards uniquement) */}
-            {sequenceNumber && (
+            {sequenceNumber && !hasCover && (
                 <div 
                     className="absolute bottom-4 right-6 text-[7rem] lg:text-[9rem] font-black leading-none pointer-events-none select-none z-0 opacity-[0.03] dark:opacity-[0.04]"
                     style={{ 
@@ -179,34 +242,38 @@ export default function MagneticProjectCard({
             {/* Dynamic Spotlight */}
             {mounted && (
                 <motion.div
-                    className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:mix-blend-screen"
+                    className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:mix-blend-screen"
                     style={{ background: spotlightTemplate }}
                 />
             )}
 
             {/* CONTENU PRINCIPAL */}
-            <div className="relative z-10 flex h-full flex-col justify-between" style={{ transform: "translateZ(30px)" }}>
+            <div className={`relative z-10 flex h-full flex-col justify-between ${hasCover ? 'text-white' : ''}`} style={{ transform: "translateZ(30px)" }}>
                 <div>
                     {/* 3. HEADER : Annee + Badge Compteur Modules */}
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-sm font-semibold tracking-wider text-zinc-500 dark:text-zinc-400">
+                        <span className={`text-sm font-semibold tracking-wider ${hasCover ? 'text-white/80' : 'text-zinc-500 dark:text-zinc-400'}`}>
                             {project.year}
                         </span>
-                        <span className="rounded-full border border-black/10 bg-black/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
+                        <span className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-widest ${
+                            hasCover 
+                                ? 'border-white/20 bg-white/10 text-white/90 backdrop-blur-sm' 
+                                : 'border-black/10 bg-black/5 text-zinc-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300'
+                        }`}>
                             {project.technologies.length} Mod. · {project.category}
                         </span>
                     </div>
 
                     <motion.h3 
                         layoutId={`project-title-${project.id}`}
-                        className="mb-4 text-lg font-bold tracking-tight text-zinc-900 md:text-xl dark:text-white"
+                        className={`mb-4 text-lg font-bold tracking-tight md:text-xl ${hasCover ? 'text-white drop-shadow-lg' : 'text-zinc-900 dark:text-white'}`}
                     >
                         {project.title}
                     </motion.h3>
                     
                     <motion.p
                         layoutId={`project-desc-${project.id}`}
-                        className="max-w-md text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+                        className={`max-w-md text-sm leading-relaxed ${hasCover ? 'text-white/80' : 'text-zinc-600 dark:text-zinc-400'}`}
                     >
                         {project.shortDescription}
                     </motion.p>
@@ -218,7 +285,11 @@ export default function MagneticProjectCard({
                         {project.technologies.slice(0, isFeatured ? 6 : 4).map((tech) => (
                             <span 
                                 key={tech}
-                                className="rounded-md border border-black/10 bg-black/5 px-2.5 py-1 text-xs font-medium text-zinc-800 dark:border-white/10 dark:bg-white/10 dark:text-zinc-200"
+                                className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
+                                    hasCover
+                                        ? 'border-white/20 bg-white/10 text-white/90 backdrop-blur-sm'
+                                        : 'border-black/10 bg-black/5 text-zinc-800 dark:border-white/10 dark:bg-white/10 dark:text-zinc-200'
+                                }`}
                             >
                                 {tech}
                             </span>
@@ -227,14 +298,18 @@ export default function MagneticProjectCard({
 
                     {/* 4. FLECHE CTA ANIMEE */}
                     <motion.div 
-                        className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-black/5 dark:border-white/10 dark:bg-white/5"
+                        className={`flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full border ${
+                            hasCover
+                                ? 'border-white/20 bg-white/10'
+                                : 'border-black/10 bg-black/5 dark:border-white/10 dark:bg-white/5'
+                        }`}
                         animate={{ 
                             x: isHovered ? 4 : 0,
                             scale: isHovered ? 1.1 : 1
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600 dark:text-zinc-300">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={hasCover ? 'text-white' : 'text-zinc-600 dark:text-zinc-300'}>
                             <line x1="5" y1="12" x2="19" y2="12" />
                             <polyline points="12 5 19 12 12 19" />
                         </svg>

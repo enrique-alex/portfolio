@@ -12,12 +12,19 @@ interface ExperienceData {
   status: 'ACTIVE' | 'COMPLETED';
   missions: string;
   skills: string[];
+  detailedTitle?: string;
+  detailedItems?: string[];
 }
 
 import { useLanguage } from '../theme/LanguageProvider';
 
 function useExperienceData(): ExperienceData[] {
   const { t } = useLanguage();
+
+  // Parse detailed missions into items (split by newlines)
+  const detailedRaw = t('experience.0.detailed');
+  const detailedItems = detailedRaw ? detailedRaw.split('\n').filter(line => line.trim().length > 0) : undefined;
+
   return [
     {
       id: 'minakem',
@@ -26,7 +33,9 @@ function useExperienceData(): ExperienceData[] {
       period: t('experience.0.period'),
       status: 'ACTIVE',
       missions: t('experience.0.missions'),
-      skills: ['Automatisme', 'Informatique Industrielle', 'C/C++', 'Python']
+      skills: ['Automatisme', 'Informatique Industrielle', 'MS SQL Server (T-SQL)', 'Ignition SCADA', 'Python'],
+      detailedTitle: t('experience.0.detailed.title'),
+      detailedItems: detailedItems,
     },
     {
       id: 'carrefour',
@@ -192,12 +201,23 @@ export default function ExperienceSection() {
                             <div className="mb-4 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
                               <Terminal className="h-4 w-4 text-zinc-500" />
                               <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                                Output.Missions
+                                {exp.detailedTitle ? exp.detailedTitle : 'Output.Missions'}
                               </h4>
                             </div>
-                            <p className="border-l-2 border-black/10 pl-4 text-sm leading-relaxed text-zinc-600 dark:border-white/10 dark:text-zinc-400">
-                              {exp.missions}
-                            </p>
+                            {exp.detailedItems ? (
+                              <ul className="space-y-3 border-l-2 border-black/10 pl-4 dark:border-white/10">
+                                {exp.detailedItems.map((item, i) => (
+                                  <li key={i} className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                                    <span className="mr-2 text-emerald-500 font-bold">›</span>
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="border-l-2 border-black/10 pl-4 text-sm leading-relaxed text-zinc-600 dark:border-white/10 dark:text-zinc-400">
+                                {exp.missions}
+                              </p>
+                            )}
                           </div>
 
                           {/* Tech Stack / Skills */}

@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence, Variants, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 
 // ─── react-icons : icônes de marques réelles ─────────────
 import { 
   SiC, SiCplusplus, SiPython, SiTypescript, SiPostgresql, SiMysql,
   SiArduino, SiLinux, SiGit, SiGithub, SiReact, SiNextdotjs,
-  SiDocker, SiFigma, SiGnubash, SiLatex
+  SiDocker, SiFigma, SiLatex
 } from 'react-icons/si';
 import { FaProjectDiagram } from 'react-icons/fa';
 import { VscVscode, VscTerminalBash } from 'react-icons/vsc';
@@ -18,7 +18,8 @@ import { BiMicrochip } from 'react-icons/bi';
 import { 
   Bot, Ruler, Brain, Users, Target, Lightbulb, 
   Globe, ClipboardList, Code, Gauge, Settings,
-  CircuitBoard, Monitor, Workflow
+  CircuitBoard, Monitor, Workflow, FileSpreadsheet,
+  Presentation, FileText, Cpu, Radio
 } from 'lucide-react';
 
 // ─── DATA ─────────────────────────────────────────────────
@@ -45,50 +46,83 @@ import { useLanguage } from '../theme/LanguageProvider';
 function useSkillCategories(): SkillCategory[] {
   const { t } = useLanguage();
   return [
+    // ① Automatisme & Supervision
     {
-      id: 'languages',
-      title: t('skills.cat.languages'),
-      subtitle: t('skills.cat.languages.sub'),
+      id: 'automation',
+      title: t('skills.cat.automation'),
+      subtitle: t('skills.cat.automation.sub'),
+      color: { r: 16, g: 185, b: 129 },
+      skills: [
+        { name: 'Grafcet / GEMMA', level: 65, icon: FaProjectDiagram },
+        { name: 'Ignition (SCADA)', level: 65, icon: Monitor },
+        { name: 'ISA-18.2 (Gestion Alarmes)', level: 55, icon: Activity },
+        { name: 'Régulation P/PI/PID', level: 60, icon: Gauge },
+        { name: 'TIA Portal', level: 55, icon: Settings },
+        { name: 'Robotino / Automates', level: 60, icon: Bot },
+        { name: 'MATLAB', level: 60, icon: Activity },
+        { name: 'Simulink', level: 55, icon: Workflow },
+      ],
+    },
+    // ② Développement Logiciel
+    {
+      id: 'devsoft',
+      title: t('skills.cat.devsoft'),
+      subtitle: t('skills.cat.devsoft.sub'),
       color: { r: 59, g: 130, b: 246 },
       skills: [
         { name: 'C', level: 75, icon: SiC },
         { name: 'C++', level: 65, icon: SiCplusplus },
         { name: 'Python', level: 70, icon: SiPython },
+        { name: 'POO / Design Patterns', level: 65, icon: Code },
+        { name: 'Algorithmique', level: 70, icon: Brain },
+        { name: 'Linux / Shell Unix', level: 68, icon: SiLinux },
+        { name: 'Git / GitHub', level: 65, icon: SiGit },
+        { name: 'SQL', level: 55, icon: SiPostgresql },
         { name: 'JavaScript / TypeScript', level: 50, icon: SiTypescript },
-        { name: 'SQL', level: 45, icon: SiPostgresql },
+        { name: 'React / Next.js', level: 45, icon: SiReact },
       ],
     },
+    // ③ Électronique & Instrumentation
+    {
+      id: 'electronics',
+      title: t('skills.cat.electronics'),
+      subtitle: t('skills.cat.electronics.sub'),
+      color: { r: 168, g: 85, b: 247 },
+      skills: [
+        { name: 'LTSpice', level: 60, icon: CircuitBoard },
+        { name: 'KiCad', level: 55, icon: CircuitBoard },
+        { name: 'Logisim', level: 55, icon: CircuitBoard },
+        { name: 'Oscilloscope / Instrumentation', level: 58, icon: Gauge },
+        { name: 'CATIA V5 / CAO', level: 50, icon: Ruler },
+      ],
+    },
+    // ④ Systèmes Embarqués
     {
       id: 'embedded',
       title: t('skills.cat.embedded'),
       subtitle: t('skills.cat.embedded.sub'),
-      color: { r: 16, g: 185, b: 129 },
+      color: { r: 239, g: 68, b: 68 },
       skills: [
         { name: 'Arduino / µContrôleurs', level: 70, icon: SiArduino },
-        { name: 'Robotino / Automates', level: 60, icon: Bot },
-        { name: 'Grafcet / GEMMA', level: 65, icon: FaProjectDiagram },
-        { name: 'MATLAB', level: 60, icon: Activity },
-        { name: 'Simulink', level: 55, icon: Workflow },
-        { name: 'TIA Portal', level: 55, icon: Settings },
-        { name: 'Ignition (SCADA)', level: 50, icon: Monitor },
+        { name: 'ASM AVR8', level: 55, icon: Cpu },
         { name: 'Capteurs Industriels', level: 62, icon: Gauge },
-        { name: 'Logisim', level: 55, icon: CircuitBoard },
-        { name: 'CATIA V5 / CAO', level: 50, icon: Ruler },
+        { name: 'CAN / USART', level: 50, icon: Radio },
       ],
     },
+    // ⑤ Bureautique & Rédaction technique
     {
-      id: 'software',
-      title: t('skills.cat.software'),
-      subtitle: t('skills.cat.software.sub'),
-      color: { r: 168, g: 85, b: 247 },
+      id: 'office',
+      title: t('skills.cat.office'),
+      subtitle: t('skills.cat.office.sub'),
+      color: { r: 37, g: 99, b: 235 },
       skills: [
-        { name: 'Linux / Shell Unix', level: 68, icon: SiLinux },
-        { name: 'Git / GitHub', level: 65, icon: SiGit },
-        { name: 'React / Next.js', level: 45, icon: SiReact },
-        { name: 'POO / Design Patterns', level: 65, icon: Code },
-        { name: 'Algorithmique', level: 70, icon: Brain },
+        { name: 'Word', level: 80, icon: FileText },
+        { name: 'Excel', level: 75, icon: FileSpreadsheet },
+        { name: 'PowerPoint', level: 75, icon: Presentation },
+        { name: 'Overleaf / LaTeX', level: 65, icon: SiLatex },
       ],
     },
+    // ⑥ Compétences Transversales
     {
       id: 'transversal',
       title: t('skills.cat.transversal'),
@@ -348,7 +382,7 @@ export default function SkillsSection() {
                   }`}>
                     {cat.title}
                   </span>
-                  <span className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block">
+                  <span className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block line-clamp-2">
                     {cat.subtitle}
                   </span>
                 </motion.button>
@@ -373,7 +407,7 @@ export default function SkillsSection() {
                 <div className="mb-8 flex items-center justify-between">
                   <div>
                     <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{active.title}</h3>
-                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{active.subtitle}</p>
+                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">{active.subtitle}</p>
                   </div>
                   <div 
                     className="flex h-10 w-10 items-center justify-center rounded-xl"
