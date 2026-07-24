@@ -176,8 +176,8 @@ export default function MagneticProjectCard({
                             : "(max-width: 768px) 100vw, 33vw"
                         }
                     />
-                    {/* Dark gradient overlay for text readability */}
-                    <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/40 to-black/10 dark:from-black/90 dark:via-black/50 dark:to-black/20" />
+                    {/* Dark gradient overlay for text readability (WCAG AA compliant) */}
+                    <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/60 to-black/30 dark:from-black/95 dark:via-black/70 dark:to-black/40 pointer-events-none" />
                 </>
             )}
 
@@ -277,6 +277,13 @@ export default function MagneticProjectCard({
                     >
                         {project.shortDescription}
                     </motion.p>
+
+                    <p 
+                        className="mt-4 text-xs font-semibold uppercase tracking-wide"
+                        style={{ color: `rgb(${tc.r}, ${tc.g}, ${tc.b})` }}
+                    >
+                        {project.impact}
+                    </p>
                 </div>
 
                 {/* BAS : Technologies + Fleche CTA */}

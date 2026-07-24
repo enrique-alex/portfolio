@@ -172,6 +172,23 @@ export default function ProjectDetail() {
                     </motion.div>
                 </div>
 
+                <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-white/5 dark:bg-white/[0.02]">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                        <h3 className="mb-4 text-xl font-bold text-zinc-900 flex items-center gap-3 dark:text-white/90">
+                            <span 
+                                className="flex h-8 w-8 items-center justify-center rounded-lg"
+                                style={{ backgroundColor: `${themeColor}20`, color: themeColor }}
+                            >
+                                <Lightbulb size={16} />
+                            </span>
+                            {t('projects.detail.impact')}
+                        </h3>
+                        <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
+                            {project.impact}
+                        </p>
+                    </motion.div>
+                </div>
+
                 <motion.div 
                     initial={{ scaleX: 0 }} 
                     animate={{ scaleX: 1 }} 

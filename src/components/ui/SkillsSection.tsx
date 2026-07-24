@@ -114,7 +114,7 @@ function useSkillCategories(): SkillCategory[] {
       id: 'office',
       title: t('skills.cat.office'),
       subtitle: t('skills.cat.office.sub'),
-      color: { r: 37, g: 99, b: 235 },
+      color: { r: 236, g: 72, b: 153 }, // Pink
       skills: [
         { name: 'Word', level: 80, icon: FileText },
         { name: 'Excel', level: 75, icon: FileSpreadsheet },
