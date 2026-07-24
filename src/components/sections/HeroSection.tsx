@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useReducedMotion } from "framer-motion";
 import Magnetic from "@/components/ui/Magnetic";
 import { Download } from "lucide-react";
 import { useLanguage } from "@/components/theme/LanguageProvider";
@@ -13,8 +14,14 @@ const CHARS = "0101010189ABCDEF!@#$%^&*()_+-=[]{}|;':,./<>?";
 
 export default function HeroSection() {
   const [displayText, setDisplayText] = useState("");
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
+    if (shouldReduceMotion) {
+      setDisplayText(TARGET_TEXT);
+      return;
+    }
+
     let pos = 0;
     let frame = 0;
     let intervalId: ReturnType<typeof setInterval>;
@@ -50,14 +57,14 @@ export default function HeroSection() {
       clearTimeout(timeoutId);
       clearInterval(intervalId);
     };
-  }, []);
+  }, [shouldReduceMotion]);
 
   const { t } = useLanguage();
 
   return (
       <section id="home" className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center px-4">
         
-        <div className="mx-auto flex w-full max-w-7xl flex-col-reverse items-center justify-between gap-12 lg:flex-row lg:gap-20">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20">
           
           {/* COLONNE GAUCHE : Typographie & Informations */}
           <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left z-10 w-full">
