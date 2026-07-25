@@ -41,7 +41,6 @@ declare global {
 
 export default function CursorFluid() {
     const { resolvedTheme } = useTheme();
-    const pathname = usePathname();
     const [shouldRender, setShouldRender] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);

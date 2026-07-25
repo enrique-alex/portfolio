@@ -57,7 +57,7 @@ export default function SocialLinks() {
       </h3>
       
       <div className="flex flex-col gap-4">
-        {socialLinks.map((link, index) => {
+        {socialLinks.map((link) => {
           const Icon = link.icon;
           return (
             <Magnetic intensity={0.1} key={link.name}>

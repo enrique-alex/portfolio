@@ -27,7 +27,7 @@ export default function GlobalError({
               Une erreur système globale est survenue
             </h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Nous sommes désolés, une erreur critique a empêché l'affichage du site.
+              Nous sommes désolés, une erreur technique majeure a empêché l&apos;affichage de cette page.
             </p>
             <button
               onClick={() => reset()}

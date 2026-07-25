@@ -11,7 +11,6 @@ import { useState } from 'react';
 
 export default function ProjectDetail() {
     const params = useParams();
-    const router = useRouter();
     const { t } = useLanguage();
     const slug = params?.slug as string;
     const shouldReduceMotion = useReducedMotion();

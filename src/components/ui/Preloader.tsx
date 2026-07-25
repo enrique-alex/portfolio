@@ -28,6 +28,7 @@ export default function Preloader() {
         setIsComplete(true);
       }, 0);
       if (typeof window !== 'undefined') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).__preloaderDone = true;
       }
       setTimeout(() => {
@@ -42,7 +43,8 @@ export default function Preloader() {
         if (prev >= 100) {
           clearInterval(interval);
           if (typeof window !== 'undefined') {
-            (window as any).__preloaderDone = true;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__preloaderDone = true;
           }
           setTimeout(() => {
             setIsComplete(true);
@@ -65,7 +67,7 @@ export default function Preloader() {
       clearInterval(interval);
       clearInterval(phraseInterval);
     };
-  }, []);
+  }, [shouldReduceMotion]);
 
   // Prevent scrolling while preloader is active
   useEffect(() => {

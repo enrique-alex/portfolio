@@ -25,7 +25,7 @@ export default function ErrorBoundary({
           Une erreur inattendue est survenue
         </h2>
         <p className="text-zinc-600 dark:text-zinc-400">
-          Nous sommes désolés, une erreur technique a empêché l'affichage de cette page.
+          Nous sommes désolés, une erreur technique a empêché l&apos;affichage de cette page.
         </p>
         <button
           onClick={() => reset()}

@@ -52,11 +52,15 @@ export default function HeroSection() {
       }, 600); // Attend la fin de la transition de sortie du preloader (0.8s)
     };
 
-    if (typeof window !== 'undefined' && (window as any).__preloaderDone) {
-      // Preloader is already done (e.g. returning to home page), skip animation
-      setDisplayText(TARGET_TEXT);
-    } else {
-      window.addEventListener('preloader-complete', startAnimation);
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const preloaderDone = (window as any).__preloaderDone;
+      if (preloaderDone) {
+        // Preloader is already done (e.g. returning to home page), skip animation
+        setDisplayText(TARGET_TEXT);
+      } else {
+        window.addEventListener('preloader-complete', startAnimation);
+      }
     }
 
     return () => {

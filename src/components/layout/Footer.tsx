@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ArrowUp, Github, Linkedin, Mail } from 'lucide-react';
 import Magnetic from '../ui/Magnetic';
 import { useLanguage } from '../theme/LanguageProvider';
