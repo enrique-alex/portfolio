@@ -1,7 +1,7 @@
 /**
- * Convertit une chaîne hexadécimale en Uint8Array
+ * Convertit une chaîne hexadécimale en Uint8Array<ArrayBuffer>
  */
-function hexToBytes(hex: string): Uint8Array {
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
     bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
@@ -63,7 +63,7 @@ export async function hashPassword(password: string, saltHex: string, iterations
 export function generateSalt(): string {
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);
-  return bufferToHex(salt.buffer);
+  return bufferToHex(salt.buffer as ArrayBuffer);
 }
 
 /**
