@@ -1,6 +1,11 @@
 import "./globals.css";
-import CursorFluid from "@/components/animations/CursorFluid";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/layout/Navbar";
+
+// Lazy load l'animation WebGL lourde pour ne pas bloquer le thread principal au chargement
+const CursorFluid = dynamic(() => import("@/components/animations/CursorFluid"), { 
+  ssr: false,
+});
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
