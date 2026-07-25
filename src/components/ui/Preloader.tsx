@@ -12,11 +12,20 @@ const LOADING_PHRASES = [
   "Awaiting Final Telemetry..."
 ];
 
+declare global {
+  interface Window {
+    __preloaderDone?: boolean;
+  }
+}
+
 export default function Preloader() {
   const shouldReduceMotion = useReducedMotion();
   const [progress, setProgress] = useState(0);
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
+  const [isComplete, setIsComplete] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.__preloaderDone === true;
+  });
 
   useEffect(() => {
     // Skip preloader for bots and Lighthouse to prevent LCP penalty
@@ -28,8 +37,7 @@ export default function Preloader() {
         setIsComplete(true);
       }, 0);
       if (typeof window !== 'undefined') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).__preloaderDone = true;
+        window.__preloaderDone = true;
       }
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('preloader-complete'));
@@ -43,8 +51,7 @@ export default function Preloader() {
         if (prev >= 100) {
           clearInterval(interval);
           if (typeof window !== 'undefined') {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).__preloaderDone = true;
+            window.__preloaderDone = true;
           }
           setTimeout(() => {
             setIsComplete(true);
