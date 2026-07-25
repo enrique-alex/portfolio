@@ -19,11 +19,26 @@ export default function Preloader() {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
+    if (shouldReduceMotion) {
+      setTimeout(() => {
+        setProgress(100);
+        setIsComplete(true);
+      }, 0);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('portfolio-preloader', 'true');
+      }
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('preloader-complete'));
+      }, 50);
+      return;
+    }
+
     // Progress counter simulation
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
+          sessionStorage.setItem('portfolio-preloader', 'true');
           setTimeout(() => {
             setIsComplete(true);
             window.dispatchEvent(new CustomEvent('preloader-complete'));

@@ -4,8 +4,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
+import { ProjectsProvider } from "@/components/theme/ProjectsProvider";
 import Preloader from "@/components/ui/Preloader";
-
 export const metadata = {
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
@@ -62,20 +62,22 @@ export default function RootLayout({
       <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>
-          {/* L'animation d'ouverture 2026 */}
-          <Preloader />
+            <ProjectsProvider>
+              {/* L'animation d'ouverture 2026 */}
+              <Preloader />
 
-          {/* L'animation WebGL Fluide en arrière-plan */}
-          <CursorFluid />
-          
-          {/* La barre de navigation par-dessus l'animation */}
-          <Navbar />
-          
-          {/* Le contenu des pages (qui pourra scroller en dessous de la navbar) */}
-          {children}
+              {/* L'animation WebGL Fluide en arrière-plan */}
+              <CursorFluid />
+              
+              {/* La barre de navigation par-dessus l'animation */}
+              <Navbar />
+              
+              {/* Le contenu des pages (qui pourra scroller en dessous de la navbar) */}
+              {children}
 
-          {/* Le Pied de page Système */}
-          <Footer />
+              {/* Le Pied de page Système */}
+              <Footer />
+            </ProjectsProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

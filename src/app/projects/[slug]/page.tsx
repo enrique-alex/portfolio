@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useProjectsData } from '@/lib/data';
+import { useProjectsData } from '@/components/theme/ProjectsProvider';
 import {ArrowLeft, ChevronLeft, ChevronRight, AlertTriangle, Lightbulb} from 'lucide-react';
 import { useLanguage } from '@/components/theme/LanguageProvider';
 import Image from 'next/image';
@@ -17,12 +17,33 @@ export default function ProjectDetail() {
     const shouldReduceMotion = useReducedMotion();
     const [imageIndex, setImageIndex] = useState(0);
     
-    const projectsData = useProjectsData();
+    const { projects: projectsData, isLoading, error } = useProjectsData();
+    
+    if (isLoading) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#020202]">
+                <div aria-hidden="true" className="w-full max-w-4xl h-[600px] rounded-3xl bg-zinc-200/50 dark:bg-white/5 animate-pulse mx-4" />
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#020202]">
+                <div className="text-zinc-500 dark:text-zinc-400 mx-4">{error}</div>
+            </main>
+        );
+    }
+
     const currentIndex = projectsData.findIndex((p) => p.slug === slug);
     const project = currentIndex !== -1 ? projectsData[currentIndex] : undefined;
 
     if (!project) {
-        return <div className="flex min-h-screen items-center justify-center text-zinc-500">{t('projects.detail.notfound')}</div>;
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#020202]">
+                <div className="text-zinc-500 mx-4">{t('projects.detail.notfound')}</div>
+            </main>
+        );
     }
 
     const prevProject = currentIndex > 0 ? projectsData[currentIndex - 1] : null;
@@ -41,14 +62,16 @@ export default function ProjectDetail() {
     return (
         <main className="relative flex min-h-screen flex-col items-center pt-24 pb-12 px-4 selection:bg-brand-blue/30 overflow-hidden bg-zinc-50 dark:bg-[#020202]">
             
-            {/* Bouton Retour */}
-            <Link 
-                href="/#projects"
-                className="absolute top-8 left-8 z-50 flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-4 py-2 text-sm font-medium backdrop-blur-md transition-hover hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
-            >
-                <ArrowLeft size={16} />
-                {t('projects.detail.back')}
-            </Link>
+            {/* Bouton Retour - Placé au-dessus de la carte pour éviter le logo */}
+            <div className="w-full max-w-4xl flex justify-start mb-6 relative z-50">
+                <Link 
+                    href="/#projects"
+                    className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-4 py-2 text-sm font-medium backdrop-blur-md transition-hover hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
+                >
+                    <ArrowLeft size={16} />
+                    {t('projects.detail.back')}
+                </Link>
+            </div>
 
             {/* Arrière-plan coloré (Glow lointain) basé sur la couleur du projet */}
             <motion.div 

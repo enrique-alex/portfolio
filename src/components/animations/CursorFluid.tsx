@@ -66,6 +66,7 @@ export default function CursorFluid() {
 
     useEffect(() => {
         if (!shouldRender || !canvasRef.current || typeof window === 'undefined') return;
+        if (fluidInstance.current) return; // Prevent multiple initializations
 
         let WebGLFluid: WebGLFluidFn | undefined;
         let cleaned = false;
@@ -93,7 +94,7 @@ export default function CursorFluid() {
                 if (WebGLFluid) {
                     fluidInstance.current = WebGLFluid(canvasRef.current!, {
                     TRIGGER: 'hover',
-                    IMMEDIATE: true,
+                    IMMEDIATE: false, // Ne pas exploser pendant le Preloader
                     NUM_SPLATS: 3,
                     CURL: 20,
                     SUNRAYS: true,
@@ -138,14 +139,22 @@ export default function CursorFluid() {
             }
         };
 
+        // Explosion WebGL à la fin du preloader
+        const handlePreloaderComplete = () => {
+            // Le script webgl-fluid écoute la touche Espace pour déclencher plusieurs splats (explosion)
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+        };
+
         window.addEventListener('webgl-resonance', handleResonance);
+        window.addEventListener('preloader-complete', handlePreloaderComplete);
 
         return () => {
              cleaned = true;
              window.removeEventListener('webgl-resonance', handleResonance);
+             window.removeEventListener('preloader-complete', handlePreloaderComplete);
              window.removeEventListener('error', silentErrorGuard as EventListener);
         };
-    }, [pathname, shouldRender]);
+    }, [shouldRender]); // Removed pathname to prevent re-initialization on route change
 
     if (!shouldRender) return null;
 

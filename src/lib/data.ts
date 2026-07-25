@@ -1,4 +1,3 @@
-import { useLanguage } from '@/components/theme/LanguageProvider';
 import { Locale } from '@/lib/i18n';
 
 export interface Project {
@@ -316,9 +315,4 @@ export function getProjectsData(locale: Locale): Project[] {
             impact: "Robot delivered and functional under real conditions, with a motor chain stabilized against voltage brownouts and a reliable bidirectional Bluetooth link.",
         }
     ];
-}
-
-export function useProjectsData(): Project[] {
-    const { locale } = useLanguage();
-    return getProjectsData(locale);
 }

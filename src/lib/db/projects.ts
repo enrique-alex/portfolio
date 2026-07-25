@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Locale } from "@/lib/i18n";
-import { Project } from "@/lib/data";
+import { Project, getProjectsData } from "@/lib/data";
 
 interface D1ProjectRow {
   id: string;
@@ -50,8 +50,19 @@ function mapRowToProject(row: D1ProjectRow): Project {
 }
 
 export async function getProjects(locale: Locale): Promise<Project[]> {
-  const { env } = getCloudflareContext();
-  const db = env.portfolio_db;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let db: any;
+  try {
+    const { env } = getCloudflareContext();
+    db = env.portfolio_db;
+  } catch {
+    // Ignore error in next dev
+  }
+
+  if (!db) {
+    console.warn("⚠️ Base D1 'portfolio_db' non trouvée (mode next dev). Utilisation des données statiques de secours.");
+    return getProjectsData(locale);
+  }
 
   const query = `
     SELECT p.*, t.* 
@@ -61,14 +72,25 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
     ORDER BY p.sort_order ASC
   `;
 
-  const { results } = await db.prepare(query).bind(locale).all<D1ProjectRow>();
+  const { results } = (await db.prepare(query).bind(locale).all()) as { results: D1ProjectRow[] };
 
   return results.map(mapRowToProject);
 }
 
 export async function getProjectBySlug(slug: string, locale: Locale): Promise<Project | null> {
-  const { env } = getCloudflareContext();
-  const db = env.portfolio_db;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let db: any;
+  try {
+    const { env } = getCloudflareContext();
+    db = env.portfolio_db;
+  } catch {
+    // Ignore error in next dev
+  }
+
+  if (!db) {
+    const allFallback = getProjectsData(locale);
+    return allFallback.find(p => p.slug === slug) || null;
+  }
 
   const query = `
     SELECT p.*, t.* 
@@ -77,7 +99,7 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
     WHERE p.slug = ? AND t.locale = ?
   `;
 
-  const project = await db.prepare(query).bind(slug, locale).first<D1ProjectRow>();
+  const project = (await db.prepare(query).bind(slug, locale).first()) as D1ProjectRow | null;
 
   if (!project) {
     return null;

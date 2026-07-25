@@ -50,7 +50,12 @@ export default function HeroSection() {
       }, 600); // Attend la fin de la transition de sortie du preloader (0.8s)
     };
 
-    window.addEventListener('preloader-complete', startAnimation);
+    if (typeof window !== 'undefined' && sessionStorage.getItem('portfolio-preloader') === 'true') {
+      // Preloader is already done (e.g. returning to home page), skip animation
+      setDisplayText(TARGET_TEXT);
+    } else {
+      window.addEventListener('preloader-complete', startAnimation);
+    }
 
     return () => {
       window.removeEventListener('preloader-complete', startAnimation);
@@ -64,7 +69,7 @@ export default function HeroSection() {
   return (
       <section id="home" className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center px-4">
         
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20 pt-24 lg:pt-0">
           
           {/* COLONNE GAUCHE : Typographie & Informations */}
           <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left z-10 w-full">

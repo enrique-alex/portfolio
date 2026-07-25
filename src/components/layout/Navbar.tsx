@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Sun, Moon, Languages } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -8,17 +9,18 @@ import { useLanguage } from '../theme/LanguageProvider';
 
 function useNavLinks() {
   const { t } = useLanguage();
-  return [
+  return useMemo(() => [
     { name: t('nav.home'), href: '/#home' },
     { name: t('nav.about'), href: '/#profile' },
     { name: t('nav.academic'), href: '/#academic' },
     { name: t('nav.experience'), href: '/#experience' },
     { name: t('nav.projects'), href: '/#projects' },
     { name: t('nav.skills'), href: '/#skills' },
-  ];
+  ], [t]);
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
   const NAV_LINKS = useNavLinks();
   const { locale, setLocale, t } = useLanguage();
@@ -58,7 +60,7 @@ export default function Navbar() {
       { rootMargin: '-30% 0px -70% 0px' } 
     );
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       NAV_LINKS.forEach((link) => {
         const hash = link.href.replace('/', '');
         if (!hash.startsWith('#')) return;
@@ -70,8 +72,9 @@ export default function Navbar() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
+      clearTimeout(timeoutId);
     };
-  }, []);
+  }, [NAV_LINKS, pathname]);
 
   // Animate pill position to active link
   useEffect(() => {
