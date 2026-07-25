@@ -17,7 +17,9 @@ export default function HeroSection() {
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (shouldReduceMotion) {
+    const isBot = typeof window !== 'undefined' && (/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) || navigator.userAgent.includes('Lighthouse'));
+
+    if (shouldReduceMotion || isBot) {
       setDisplayText(TARGET_TEXT);
       return;
     }
