@@ -10,7 +10,8 @@
     "lint": "eslint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "generate:seed": "tsx scripts/generate-seed-sql.ts"
+    "generate:seed": "tsx scripts/generate-seed-sql.ts",
+    "generate:admin-secrets": "node scripts/generate-admin-secrets.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
