@@ -28,7 +28,7 @@ export default function Preloader() {
         setIsComplete(true);
       }, 0);
       if (typeof window !== 'undefined') {
-        window.__preloaderDone = true;
+        (window as any).__preloaderDone = true;
       }
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('preloader-complete'));
@@ -42,7 +42,7 @@ export default function Preloader() {
         if (prev >= 100) {
           clearInterval(interval);
           if (typeof window !== 'undefined') {
-            window.__preloaderDone = true;
+            (window as any).__preloaderDone = true;
           }
           setTimeout(() => {
             setIsComplete(true);
