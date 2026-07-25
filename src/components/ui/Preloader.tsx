@@ -27,8 +27,8 @@ export default function Preloader() {
         setProgress(100);
         setIsComplete(true);
       }, 0);
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('portfolio-preloader', 'true');
+      if (typeof window !== 'undefined') {
+        window.__preloaderDone = true;
       }
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('preloader-complete'));
@@ -41,7 +41,9 @@ export default function Preloader() {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          sessionStorage.setItem('portfolio-preloader', 'true');
+          if (typeof window !== 'undefined') {
+            window.__preloaderDone = true;
+          }
           setTimeout(() => {
             setIsComplete(true);
             window.dispatchEvent(new CustomEvent('preloader-complete'));

@@ -52,7 +52,7 @@ export default function HeroSection() {
       }, 600); // Attend la fin de la transition de sortie du preloader (0.8s)
     };
 
-    if (typeof window !== 'undefined' && sessionStorage.getItem('portfolio-preloader') === 'true') {
+    if (typeof window !== 'undefined' && (window as any).__preloaderDone) {
       // Preloader is already done (e.g. returning to home page), skip animation
       setDisplayText(TARGET_TEXT);
     } else {
