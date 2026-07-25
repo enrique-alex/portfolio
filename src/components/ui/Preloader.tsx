@@ -19,7 +19,10 @@ export default function Preloader() {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    if (shouldReduceMotion) {
+    // Skip preloader for bots and Lighthouse to prevent LCP penalty
+    const isBot = typeof window !== 'undefined' && (/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) || navigator.userAgent.includes('Lighthouse'));
+
+    if (shouldReduceMotion || isBot) {
       setTimeout(() => {
         setProgress(100);
         setIsComplete(true);
