@@ -1,0 +1,21 @@
+CREATE TABLE projects (
+  id                     TEXT PRIMARY KEY,
+  title                  TEXT NOT NULL,
+  slug                   TEXT NOT NULL UNIQUE,
+  year                   INTEGER NOT NULL,
+  category               TEXT NOT NULL,
+  short_description      TEXT NOT NULL,
+  detailed_description   TEXT NOT NULL,
+  technical_challenges   TEXT NOT NULL,
+  impact                 TEXT NOT NULL,
+  technologies           TEXT NOT NULL DEFAULT '[]',
+  theme_color_r          INTEGER NOT NULL,
+  theme_color_g          INTEGER NOT NULL,
+  theme_color_b          INTEGER NOT NULL,
+  github_url             TEXT,
+  cover_image            TEXT,
+  gallery                TEXT,
+  sort_order             INTEGER NOT NULL DEFAULT 0,
+  created_at             TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at             TEXT NOT NULL DEFAULT (datetime('now'))
+);
