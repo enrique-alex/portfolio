@@ -23,10 +23,10 @@ function bufferToHex(buffer: ArrayBuffer): string {
  * 
  * @param password Le mot de passe en clair à hacher
  * @param saltHex Le sel encodé en hexadécimal
- * @param iterations Le nombre d'itérations (par défaut 210000, recommandation de l'OWASP pour PBKDF2-HMAC-SHA256)
+ * @param iterations Le nombre d'itérations (par défaut 100000, plafond maximal imposé par le runtime Cloudflare Workers (au-delà : NotSupportedError))
  * @returns Le hash final encodé en chaîne hexadécimale (64 caractères pour 256 bits)
  */
-export async function hashPassword(password: string, saltHex: string, iterations: number = 210000): Promise<string> {
+export async function hashPassword(password: string, saltHex: string, iterations: number = 100000): Promise<string> {
   const encoder = new TextEncoder();
   const passwordBuffer = encoder.encode(password);
   const saltBuffer = hexToBytes(saltHex);
@@ -119,7 +119,7 @@ export function constantTimeEqual(a: string, b: string): boolean {
  * @param iterations Le nombre d'itérations utilisé lors du hachage
  * @returns true si le mot de passe est valide, false sinon
  */
-export async function verifyPassword(password: string, saltHex: string, expectedHashHex: string, iterations: number = 210000): Promise<boolean> {
+export async function verifyPassword(password: string, saltHex: string, expectedHashHex: string, iterations: number = 100000): Promise<boolean> {
   const actualHashHex = await hashPassword(password, saltHex, iterations);
   return constantTimeEqual(actualHashHex, expectedHashHex);
 }

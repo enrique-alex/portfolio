@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import readline from 'node:readline';
 import { Writable } from 'node:stream';
 
-const ITERATIONS = 210000;
+const ITERATIONS = 100000;
 const KEY_LENGTH = 32;
 
 // Flux de sortie muté pour cacher la saisie du mot de passe
@@ -62,7 +62,7 @@ async function main() {
   const saltBuffer = crypto.randomBytes(16);
   const saltHex = saltBuffer.toString('hex');
   
-  // 2. Hash (PBKDF2-SHA256, 210000 itérations, 32 octets = 256 bits)
+  // 2. Hash (PBKDF2-SHA256, 100000 itérations, 32 octets = 256 bits)
   const hashBuffer = crypto.pbkdf2Sync(p1, saltBuffer, ITERATIONS, KEY_LENGTH, 'sha256');
   const hashHex = hashBuffer.toString('hex');
   
