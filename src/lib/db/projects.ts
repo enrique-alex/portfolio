@@ -68,7 +68,7 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
     SELECT p.*, t.* 
     FROM projects p
     JOIN project_translations t ON p.id = t.project_id
-    WHERE t.locale = ?
+    WHERE t.locale = ? AND p.deleted_at IS NULL
     ORDER BY p.sort_order ASC
   `;
 
@@ -96,7 +96,7 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
     SELECT p.*, t.* 
     FROM projects p
     JOIN project_translations t ON p.id = t.project_id
-    WHERE p.slug = ? AND t.locale = ?
+    WHERE p.slug = ? AND t.locale = ? AND p.deleted_at IS NULL
   `;
 
   const project = (await db.prepare(query).bind(slug, locale).first()) as D1ProjectRow | null;

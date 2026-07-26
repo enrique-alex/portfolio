@@ -102,7 +102,7 @@ export async function POST(request: Request): Promise<NextResponse<ErrorResponse
 
     response.headers.set(
       "Set-Cookie",
-      `admin_session=${cookieValue}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+      `admin_session=${cookieValue}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=7200`
     );
 
     return response;

@@ -1,5 +1,7 @@
 import { constantTimeEqual } from "@/lib/auth/password";
 
+export const SESSION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 heures en ms
+
 /**
  * Payload stocké dans le cookie de session signé.
  * Le rôle est toujours 'admin' car c'est le seul rôle existant.
@@ -66,7 +68,7 @@ async function importHmacKey(secret: string): Promise<CryptoKey> {
 /**
  * Crée la valeur d'un cookie de session signé (format : payload_b64url.signature_b64url).
  *
- * Le payload contient le rôle, l'horodatage d'émission et l'expiration (24h).
+ * Le payload contient le rôle, l'horodatage d'émission et l'expiration.
  * La signature HMAC-SHA256 garantit l'intégrité et l'authenticité du payload :
  * toute modification du payload invalide la signature, ce qui empêche la falsification.
  *
@@ -78,7 +80,7 @@ export async function createSessionCookie(sessionSecret: string): Promise<string
   const payload: SessionPayload = {
     role: "admin",
     issuedAt: now,
-    expiresAt: now + 24 * 60 * 60 * 1000, // 24 heures en ms
+    expiresAt: now + SESSION_DURATION_MS,
   };
 
   const payloadB64url = stringToBase64url(JSON.stringify(payload));

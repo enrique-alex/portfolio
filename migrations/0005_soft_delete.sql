@@ -1,0 +1,2 @@
+-- Migration number: 0005 	 2026-07-26T11:00:00.000Z
+ALTER TABLE projects ADD COLUMN deleted_at TEXT DEFAULT NULL;

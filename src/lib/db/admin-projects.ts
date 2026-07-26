@@ -26,6 +26,7 @@ export async function getProjectsForAdmin(db: D1Database): Promise<ProjectAdminL
     FROM projects p
     LEFT JOIN project_translations t_fr ON p.id = t_fr.project_id AND t_fr.locale = 'fr'
     LEFT JOIN project_translations t_en ON p.id = t_en.project_id AND t_en.locale = 'en'
+    WHERE p.deleted_at IS NULL
     ORDER BY p.sort_order ASC
   `);
 
