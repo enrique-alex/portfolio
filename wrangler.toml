@@ -12,3 +12,7 @@ binding = "ASSETS"
 binding = "portfolio_db"
 database_name = "portfolio-db"
 database_id = "96fa978e-2ad1-4171-84a1-76fa1846e12e"
+
+[[r2_buckets]]
+bucket_name = "portfolio-images"
+binding = "portfolio_images"
