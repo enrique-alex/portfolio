@@ -3,7 +3,7 @@ import { purgeExpiredProjects, getTrashedProjects } from "@/lib/db/admin-project
 import { RestoreProjectButton } from "@/components/admin/RestoreProjectButton";
 import { PurgeTrashButton } from "@/components/admin/PurgeTrashButton";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2, ArchiveX } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +16,7 @@ export default async function TrashPage() {
   const trashedProjects = await getTrashedProjects(db);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-8 py-8">
       <div>
         <Link 
           href="/admin" 
@@ -26,20 +26,27 @@ export default async function TrashPage() {
           Retour au tableau de bord
         </Link>
       </div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Corbeille
-        </h1>
-        <PurgeTrashButton />
+      
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            <Trash2 className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
+            Corbeille
+          </h1>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Les projets supprimés sont conservés ici pendant 90 jours avant d'être définitivement effacés.
+          </p>
+        </div>
+        <div className="shrink-0">
+          <PurgeTrashButton />
+        </div>
       </div>
 
-      <p className="text-zinc-600 dark:text-zinc-400">
-        Les projets supprimés sont conservés ici pendant 90 jours avant d'être définitivement effacés.
-      </p>
-
       {trashedProjects.length === 0 ? (
-        <div className="rounded-2xl border border-zinc-200/50 bg-white/50 p-12 text-center backdrop-blur-md shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]/50">
-          <p className="text-zinc-500 dark:text-zinc-400">La corbeille est vide.</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200/50 bg-white/50 py-24 text-center backdrop-blur-md shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]/50">
+          <ArchiveX className="h-12 w-12 text-zinc-300 dark:text-zinc-600 mb-4" />
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">La corbeille est vide</h3>
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Aucun projet supprimé récemment.</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-zinc-200/50 bg-white/50 backdrop-blur-md shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]/50">

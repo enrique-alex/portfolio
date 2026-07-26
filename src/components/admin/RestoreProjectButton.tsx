@@ -49,7 +49,7 @@ export function RestoreProjectButton({ projectId, projectTitle }: RestoreProject
     <button
       onClick={handleRestore}
       disabled={isRestoring}
-      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50/50 px-3 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-100 transition-colors dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200/50 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-sm hover:bg-zinc-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
       aria-label={`Restaurer le projet ${projectTitle}`}
     >
       <RotateCcw className="h-3.5 w-3.5" />

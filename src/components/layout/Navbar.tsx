@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Languages } from 'lucide-react';
+import { Sun, Moon, Languages, Lock } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../theme/LanguageProvider';
+import Link from 'next/link';
 
 function useNavLinks() {
   const { t } = useLanguage();
@@ -214,7 +215,7 @@ export default function Navbar() {
           </div>
 
           {/* LANGUAGE TOGGLE - DESKTOP */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-2">
             <button
               onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
               className="group relative flex h-9 items-center gap-1.5 overflow-hidden rounded-full px-3 text-zinc-500 transition-all duration-300 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
@@ -234,6 +235,24 @@ export default function Navbar() {
                 {locale === 'fr' ? 'EN' : 'FR'}
               </span>
             </button>
+
+            {/* ADMIN ACCESS - DESKTOP */}
+            <Link
+              href="/admin/login"
+              className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-all duration-300 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+              style={{
+                background: mounted && theme === 'dark'
+                  ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
+                  : 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%)',
+                border: mounted && theme === 'dark'
+                  ? '1px solid rgba(255,255,255,0.08)'
+                  : '1px solid rgba(0,0,0,0.06)',
+                backdropFilter: 'blur(12px)',
+              }}
+              aria-label="Accès administrateur"
+            >
+              <Lock className="h-3.5 w-3.5" />
+            </Link>
           </div>
 
           {/* BURGER MOBILE */}
@@ -314,6 +333,17 @@ export default function Navbar() {
                   <Languages className="h-5 w-5" />
                   {locale === 'fr' ? 'English' : 'Français'}
                 </button>
+
+                {/* Admin toggle mobile */}
+                <Link
+                  href="/admin/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 text-lg font-medium text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
+                  aria-label="Accès administrateur"
+                >
+                  <Lock className="h-5 w-5" />
+                  Administration
+                </Link>
 
                 <a
                   href="#contact"

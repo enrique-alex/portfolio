@@ -2,6 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 /**
  * Page de connexion administrateur.
@@ -43,12 +45,27 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="relative z-10 flex min-h-screen items-center justify-center px-4">
+    <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="mb-8 w-full max-w-sm">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-100/80 px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm hover:bg-zinc-200 hover:text-zinc-900 transition-colors dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 w-fit"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour au portfolio
+        </Link>
+      </div>
+
       <div className="w-full max-w-sm">
         <div className="rounded-3xl border border-zinc-200/50 bg-white/50 p-8 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#0a0a0a]/50">
-          <h1 className="mb-6 text-center font-mono text-lg font-semibold tracking-tight text-zinc-900 dark:text-white">
-            Administration
-          </h1>
+          <div className="mb-6 text-center">
+            <h1 className="font-mono text-lg font-semibold tracking-tight text-zinc-900 dark:text-white mb-2">
+              Administration
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Cette section est réservée à l'administrateur du site.
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} aria-label="Formulaire de connexion administrateur">
             <div className="mb-4">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Trash2, ExternalLink } from "lucide-react";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { countTrashedProjects } from "@/lib/db/admin-projects-write";
 export default async function AdminDashboardLayout({
@@ -22,6 +22,15 @@ export default async function AdminDashboardLayout({
             Panel Admin
           </div>
           <div className="flex items-center gap-4">
+            <Link 
+              href="/" 
+              className="group flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors dark:text-zinc-400 dark:hover:text-zinc-100 mr-2"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Voir le site
+            </Link>
             <Link 
               href="/admin/trash" 
               className="group flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors dark:text-zinc-400 dark:hover:text-zinc-100"
