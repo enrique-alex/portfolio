@@ -91,12 +91,13 @@ export default function ProjectsGrid() {
                     {isLoading ? (
                         Array.from({ length: 6 }).map((_, index) => {
                             let spanClasses = "col-span-1 row-span-1";
-                            if (index === 0 || index === 4) {
+                            const isFeatured = false; // Les squelettes sont uniformes
+                            if (isFeatured) {
                                 spanClasses = "md:col-span-2 md:row-span-1";
                             }
                             return (
                                 <div key={`skeleton-${index}`} className={spanClasses}>
-                                    <ProjectCardSkeleton isFeatured={index === 0 || index === 4} />
+                                    <ProjectCardSkeleton isFeatured={isFeatured} />
                                 </div>
                             );
                         })
@@ -110,8 +111,8 @@ export default function ProjectsGrid() {
                         filteredProjects.map((project, index) => {
                             let spanClasses = "col-span-1 row-span-1";
                             
-                            // Maintien de l'asymétrie Bento sur les éléments filtrés
-                            if (index === 0 || index === 4) {
+                            // Maintien de l'asymétrie Bento via le champ éditorial
+                            if (project.isFeatured) {
                                 spanClasses = "md:col-span-2 md:row-span-1"; // Rectangle large
                             } else {
                                 spanClasses = "md:col-span-1 md:row-span-1"; // Carré normal
@@ -129,8 +130,8 @@ export default function ProjectsGrid() {
                                 >
                                     <MagneticProjectCard 
                                         project={project} 
-                                        isFeatured={index === 0 || index === 4} 
-                                        sequenceNumber={index === 0 ? '01' : index === 4 ? '02' : undefined}
+                                        isFeatured={project.isFeatured} 
+                                        sequenceNumber={project.isFeatured ? `0${filteredProjects.filter(p => p.isFeatured).findIndex(p => p.id === project.id) + 1}` : undefined}
                                         onClick={handleProjectClick} 
                                     />
                                 </motion.div>

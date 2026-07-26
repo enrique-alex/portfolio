@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Locale } from "@/lib/i18n";
-import { Project, getProjectsData } from "@/lib/data";
+import { Project } from "@/lib/data";
 
 interface D1ProjectRow {
   id: string;
@@ -14,6 +14,7 @@ interface D1ProjectRow {
   cover_image: string | null;
   gallery: string | null;
   sort_order: number;
+  is_featured: number;
   created_at: string;
   updated_at: string;
   project_id: string;
@@ -38,6 +39,7 @@ function mapRowToProject(row: D1ProjectRow): Project {
     technicalChallenges: row.technical_challenges,
     impact: row.impact,
     technologies: JSON.parse(row.technologies) as string[],
+    isFeatured: Boolean(row.is_featured),
     themeColor: {
       r: row.theme_color_r,
       g: row.theme_color_g,
@@ -60,8 +62,8 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
   }
 
   if (!db) {
-    console.warn("⚠️ Base D1 'portfolio_db' non trouvée (mode next dev). Utilisation des données statiques de secours.");
-    return getProjectsData(locale);
+    console.warn("⚠️ Base D1 'portfolio_db' non trouvée (mode next dev sans wrangler).");
+    return [];
   }
 
   const query = `
@@ -88,8 +90,7 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
   }
 
   if (!db) {
-    const allFallback = getProjectsData(locale);
-    return allFallback.find(p => p.slug === slug) || null;
+    return null;
   }
 
   const query = `

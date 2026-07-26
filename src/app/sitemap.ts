@@ -1,11 +1,13 @@
 import { MetadataRoute } from 'next'
-import { getProjectsData } from '@/lib/data'
- 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const projects = getProjectsData('fr'); // Get static projects to generate URLs
+import { getProjects } from '@/lib/db/projects'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const projects = await getProjects('fr');
   
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://enrique-alex.pages.dev';
+
   const projectUrls = projects.map((project) => ({
-    url: `https://enrique-alex.pages.dev/projects/${project.slug}`,
+    url: `${baseUrl}/projects/${project.slug}`,
     lastModified: new Date(),
     changeFrequency: 'monthly' as const,
     priority: 0.8,
@@ -13,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: 'https://enrique-alex.pages.dev',
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 1,

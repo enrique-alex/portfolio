@@ -34,6 +34,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
       themeColorB: parseInt(data.themeColorB as string, 10),
       sortOrder: parseInt(data.sortOrder as string, 10),
       gallery: (data.gallery as string).split(",").map((t) => t.trim()).filter(Boolean),
+      isFeatured: formData.get("isFeatured") === "on",
     };
 
     if (Array.isArray(payload.gallery) && payload.gallery.length === 0) payload.gallery = null;
@@ -102,6 +103,24 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
       <div className="rounded-2xl border border-zinc-200/50 bg-white/50 backdrop-blur-md p-6 shadow-sm dark:border-white/10 dark:bg-[#0a0a0a]/50">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Informations Générales</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="isFeatured"
+                id="isFeatured"
+                defaultChecked={initialData?.isFeatured ?? false}
+                className="h-5 w-5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600"
+              />
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Mettre en avant (carte plus grande sur l'accueil)
+              </span>
+            </label>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              Conseil : Ne pas dépasser 2 à 4 projets mis en avant simultanément pour garder une grille harmonieuse.
+            </p>
+          </div>
           
           <div className="sm:col-span-2">
             <label htmlFor="slug" className={labelClass}>Slug</label>

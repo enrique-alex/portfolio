@@ -7,7 +7,7 @@ export async function getProjectByIdForAdmin(
   const statement = db.prepare(`
     SELECT 
       p.id, p.slug, p.year, p.technologies, p.theme_color_r, p.theme_color_g, p.theme_color_b,
-      p.github_url, p.cover_image, p.gallery, p.sort_order,
+      p.github_url, p.cover_image, p.gallery, p.sort_order, p.is_featured,
       t_fr.title as titleFr, t_fr.category as categoryFr, t_fr.short_description as shortDescriptionFr,
       t_fr.detailed_description as detailedDescriptionFr, t_fr.technical_challenges as technicalChallengesFr, t_fr.impact as impactFr,
       t_en.title as titleEn, t_en.category as categoryEn, t_en.short_description as shortDescriptionEn,
@@ -36,6 +36,7 @@ export async function getProjectByIdForAdmin(
     coverImage: result.cover_image as string | null,
     gallery: result.gallery ? (typeof result.gallery === 'string' ? JSON.parse(result.gallery) : result.gallery) : null,
     sortOrder: result.sort_order as number,
+    isFeatured: Boolean(result.is_featured),
     titleFr: result.titleFr as string || "",
     categoryFr: result.categoryFr as string || "",
     shortDescriptionFr: result.shortDescriptionFr as string || "",
@@ -79,8 +80,8 @@ export async function createProjectAtomic(
       .prepare(
         `INSERT INTO projects (
           id, slug, year, technologies, theme_color_r, theme_color_g, theme_color_b,
-          github_url, cover_image, gallery, sort_order
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          github_url, cover_image, gallery, sort_order, is_featured
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         id,
@@ -93,7 +94,8 @@ export async function createProjectAtomic(
         input.githubUrl,
         input.coverImage,
         input.gallery ? JSON.stringify(input.gallery) : null,
-        input.sortOrder
+        input.sortOrder,
+        input.isFeatured ? 1 : 0
       )
   );
 
@@ -193,7 +195,7 @@ export async function updateProjectAtomic(
       .prepare(
         `UPDATE projects SET 
           slug = ?, year = ?, technologies = ?, theme_color_r = ?, theme_color_g = ?, theme_color_b = ?,
-          github_url = ?, cover_image = ?, gallery = ?, sort_order = ?, updated_at = datetime('now')
+          github_url = ?, cover_image = ?, gallery = ?, sort_order = ?, is_featured = ?, updated_at = datetime('now')
         WHERE id = ?`
       )
       .bind(
@@ -207,6 +209,7 @@ export async function updateProjectAtomic(
         input.coverImage,
         input.gallery ? JSON.stringify(input.gallery) : null,
         input.sortOrder,
+        input.isFeatured ? 1 : 0,
         id
       )
   );

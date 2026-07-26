@@ -9,6 +9,7 @@ export interface ProjectFormInput {
   coverImage: string | null;
   gallery: string[] | null;
   sortOrder: number;
+  isFeatured: boolean;
   titleFr: string;
   categoryFr: string;
   shortDescriptionFr: string;
@@ -122,6 +123,14 @@ export function validateProjectInput(
     errors.push(`L'ordre de tri doit être un entier entre 0 et ${currentProjectCount} inclus.`);
   }
 
+  // validation isFeatured
+  let isFeatured = data.isFeatured;
+  if (isFeatured === undefined) {
+    isFeatured = false;
+  } else if (typeof isFeatured !== 'boolean') {
+    errors.push("Le champ 'isFeatured' doit être un booléen.");
+  }
+
   // validation strings
   const validateString = (val: unknown, name: string, maxLen: number) => {
     if (typeof val !== 'string' || val.trim().length === 0) {
@@ -164,6 +173,7 @@ export function validateProjectInput(
     coverImage: coverImage as string | null,
     gallery: gallery as string[] | null,
     sortOrder: sortOrder as number,
+    isFeatured: isFeatured as boolean,
     titleFr: (data.titleFr as string).trim(),
     categoryFr: (data.categoryFr as string).trim(),
     shortDescriptionFr: (data.shortDescriptionFr as string).trim(),

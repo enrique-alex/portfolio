@@ -2,7 +2,7 @@
 
 import type { ProjectAdminListItem } from "@/lib/db/admin-projects";
 import Link from "next/link";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, Star } from "lucide-react";
 import { DeleteProjectButton } from "./DeleteProjectButton";
 
 interface ProjectsAdminTableProps {
@@ -46,8 +46,13 @@ export function ProjectsAdminTable({ projects }: ProjectsAdminTableProps) {
                   {project.sortOrder}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-medium text-zinc-900 dark:text-zinc-100">{project.titleFr}</div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">{project.titleEn}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">{project.titleFr}</span>
+                    {project.isFeatured && (
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-label="Mis en avant" />
+                    )}
+                  </div>
+                  <div className="text-xs text-zinc-500 mt-1">{project.titleEn}</div>
                 </td>
                 <td className="px-6 py-4">{project.year}</td>
                 <td className="px-6 py-4">{project.category}</td>
