@@ -140,8 +140,8 @@ export default function CursorFluid() {
 
         // Explosion WebGL à la fin du preloader
         const handlePreloaderComplete = () => {
-            // Le script webgl-fluid écoute la touche Espace pour déclencher plusieurs splats (explosion)
-            window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+            // Déclenche l'explosion de manière propre sans utiliser le clavier
+            window.dispatchEvent(new CustomEvent('webgl-explode'));
         };
 
         window.addEventListener('webgl-resonance', handleResonance);

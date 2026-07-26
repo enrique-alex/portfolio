@@ -1,11 +1,8 @@
 import "./globals.css";
-import CursorFluid from "@/components/animations/CursorFluid";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import { ProjectsProvider } from "@/components/theme/ProjectsProvider";
-import Preloader from "@/components/ui/Preloader";
+
 export const metadata = {
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
@@ -63,20 +60,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>
             <ProjectsProvider>
-              {/* L'animation d'ouverture 2026 */}
-              <Preloader />
-
-              {/* L'animation WebGL Fluide en arrière-plan */}
-              <CursorFluid />
-              
-              {/* La barre de navigation par-dessus l'animation */}
-              <Navbar />
-              
-              {/* Le contenu des pages (qui pourra scroller en dessous de la navbar) */}
               {children}
-
-              {/* Le Pied de page Système */}
-              <Footer />
             </ProjectsProvider>
           </LanguageProvider>
         </ThemeProvider>
