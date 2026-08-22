@@ -2,6 +2,11 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import { ProjectsProvider } from "@/components/theme/ProjectsProvider";
+import type { Viewport } from 'next';
+
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+};
 
 export const metadata = {
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",

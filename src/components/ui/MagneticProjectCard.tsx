@@ -98,8 +98,12 @@ export default function MagneticProjectCard({
     const cardRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-    useEffect(() => setMounted(true), []);
+    useEffect(() => {
+        setMounted(true);
+        setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
+    }, []);
 
     // --- Animation 1: Magnetic Tilt 3D ---
     const mouseX = useMotionValue(0);
@@ -152,6 +156,7 @@ export default function MagneticProjectCard({
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
+            whileTap={{ scale: 0.98 }}
             style={{
                 rotateX: isHovered ? rotateX : 0,
                 rotateY: isHovered ? rotateY : 0,
@@ -186,8 +191,8 @@ export default function MagneticProjectCard({
                 className="absolute left-0 top-0 h-full w-[3px] transition-all duration-500 group-hover:w-[5px] group-hover:shadow-lg z-[2]"
                 style={{ 
                     background: `linear-gradient(180deg, rgb(${tc.r},${tc.g},${tc.b}), transparent)`,
-                    opacity: isHovered ? 1 : 0.4,
-                    boxShadow: isHovered ? `0 0 20px rgba(${tc.r},${tc.g},${tc.b},0.3)` : 'none'
+                    opacity: isTouchDevice ? 0.7 : (isHovered ? 1 : 0.4),
+                    boxShadow: (isTouchDevice || isHovered) ? `0 0 20px rgba(${tc.r},${tc.g},${tc.b},0.3)` : 'none'
                 }}
             />
 
@@ -197,7 +202,7 @@ export default function MagneticProjectCard({
                     className="absolute inset-0 rounded-[2rem] transition-opacity duration-700 pointer-events-none"
                     style={{
                         background: `radial-gradient(ellipse at 0% 0%, rgba(${tc.r},${tc.g},${tc.b},0.06), transparent 60%)`,
-                        opacity: isHovered ? 1 : 0
+                        opacity: isTouchDevice ? 0.5 : (isHovered ? 1 : 0)
                     }}
                 />
             )}
@@ -216,9 +221,9 @@ export default function MagneticProjectCard({
                     className="absolute right-6 bottom-20 h-14 w-14 pointer-events-none z-0"
                     style={{ color: `rgb(${tc.r},${tc.g},${tc.b})` }}
                     animate={{ 
-                        rotate: isHovered ? 8 : 0,
-                        opacity: isHovered ? 0.5 : 0.2,
-                        scale: isHovered ? 1.1 : 1
+                        rotate: isTouchDevice ? 4 : (isHovered ? 8 : 0),
+                        opacity: isTouchDevice ? 0.4 : (isHovered ? 0.5 : 0.2),
+                        scale: isTouchDevice ? 1.05 : (isHovered ? 1.1 : 1)
                     }}
                     transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                 >
@@ -311,8 +316,8 @@ export default function MagneticProjectCard({
                                 : 'border-black/10 bg-black/5 dark:border-white/10 dark:bg-white/5'
                         }`}
                         animate={{ 
-                            x: isHovered ? 4 : 0,
-                            scale: isHovered ? 1.1 : 1
+                            x: isTouchDevice ? 2 : (isHovered ? 4 : 0),
+                            scale: isTouchDevice ? 1.05 : (isHovered ? 1.1 : 1)
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     >

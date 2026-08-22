@@ -23,7 +23,11 @@ export default function ProjectCard({
 
     // On utilise un composant client-side only pour éviter l'Hydration error sur le Spotlight
     const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+        setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
+    }, []);
 
     function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
         if (!cardRef.current) return;
@@ -67,6 +71,7 @@ export default function ProjectCard({
             onClick={() => onClick(project)}
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
+            whileTap={{ scale: 0.98 }}
             onMouseLeave={() => {
                 setIsHovered(false);
                 // Reset du tilt quand on quitte la carte
@@ -124,7 +129,7 @@ export default function ProjectCard({
 
             {/* Accent d'Ingénierie : Ligne brillante dynamique */}
             <motion.div 
-                className="absolute bottom-0 left-0 h-1 w-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                className={`absolute bottom-0 left-0 h-1 w-full transition-opacity duration-500 ${isTouchDevice ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'}`}
                 style={{ 
                     background: `linear-gradient(90deg, transparent, rgb(${project.themeColor.r},${project.themeColor.g},${project.themeColor.b}), transparent)`
                 }}

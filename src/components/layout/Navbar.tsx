@@ -97,7 +97,7 @@ export default function Navbar() {
 
       <header
         className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-700 ease-out ${
-          isScrolled ? 'py-3' : 'py-6'
+          isScrolled ? 'pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]' : 'pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))]'
         }`}
       >
         <div 
@@ -284,7 +284,7 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-              className="fixed inset-0 z-40 flex flex-col items-center justify-center md:hidden"
+              className="fixed inset-0 z-40 flex flex-col items-center justify-center pb-[env(safe-area-inset-bottom)] md:hidden"
               style={{
                 background: mounted && theme === 'dark'
                   ? 'rgba(5,5,5,0.92)'
