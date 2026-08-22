@@ -7,10 +7,16 @@ export default defineConfig(async () => {
   const migrationsPath = path.join(process.cwd(), "migrations");
   const migrations = await readD1Migrations(migrationsPath);
 
-  // Assure la présence du dossier d'assets attendu par wrangler.toml en environnement CI
-  const assetsDir = path.join(process.cwd(), ".open-next", "assets");
+  // Assure la présence des fichiers et dossiers attendus par wrangler.toml en environnement CI
+  const openNextDir = path.join(process.cwd(), ".open-next");
+  const assetsDir = path.join(openNextDir, "assets");
+  const workerFile = path.join(openNextDir, "worker.js");
+
   if (!fs.existsSync(assetsDir)) {
     fs.mkdirSync(assetsDir, { recursive: true });
+  }
+  if (!fs.existsSync(workerFile)) {
+    fs.writeFileSync(workerFile, "export default {};");
   }
 
   return {
