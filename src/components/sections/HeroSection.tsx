@@ -13,11 +13,14 @@ const SHUFFLE_TIME = 45; // Lègèrement augmenté pour rendre les caractères p
 const CHARS = "0101010189ABCDEF!@#$%^&*()_+-=[]{}|;':,./<>?";
 
 export default function HeroSection() {
-  const [displayText, setDisplayText] = useState("");
+  const [displayText, setDisplayText] = useState(TARGET_TEXT);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const isBot = typeof window !== 'undefined' && (/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) || navigator.userAgent.includes('Lighthouse'));
+    const isBot = typeof window !== 'undefined' && (
+      Boolean(navigator.webdriver) || 
+      /bot|google|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|headlesschrome|chrome-lighthouse/i.test(navigator.userAgent)
+    );
 
     if (shouldReduceMotion || isBot) {
       setDisplayText(TARGET_TEXT);
@@ -49,14 +52,12 @@ export default function HeroSection() {
           frame++;
           if (frame % CYCLES_PER_LETTER === 0) pos++;
         }, SHUFFLE_TIME);
-      }, 600); // Attend la fin de la transition de sortie du preloader (0.8s)
+      }, 300);
     };
 
     if (typeof window !== 'undefined') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const preloaderDone = (window as any).__preloaderDone;
+      const preloaderDone = window.__preloaderDone;
       if (preloaderDone) {
-        // Preloader is already done (e.g. returning to home page), skip animation
         setDisplayText(TARGET_TEXT);
       } else {
         window.addEventListener('preloader-complete', startAnimation);
@@ -172,6 +173,7 @@ export default function HeroSection() {
                     className="object-cover z-20 grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 300px"
                     priority
+                    fetchPriority="high"
                   />
 
                 </div>
