@@ -251,7 +251,7 @@ export default function Navbar() {
           {/* BURGER MOBILE */}
           <button
             type="button"
-            className="z-50 relative flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-full md:hidden"
+            className="z-50 relative flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-full md:hidden"
             style={{
               background: mounted && theme === 'dark'
                 ? 'rgba(255,255,255,0.06)'
@@ -314,7 +314,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 text-lg font-medium text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
                   >
                     {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                    {theme === 'dark' ? 'Mode Jour' : 'Mode Nuit'}
+                    {theme === 'dark' ? t('nav.themeDay') : t('nav.themeNight')}
                   </button>
                 )}
 
@@ -338,7 +338,7 @@ export default function Navbar() {
                   aria-label="Accès administrateur"
                 >
                   <Lock className="h-5 w-5" />
-                  Administration
+                  {t('nav.admin')}
                 </Link>
 
                 <a

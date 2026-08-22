@@ -461,14 +461,14 @@ export default function SkillsSection() {
                     <span className="text-2xl font-bold text-zinc-900 dark:text-white">
                       {Math.round(active.skills.reduce((a, s) => a + s.level, 0) / active.skills.length)}%
                     </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Maîtrise moyenne</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('skills.stats.average')}</p>
                   </div>
                   <div className="h-8 w-px bg-black/5 dark:bg-white/5" />
                   <div>
                     <span className="text-2xl font-bold text-zinc-900 dark:text-white">
                       {active.skills.filter(s => s.level >= 85).length}
                     </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Expert (85%+)</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('skills.stats.expert')}</p>
                   </div>
                   <div className="h-8 w-px bg-black/5 dark:bg-white/5" />
                   <div>
@@ -478,7 +478,7 @@ export default function SkillsSection() {
                     >
                       {active.skills.reduce((a, s) => Math.max(a, s.level), 0)}%
                     </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Top compétence</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('skills.stats.top')}</p>
                   </div>
                 </div>
               </motion.div>

@@ -31,13 +31,13 @@ export default function Footer() {
         </div>
 
         {/* Center: Micro Socials */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           <Magnetic intensity={0.2}>
             <a 
               href="https://github.com/enrique-alex" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-zinc-400 transition-colors hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-100"
+              className="flex items-center justify-center p-3 text-zinc-400 transition-colors hover:text-zinc-900 dark:text-zinc-600 dark:hover:text-zinc-100"
               aria-label="GitHub"
             >
               <Github className="h-5 w-5" />
@@ -48,7 +48,7 @@ export default function Footer() {
               href="https://www.linkedin.com/in/alex-ndjakou/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-zinc-400 transition-colors hover:text-brand-blue dark:text-zinc-600 dark:hover:text-[#8AB4F8]"
+              className="flex items-center justify-center p-3 text-zinc-400 transition-colors hover:text-brand-blue dark:text-zinc-600 dark:hover:text-[#8AB4F8]"
               aria-label="LinkedIn"
             >
               <Linkedin className="h-5 w-5" />
@@ -57,7 +57,7 @@ export default function Footer() {
           <Magnetic intensity={0.2}>
             <a 
               href="mailto:enriquekemayou@gmail.com" 
-              className="text-zinc-400 transition-colors hover:text-brand-red dark:text-zinc-600 dark:hover:text-brand-red"
+              className="flex items-center justify-center p-3 text-zinc-400 transition-colors hover:text-brand-red dark:text-zinc-600 dark:hover:text-brand-red"
               aria-label="Email"
             >
               <Mail className="h-5 w-5" />
