@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 
@@ -214,11 +214,13 @@ function SkillBar({ skill, color, index }: { skill: Skill; color: { r: number; g
 }
 
 // ─── Tool Card (with brand color glow on hover) ──────────
-function ToolCard({ tool }: { tool: MarqueeTool }) {
+function ToolCard({ tool, isTouch }: { tool: MarqueeTool; isTouch?: boolean }) {
   const IconComp = tool.icon;
   return (
     <div 
-      className="tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] bg-white/60 px-4 py-2.5 sm:px-5 sm:py-3.5 backdrop-blur-sm transition-all duration-500 hover:scale-105 dark:border-white/[0.08] dark:bg-white/[0.03]"
+      className={`tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] ${
+        isTouch ? 'bg-white/80 dark:bg-zinc-900/80' : 'bg-white/60 backdrop-blur-sm dark:bg-white/[0.03]'
+      } px-4 py-2.5 sm:px-5 sm:py-3.5 transition-all duration-500 hover:scale-105 dark:border-white/[0.08]`}
       style={{
         '--brand': tool.brandColor,
       } as CSSPropertiesWithVars}
@@ -258,7 +260,7 @@ function ToolCard({ tool }: { tool: MarqueeTool }) {
 }
 
 // ─── CSS Infinite Marquee (pause on hover) ────────────────
-function InfiniteMarquee({ tools, direction = 'left', speed = 35 }: { tools: MarqueeTool[]; direction?: 'left' | 'right'; speed?: number }) {
+function InfiniteMarquee({ tools, direction = 'left', speed = 35, isTouch }: { tools: MarqueeTool[]; direction?: 'left' | 'right'; speed?: number; isTouch?: boolean }) {
   const doubled = [...tools, ...tools];
   
   return (
@@ -274,7 +276,7 @@ function InfiniteMarquee({ tools, direction = 'left', speed = 35 }: { tools: Mar
         }}
       >
         {doubled.map((tool, i) => (
-          <ToolCard key={`${tool.name}-${i}`} tool={tool} />
+          <ToolCard key={`${tool.name}-${i}`} tool={tool} isTouch={isTouch} />
         ))}
       </div>
     </div>
@@ -285,6 +287,12 @@ function InfiniteMarquee({ tools, direction = 'left', speed = 35 }: { tools: Mar
 export default function SkillsSection() {
   const shouldReduceMotion = useReducedMotion();
   const { t } = useLanguage();
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
+
   const SKILL_CATEGORIES = useSkillCategories();
   const [activeCategory, setActiveCategory] = useState(SKILL_CATEGORIES[0].id);
   const active = SKILL_CATEGORIES.find(c => c.id === activeCategory)!;
@@ -333,71 +341,93 @@ export default function SkillsSection() {
         {/* LAYOUT : Tabs à gauche + Contenu à droite */}
         <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] lg:gap-12">
           
-          {/* CATEGORY TABS (vertical) */}
-          <motion.div 
-            className="flex flex-row gap-2 overflow-x-auto pb-4 scrollbar-hide lg:flex-col lg:gap-3 lg:pb-0"
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: shouldReduceMotion ? 0 : 0.08 },
-              },
-            }}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            {SKILL_CATEGORIES.map((cat) => {
-              const isActive = cat.id === activeCategory;
-              return (
-                <motion.button
-                  key={cat.id}
-                  variants={{
-                    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 30, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(8px)' },
-                    show: { 
-                      opacity: 1, y: 0, filter: 'blur(0px)',
-                      transition: { duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 120, damping: 20 } 
-                    },
-                  }}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-all duration-300 lg:w-full ${
-                    isActive 
-                      ? 'bg-black/[0.04] dark:bg-white/[0.06]'
-                      : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
-                  }`}
-                  style={isActive ? {
-                    boxShadow: `inset 0 0 0 1px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.2), 0 4px 12px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.08)`
-                  } : undefined}
-                >
-                  <div 
-                    className="mb-2 h-2 w-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      background: `rgb(${cat.color.r},${cat.color.g},${cat.color.b})`,
-                      opacity: isActive ? 1 : 0.3,
-                      boxShadow: isActive ? `0 0 8px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.5)` : 'none'
+          {/* CATEGORY TABS (vertical sur desktop, horizontal sur mobile) */}
+          <div className="relative w-full lg:w-auto">
+            <motion.div 
+              className="flex flex-row gap-2 overflow-x-auto pb-4 scrollbar-hide lg:flex-col lg:gap-3 lg:pb-0"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: shouldReduceMotion ? 0 : 0.08 },
+                },
+              }}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+            >
+              {SKILL_CATEGORIES.map((cat) => {
+                const isActive = cat.id === activeCategory;
+                return (
+                  <motion.button
+                    key={cat.id}
+                    variants={{
+                      hidden: { 
+                        opacity: 0, 
+                        y: shouldReduceMotion ? 0 : 30, 
+                        filter: (shouldReduceMotion || isTouch) ? 'blur(0px)' : 'blur(8px)' 
+                      },
+                      show: { 
+                        opacity: 1, 
+                        y: 0, 
+                        filter: 'blur(0px)',
+                        transition: { duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 120, damping: 20 } 
+                      },
                     }}
-                  />
-                  <span className={`text-sm font-semibold transition-colors duration-300 ${
-                    isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'
-                  }`}>
-                    {cat.title}
-                  </span>
-                  <span className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block line-clamp-2">
-                    {cat.subtitle}
-                  </span>
-                </motion.button>
-              );
-            })}
-          </motion.div>
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-all duration-300 lg:w-full ${
+                      isActive 
+                        ? 'bg-black/[0.04] dark:bg-white/[0.06]'
+                        : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+                    }`}
+                    style={isActive ? {
+                      boxShadow: `inset 0 0 0 1px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.2), 0 4px 12px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.08)`
+                    } : undefined}
+                  >
+                    <div 
+                      className="mb-2 h-2 w-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        background: `rgb(${cat.color.r},${cat.color.g},${cat.color.b})`,
+                        opacity: isActive ? 1 : 0.3,
+                        boxShadow: isActive ? `0 0 8px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.5)` : 'none'
+                      }}
+                    />
+                    <span className={`text-sm font-semibold transition-colors duration-300 ${
+                      isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'
+                    }`}>
+                      {cat.title}
+                    </span>
+                    <span className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block line-clamp-2">
+                      {cat.subtitle}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+
+            {/* Fade cue on right edge for horizontal scroll on mobile */}
+            <div 
+              aria-hidden="true" 
+              className="pointer-events-none absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white dark:from-[#050505] to-transparent lg:hidden" 
+            />
+          </div>
 
           {/* SKILL CARDS PANEL */}
           <div className="relative min-h-[400px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeCategory}
-                initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 15, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(6px)' }}
+                initial={{ 
+                  opacity: 0, 
+                  y: shouldReduceMotion ? 0 : 15, 
+                  filter: (shouldReduceMotion || isTouch) ? 'blur(0px)' : 'blur(6px)' 
+                }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -15, filter: shouldReduceMotion ? 'blur(0px)' : 'blur(6px)' }}
+                exit={{ 
+                  opacity: 0, 
+                  y: shouldReduceMotion ? 0 : -15, 
+                  filter: (shouldReduceMotion || isTouch) ? 'blur(0px)' : 'blur(6px)' 
+                }}
                 transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeInOut' }}
                 className="rounded-3xl border border-black/5 bg-black/[0.02] p-8 backdrop-blur-sm dark:border-white/5 dark:bg-white/[0.02] lg:p-10"
                 style={{
@@ -482,8 +512,8 @@ export default function SkillsSection() {
               </p>
             </div>
             <div className="flex flex-col gap-5">
-              <InfiniteMarquee tools={topRow} direction="left" speed={45} />
-              <InfiniteMarquee tools={bottomRow} direction="right" speed={50} />
+              <InfiniteMarquee tools={topRow} direction="left" speed={45} isTouch={isTouch} />
+              <InfiniteMarquee tools={bottomRow} direction="right" speed={50} isTouch={isTouch} />
             </div>
           </div>
         </motion.div>

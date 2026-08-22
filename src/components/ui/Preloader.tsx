@@ -22,6 +22,7 @@ export default function Preloader() {
   const shouldReduceMotion = useReducedMotion();
   const [progress, setProgress] = useState(0);
   const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isTouch, setIsTouch] = useState(false);
   const [isComplete, setIsComplete] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.__preloaderDone === true;
@@ -30,6 +31,8 @@ export default function Preloader() {
   useEffect(() => {
     // Skip preloader for bots and Lighthouse to prevent LCP penalty
     const isBot = typeof window !== 'undefined' && (/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) || navigator.userAgent.includes('Lighthouse'));
+    const isTouchCoarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+    setIsTouch(isTouchCoarse);
 
     if (shouldReduceMotion || isBot) {
       setTimeout(() => {
@@ -45,7 +48,8 @@ export default function Preloader() {
       return;
     }
 
-    // Progress counter simulation
+    // Progress counter simulation (faster on touch devices)
+    const intervalDelay = isTouchCoarse ? 25 : 45;
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
@@ -60,10 +64,12 @@ export default function Preloader() {
           return 100;
         }
         // Random increment to simulate real loading
-        const increment = Math.floor(Math.random() * 5) + 1;
+        const increment = isTouchCoarse 
+          ? Math.floor(Math.random() * 8) + 3 
+          : Math.floor(Math.random() * 5) + 1;
         return Math.min(prev + increment, 100);
       });
-    }, 45); // Speed of loading
+    }, intervalDelay);
 
     // Changing phrases 
     const phraseInterval = setInterval(() => {
@@ -97,7 +103,7 @@ export default function Preloader() {
           exit={{ 
             opacity: 0,
             scale: 1.05,
-            filter: "blur(10px)"
+            filter: shouldReduceMotion ? "blur(0px)" : isTouch ? "blur(4px)" : "blur(10px)"
           }}
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#050505]"
@@ -110,41 +116,45 @@ export default function Preloader() {
             {/* SVG Complex Loading Graphic */}
             <div className="relative mb-12 flex h-48 w-48 items-center justify-center">
               
-              {/* Outer Rotating Dashed Ring */}
-              <motion.svg
-                viewBox="0 0 100 100"
-                className="absolute inset-0 h-full w-full text-zinc-300 dark:text-zinc-800"
-                animate={{ rotate: shouldReduceMotion ? 0 : 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              >
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="48"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="0.5"
-                  strokeDasharray="4 4"
-                />
-              </motion.svg>
+              {/* Outer Rotating Dashed Ring (Omitted on touch) */}
+              {!isTouch && (
+                <motion.svg
+                  viewBox="0 0 100 100"
+                  className="absolute inset-0 h-full w-full text-zinc-300 dark:text-zinc-800"
+                  animate={{ rotate: shouldReduceMotion ? 0 : 360 }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="48"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    strokeDasharray="4 4"
+                  />
+                </motion.svg>
+              )}
 
-              {/* Middle Pulsing Ring */}
-              <motion.svg
-                viewBox="0 0 100 100"
-                className="absolute inset-2 h-full w-full text-brand-blue/30"
-                animate={{ rotate: shouldReduceMotion ? 0 : -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              >
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="44"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  strokeDasharray="20 10"
-                />
-              </motion.svg>
+              {/* Middle Pulsing Ring (Omitted on touch) */}
+              {!isTouch && (
+                <motion.svg
+                  viewBox="0 0 100 100"
+                  className="absolute inset-2 h-full w-full text-brand-blue/30"
+                  animate={{ rotate: shouldReduceMotion ? 0 : -360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="44"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    strokeDasharray="20 10"
+                  />
+                </motion.svg>
+              )}
 
               {/* Inner Progress Ring (Fills up) */}
               <svg

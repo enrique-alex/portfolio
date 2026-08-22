@@ -31,6 +31,7 @@ export default function Navbar() {
   
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
 
   // Refs for the pill indicator
   const navRef = useRef<HTMLElement>(null);
@@ -39,6 +40,7 @@ export default function Navbar() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -110,8 +112,8 @@ export default function Navbar() {
             background: mounted && theme === 'dark' 
               ? 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
               : 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 100%)',
-            backdropFilter: 'blur(24px) saturate(1.6)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+            backdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(24px) saturate(1.6)',
+            WebkitBackdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(24px) saturate(1.6)',
             boxShadow: mounted && theme === 'dark'
               ? '0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 0.5px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05)'
               : '0 8px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 0 0 0.5px rgba(255,255,255,0.6), inset 0 1px 0 rgba(255,255,255,0.8)',
@@ -282,7 +284,8 @@ export default function Navbar() {
                 background: mounted && theme === 'dark'
                   ? 'rgba(5,5,5,0.92)'
                   : 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(40px) saturate(1.8)',
+                backdropFilter: isTouch ? 'blur(20px) saturate(1.5)' : 'blur(40px) saturate(1.8)',
+                WebkitBackdropFilter: isTouch ? 'blur(20px) saturate(1.5)' : 'blur(40px) saturate(1.8)',
               }}
             >
               <nav className="flex flex-col items-center gap-8">
