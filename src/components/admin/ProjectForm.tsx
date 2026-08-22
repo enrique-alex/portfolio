@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { ProjectFormInput } from "@/lib/validation/project";
 import { Loader2 } from "lucide-react";
@@ -15,6 +15,107 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [slugWarning, setSlugWarning] = useState(false);
+
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(initialData?.coverImage ?? null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(initialData?.coverImage ?? null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+
+  const [galleryItems, setGalleryItems] = useState<{ url: string; preview: string }[]>(
+    (initialData?.gallery ?? []).map((url) => ({ url, preview: url }))
+  );
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+
+  // Revoke object URLs on unmount to avoid memory leaks
+  const objectUrlsRef = useRef<string[]>([]);
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  const createLocalPreview = (file: File): string => {
+    const url = URL.createObjectURL(file);
+    objectUrlsRef.current.push(url);
+    return url;
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Instant local preview
+    setCoverImagePreview(createLocalPreview(file));
+    setIsUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        alert(data.error || "Erreur lors de l'upload de l'image de couverture.");
+        // Revert preview on failure
+        setCoverImagePreview(null);
+        return;
+      }
+      const data = (await res.json()) as { url: string };
+      setCoverImageUrl(data.url);
+    } catch (err) {
+      alert("Erreur réseau inattendue lors de l'upload.");
+      setCoverImagePreview(null);
+    } finally {
+      setIsUploadingCover(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Create instant local previews for all files
+    const localPreviews: { url: string; preview: string; pending: boolean }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      localPreviews.push({
+        url: "",
+        preview: createLocalPreview(files[i]),
+        pending: true,
+      });
+    }
+    const startIndex = galleryItems.length;
+    setGalleryItems((prev) => [...prev, ...localPreviews.map(({ preview }) => ({ url: "", preview }))]);
+
+    setIsUploadingGallery(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append("file", files[i]);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+        if (res.ok) {
+          const data = (await res.json()) as { url: string };
+          // Update the gallery item with the real URL
+          setGalleryItems((prev) =>
+            prev.map((item, idx) =>
+              idx === startIndex + i ? { ...item, url: data.url } : item
+            )
+          );
+        } else {
+          const data = (await res.json()) as { error?: string };
+          alert(`Erreur pour ${files[i].name} : ${data.error || "Erreur d'upload"}`);
+          // Remove the failed preview
+          setGalleryItems((prev) => prev.filter((_, idx) => idx !== startIndex + i));
+        }
+      }
+    } catch (err) {
+      alert("Erreur réseau inattendue lors de l'upload.");
+    } finally {
+      setIsUploadingGallery(false);
+      e.target.value = "";
+    }
+  };
+
+  const removeGalleryItem = (urlToRemove: string) => {
+    setGalleryItems((prev) => prev.filter((item) => item.url !== urlToRemove));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -217,29 +318,70 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="coverImage" className={labelClass}>Image de couverture (chemin absolu, optionnel)</label>
-            <input
-              type="text"
-              name="coverImage"
-              id="coverImage"
-              defaultValue={initialData?.coverImage || ""}
-              placeholder="/image/projects/mon-projet.webp"
-              className={inputClass}
-              aria-label="Image de couverture"
-            />
+            <label className={labelClass}>Image de couverture (optionnel)</label>
+            <div className="space-y-4">
+              <input
+                type="file"
+                accept="image/webp,image/png,image/jpeg"
+                onChange={handleCoverUpload}
+                disabled={isUploadingCover}
+                className={inputClass}
+                aria-label="Upload de l'image de couverture"
+              />
+              {isUploadingCover && <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Upload en cours...</p>}
+              {coverImagePreview && (
+                <div className="relative inline-block">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={coverImagePreview} alt="Prévisualisation couverture" className="h-32 w-auto rounded-lg object-cover shadow-sm border border-zinc-200 dark:border-white/10" />
+                  <button
+                    type="button"
+                    onClick={() => { setCoverImageUrl(null); setCoverImagePreview(null); }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
+                    aria-label="Supprimer l'image de couverture"
+                  >
+                    <span className="sr-only">Supprimer</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              )}
+            </div>
+            <input type="hidden" name="coverImage" value={coverImageUrl ?? ""} />
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="gallery" className={labelClass}>Galerie (chemins absolus séparés par des virgules, optionnel)</label>
-            <input
-              type="text"
-              name="gallery"
-              id="gallery"
-              defaultValue={initialData?.gallery?.join(", ") || ""}
-              placeholder="/image/projects/img1.webp, /image/projects/img2.webp"
-              className={inputClass}
-              aria-label="Images de la galerie"
-            />
+            <label className={labelClass}>Galerie (optionnel)</label>
+            <div className="space-y-4">
+              <input
+                type="file"
+                accept="image/webp,image/png,image/jpeg"
+                multiple
+                onChange={handleGalleryUpload}
+                disabled={isUploadingGallery}
+                className={inputClass}
+                aria-label="Upload d'images pour la galerie"
+              />
+              {isUploadingGallery && <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Upload en cours...</p>}
+              {galleryItems.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {galleryItems.map((item, i) => (
+                    <div key={i} className="relative inline-block">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.preview} alt={`Prévisualisation galerie ${i + 1}`} className="h-24 w-full rounded-lg object-cover shadow-sm border border-zinc-200 dark:border-white/10" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryItem(item.url)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
+                        aria-label={`Supprimer l'image ${i + 1} de la galerie`}
+                      >
+                        <span className="sr-only">Supprimer</span>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <input type="hidden" name="gallery" value={galleryItems.map(item => item.url).filter(Boolean).join(",")} />
           </div>
 
         </div>

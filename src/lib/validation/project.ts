@@ -1,3 +1,6 @@
+// Cette valeur doit rester synchronisée avec R2_PUBLIC_URL dans wrangler.toml si elle change un jour (ex: migration vers domaine personnalisé)
+const R2_PUBLIC_URL_PATTERN = 'pub-f2abb97fd5a44520b79d8e56bf020956\\.r2\\.dev';
+
 export interface ProjectFormInput {
   slug: string;
   year: number;
@@ -93,14 +96,15 @@ export function validateProjectInput(
     }
   }
 
-  const imageRegex = /^\/image\/projects\/[a-zA-Z0-9._-]+\.(webp|png|jpe?g|svg)$/;
+  const localImageRegex = /^\/image\/projects\/[a-zA-Z0-9._-]+\.(webp|png|jpe?g|svg)$/;
+  const r2ImageRegex = new RegExp(`^https://${R2_PUBLIC_URL_PATTERN}/[a-zA-Z0-9._-]+\\.(webp|png|jpe?g)$`);
 
   // validation coverImage
   let coverImage = data.coverImage;
   if (coverImage === '') coverImage = null;
   if (coverImage !== null) {
-    if (typeof coverImage !== 'string' || !imageRegex.test(coverImage)) {
-      errors.push("L'image de couverture doit respecter le format /image/projects/*.{webp,png,jpg,jpeg,svg}.");
+    if (typeof coverImage !== 'string' || (!localImageRegex.test(coverImage) && !r2ImageRegex.test(coverImage))) {
+      errors.push("L'image de couverture doit respecter le format /image/projects/*.{webp,png,jpg,jpeg,svg} ou une URL R2 valide.");
     }
   }
 
@@ -109,8 +113,8 @@ export function validateProjectInput(
   if (gallery === '' || (Array.isArray(gallery) && gallery.length === 0)) gallery = null;
   if (gallery !== null) {
     if (Array.isArray(gallery)) {
-      if (!gallery.every((img) => typeof img === 'string' && imageRegex.test(img))) {
-        errors.push("Chaque image de la galerie doit respecter le format /image/projects/*.{webp,png,jpg,jpeg,svg}.");
+      if (!gallery.every((img) => typeof img === 'string' && (localImageRegex.test(img) || r2ImageRegex.test(img)))) {
+        errors.push("Chaque image de la galerie doit respecter le format /image/projects/*.{webp,png,jpg,jpeg,svg} ou une URL R2 valide.");
       }
     } else {
       errors.push("La galerie doit être une liste d'images.");
