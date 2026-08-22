@@ -18,11 +18,11 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      # 2. Configuration de l'environnement Node.js (aligné sur Node 24)
-      - name: Configuration de Node.js 24
+      # 2. Configuration de l'environnement Node.js (LTS 22)
+      - name: Configuration de Node.js 22 (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: 'npm'
 
       # 3. Installation stricte et reproductible des dépendances
