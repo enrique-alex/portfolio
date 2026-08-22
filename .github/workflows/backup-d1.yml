@@ -1,9 +1,6 @@
 name: Sauvegarde Hebdomadaire D1 vers R2
 
 on:
-  push:
-    branches:
-      - feat/cloudflare-workers-backend
   schedule:
     # Exécution automatique tous les dimanches à 03:00 UTC
     - cron: '0 3 * * 0'
