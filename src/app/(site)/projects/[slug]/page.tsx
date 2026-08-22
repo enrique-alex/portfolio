@@ -83,7 +83,7 @@ export default function ProjectDetail() {
             {/* Conteneur principal avec le layoutId partagé pour la transition de Morphing Spatial */}
             <motion.div 
                 layoutId={`project-${project.id}`}
-                className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0a0a0a] md:p-12"
+                className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-[#0a0a0a] md:p-12"
             >
                 {/* 1. Cover Image / Galerie (Optionnelle) */}
                 {images.length > 0 && (
@@ -183,20 +183,20 @@ export default function ProjectDetail() {
 
                     <motion.h1 
                         layoutId={`project-title-${project.id}`}
-                        className="text-4xl font-black tracking-tight text-zinc-900 md:text-5xl lg:text-6xl dark:text-white"
+                        className="text-3xl font-black tracking-tight text-zinc-900 md:text-5xl lg:text-6xl dark:text-white"
                     >
                         {project.title}
                     </motion.h1>
                     
                     <motion.p 
                         layoutId={`project-desc-${project.id}`}
-                        className="mt-6 text-lg leading-relaxed text-zinc-600 dark:text-zinc-400 md:text-xl"
+                        className="mt-6 text-base leading-relaxed text-zinc-600 dark:text-zinc-400 md:text-lg"
                     >
                         {project.detailedDescription}
                     </motion.p>
                 </header>
 
-                <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-white/5 dark:bg-white/[0.02]">
+                <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/5 dark:bg-white/[0.02] md:p-6">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -208,13 +208,13 @@ export default function ProjectDetail() {
                             </span>
                             {t('projects.detail.analysis')}
                         </h3>
-                        <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
+                        <p className="text-base md:text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
                             {project.technicalChallenges}
                         </p>
                     </motion.div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-white/5 dark:bg-white/[0.02]">
+                <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/5 dark:bg-white/[0.02] md:p-6">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                         <h3 className="mb-4 text-xl font-bold text-zinc-900 flex items-center gap-3 dark:text-white/90">
                             <span 
@@ -225,7 +225,7 @@ export default function ProjectDetail() {
                             </span>
                             {t('projects.detail.impact')}
                         </h3>
-                        <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
+                        <p className="text-base md:text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
                             {project.impact}
                         </p>
                     </motion.div>
