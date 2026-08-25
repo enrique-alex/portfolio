@@ -3,7 +3,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import { Fingerprint, Terminal, Crosshair, MapPin, Code2, Zap } from 'lucide-react';
-import Magnetic from '../ui/Magnetic';
 import { useLanguage } from '../theme/LanguageProvider';
 
 export default function ProfileSection() {

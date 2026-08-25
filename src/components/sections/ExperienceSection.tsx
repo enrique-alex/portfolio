@@ -170,7 +170,7 @@ export default function ExperienceSection() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-black/5 bg-black/[0.02] text-zinc-400 transition-all duration-300 group-hover:border-black/10 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/5 dark:bg-white/[0.02] dark:group-hover:border-white/10 dark:group-hover:bg-white/[0.04] dark:group-hover:text-white sm:mt-0">
+                  <div className="mt-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-black/5 bg-black/[0.02] text-zinc-400 transition-all duration-300 group-hover:border-black/10 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/5 dark:bg-white/[0.02] dark:group-hover:border-white/10 dark:group-hover:bg-white/[0.04] dark:group-hover:text-white sm:mt-0">
                     <motion.div
                       animate={{ rotate: isExpanded ? 180 : 0 }}
                       transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 200, damping: 20 }}

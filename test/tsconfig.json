@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [
+      "@cloudflare/vitest-plugin",
+      "@cloudflare/vitest-plugin/types"
+    ],
+    "paths": {
+      "@/*": ["../src/*"]
+    }
+  },
+  "include": [
+    "../worker-configuration.d.ts",
+    "./**/*.ts",
+    "./**/*.d.ts"
+  ]
+}

@@ -10,6 +10,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     'nav.projects': 'Projets',
     'nav.skills': 'Compétences',
     'nav.contact': 'Me contacter',
+    'nav.themeDay': 'Mode Jour',
+    'nav.themeNight': 'Mode Nuit',
+    'nav.admin': 'Administration',
 
     // ─── Hero ───
     'hero.badge': 'System Online',
@@ -87,6 +90,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     'skills.cat.transversal.sub': 'Soft skills & méthodologie',
     'skills.marquee.title': 'Outils & Technologies',
     'skills.marquee.subtitle': 'Technologies maîtrisées au quotidien',
+    'skills.stats.average': 'Maîtrise moyenne',
+    'skills.stats.expert': 'Expert (85%+)',
+    'skills.stats.top': 'Top compétence',
 
     // ─── Contact ───
     'contact.header.title': 'Initialiser le Contact',
@@ -137,6 +143,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     'nav.projects': 'Projects',
     'nav.skills': 'Skills',
     'nav.contact': 'Contact me',
+    'nav.themeDay': 'Light Mode',
+    'nav.themeNight': 'Dark Mode',
+    'nav.admin': 'Administration',
 
     // ─── Hero ───
     'hero.badge': 'System Online',
@@ -214,6 +223,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     'skills.cat.transversal.sub': 'Methodologies & teamwork',
     'skills.marquee.title': 'Tools & Technologies',
     'skills.marquee.subtitle': 'Technologies mastered on a daily basis',
+    'skills.stats.average': 'Average Mastery',
+    'skills.stats.expert': 'Expert (85%+)',
+    'skills.stats.top': 'Top Skill',
 
     // ─── Contact ───
     'contact.header.title': 'Initialize Contact',

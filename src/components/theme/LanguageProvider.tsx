@@ -19,6 +19,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (stored && (stored === 'fr' || stored === 'en')) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture de localStorage (indisponible côté serveur) : ce setState post-montage est nécessaire pour éviter un mismatch d'hydratation, ne pas remplacer par une initialisation lazy de useState.
       setLocaleState(stored);
+    } else if (typeof navigator !== 'undefined' && navigator.language) {
+      const browserLang = navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+      setLocaleState(browserLang);
+      document.documentElement.lang = browserLang;
     }
   }, []);
 

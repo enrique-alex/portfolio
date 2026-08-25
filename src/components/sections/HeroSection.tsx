@@ -13,11 +13,16 @@ const SHUFFLE_TIME = 45; // Lègèrement augmenté pour rendre les caractères p
 const CHARS = "0101010189ABCDEF!@#$%^&*()_+-=[]{}|;':,./<>?";
 
 export default function HeroSection() {
-  const [displayText, setDisplayText] = useState("");
+  const [displayText, setDisplayText] = useState(TARGET_TEXT);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (shouldReduceMotion) {
+    const isBot = typeof window !== 'undefined' && (
+      Boolean(navigator.webdriver) || 
+      /bot|google|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|headlesschrome|chrome-lighthouse/i.test(navigator.userAgent)
+    );
+
+    if (shouldReduceMotion || isBot) {
       setDisplayText(TARGET_TEXT);
       return;
     }
@@ -47,10 +52,17 @@ export default function HeroSection() {
           frame++;
           if (frame % CYCLES_PER_LETTER === 0) pos++;
         }, SHUFFLE_TIME);
-      }, 600); // Attend la fin de la transition de sortie du preloader (0.8s)
+      }, 300);
     };
 
-    window.addEventListener('preloader-complete', startAnimation);
+    if (typeof window !== 'undefined') {
+      const preloaderDone = window.__preloaderDone;
+      if (preloaderDone) {
+        setDisplayText(TARGET_TEXT);
+      } else {
+        window.addEventListener('preloader-complete', startAnimation);
+      }
+    }
 
     return () => {
       window.removeEventListener('preloader-complete', startAnimation);
@@ -64,24 +76,10 @@ export default function HeroSection() {
   return (
       <section id="home" className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center px-4">
         
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20 pt-24 lg:pt-0">
           
           {/* COLONNE GAUCHE : Typographie & Informations */}
           <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left z-10 w-full">
-            
-            {/* Badge "Hardware Status" */}
-            <div className="mb-6">
-              <Magnetic intensity={0.2}>
-                <div className="group relative inline-flex cursor-pointer items-center gap-3 rounded-full border border-black/10 bg-black/5 px-5 py-2 text-sm font-medium text-zinc-900 backdrop-blur-md transition-colors hover:bg-black/10 dark:border-white/5 dark:bg-[#050505]/60 dark:text-zinc-200 dark:hover:bg-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60"></span>
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)]"></span>
-                  </span>
-                  <span className="tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('hero.badge')} <span className="mx-1">•</span> {t('hero.badge.company')}</span>
-                </div>
-              </Magnetic>
-            </div>
-
             {/* Titre Principal (Scramble Hardware Reveal) */}
             <h1 className="z-10 w-full text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4rem] tracking-tighter leading-[1.05] font-extrabold">
               <div className={`flex flex-col ${displayText !== TARGET_TEXT ? "font-mono font-normal tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl" : ""}`}>
@@ -107,7 +105,20 @@ export default function HeroSection() {
               </div>
             </h1>
             
-            <p className="mt-8 max-w-2xl text-base font-light leading-relaxed text-zinc-600 md:text-xl dark:text-white/50">
+            {/* Badge "Hardware Status" */}
+            <div className="mt-6 mb-2">
+              <Magnetic intensity={0.2}>
+                <div className="group relative inline-flex cursor-pointer items-center gap-3 rounded-full border border-black/10 bg-black/5 px-5 py-2 text-sm font-medium text-zinc-900 backdrop-blur-md transition-colors hover:bg-black/10 dark:border-white/5 dark:bg-[#050505]/60 dark:text-zinc-200 dark:hover:bg-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)]"></span>
+                  </span>
+                  <span className="tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('hero.badge')} <span className="mx-1">•</span> {t('hero.badge.company')}</span>
+                </div>
+              </Magnetic>
+            </div>
+
+            <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-zinc-600 md:text-xl dark:text-white/50">
               <span className="font-semibold text-zinc-900 dark:text-white/80">{t('hero.subtitle.line1')}</span><br/>
               {t('hero.subtitle.line2')} <span className="font-medium text-brand-blue dark:text-[#8AB4F8]">{t('hero.subtitle.company')}</span>{t('hero.subtitle.line3')}
             </p>
@@ -162,6 +173,7 @@ export default function HeroSection() {
                     className="object-cover z-20 grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 300px"
                     priority
+                    fetchPriority="high"
                   />
 
                 </div>

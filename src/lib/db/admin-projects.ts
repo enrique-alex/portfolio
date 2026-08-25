@@ -1,0 +1,59 @@
+export interface ProjectAdminListItem {
+  id: string;
+  slug: string;
+  year: number;
+  sortOrder: number;
+  titleFr: string;
+  titleEn: string;
+  category: string;
+  isFeatured: boolean;
+}
+
+interface ProjectAdminRawRow {
+  id: string;
+  slug: string;
+  year: number;
+  sortOrder: number;
+  titleFr: string;
+  titleEn: string;
+  category: string;
+  isFeaturedNum: number;
+}
+
+/**
+ * Récupère tous les projets pour le panel d'administration, incluant les traductions FR et EN.
+ * Trie par sort_order croissant.
+ * Ne filtre pas par langue, retourne toutes les informations d'identification essentielles.
+ */
+export async function getProjectsForAdmin(db: D1Database): Promise<ProjectAdminListItem[]> {
+  const statement = db.prepare(`
+    SELECT 
+      p.id, 
+      p.slug, 
+      p.year, 
+      p.sort_order as sortOrder,
+      t_fr.title as titleFr, 
+      t_en.title as titleEn,
+      t_fr.category as category,
+      p.is_featured as isFeaturedNum
+    FROM projects p
+    LEFT JOIN project_translations t_fr ON p.id = t_fr.project_id AND t_fr.locale = 'fr'
+    LEFT JOIN project_translations t_en ON p.id = t_en.project_id AND t_en.locale = 'en'
+    WHERE p.deleted_at IS NULL
+    ORDER BY p.sort_order ASC
+  `);
+
+  const { results } = await statement.all<ProjectAdminRawRow>();
+  if (!results) return [];
+  
+  return results.map(row => ({
+    id: row.id,
+    slug: row.slug,
+    year: row.year,
+    sortOrder: row.sortOrder,
+    titleFr: row.titleFr,
+    titleEn: row.titleEn,
+    category: row.category,
+    isFeatured: Boolean(row.isFeaturedNum)
+  }));
+}

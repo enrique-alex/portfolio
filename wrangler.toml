@@ -1,5 +1,20 @@
 name = "portfolio"
-compatibility_date = "2026-07-18"
+compatibility_date = "2026-07-21"
+main = ".open-next/worker.js"
+compatibility_flags = ["nodejs_compat"]
+[vars]
+R2_PUBLIC_URL = "https://pub-f2abb97fd5a44520b79d8e56bf020956.r2.dev"
+keep_names = false
 
 [assets]
-directory = "out"
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "portfolio_db"
+database_name = "portfolio-db"
+database_id = "96fa978e-2ad1-4171-84a1-76fa1846e12e"
+
+[[r2_buckets]]
+bucket_name = "portfolio-images"
+binding = "portfolio_images"

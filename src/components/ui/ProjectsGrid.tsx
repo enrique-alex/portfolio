@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { motion, Variants, useReducedMotion, AnimatePresence } from 'framer-motion';
 import MagneticProjectCard from './MagneticProjectCard';
-import { useProjectsData, Project } from '@/lib/data';
+import ProjectCardSkeleton from './ProjectCardSkeleton';
+import { Project } from '@/lib/data';
+import { useProjectsData } from '@/components/theme/ProjectsProvider';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/theme/LanguageProvider';
 
 export default function ProjectsGrid() {
     const shouldReduceMotion = useReducedMotion();
     const router = useRouter();
-    const projectsData = useProjectsData();
+    const { projects: projectsData, isLoading, error } = useProjectsData();
     const { t } = useLanguage();
     
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -86,35 +88,56 @@ export default function ProjectsGrid() {
                 className="grid w-full auto-rows-[380px] grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:auto-rows-[420px]"
             >
                 <AnimatePresence mode="popLayout">
-                    {filteredProjects.map((project, index) => {
-                        let spanClasses = "col-span-1 row-span-1";
-                        
-                        // Maintien de l'asymétrie Bento sur les éléments filtrés
-                        if (index === 0 || index === 4) {
-                            spanClasses = "md:col-span-2 md:row-span-1"; // Rectangle large
-                        } else {
-                            spanClasses = "md:col-span-1 md:row-span-1"; // Carré normal
-                        }
+                    {isLoading ? (
+                        Array.from({ length: 6 }).map((_, index) => {
+                            let spanClasses = "col-span-1 row-span-1";
+                            const isFeatured = false; // Les squelettes sont uniformes
+                            if (isFeatured) {
+                                spanClasses = "md:col-span-2 md:row-span-1";
+                            }
+                            return (
+                                <div key={`skeleton-${index}`} className={spanClasses}>
+                                    <ProjectCardSkeleton isFeatured={isFeatured} />
+                                </div>
+                            );
+                        })
+                    ) : error ? (
+                        <div className="col-span-1 md:col-span-3 lg:col-span-3 flex min-h-[380px] items-center justify-center rounded-[2rem] border border-black/5 bg-black/[0.02] dark:border-white/5 dark:bg-white/[0.02]">
+                            <p className="text-zinc-500 dark:text-zinc-400">
+                                {error}
+                            </p>
+                        </div>
+                    ) : (
+                        filteredProjects.map((project, index) => {
+                            let spanClasses = "col-span-1 row-span-1";
+                            
+                            // Maintien de l'asymétrie Bento via le champ éditorial
+                            if (project.isFeatured) {
+                                spanClasses = "md:col-span-2 md:row-span-1"; // Rectangle large
+                            } else {
+                                spanClasses = "md:col-span-1 md:row-span-1"; // Carré normal
+                            }
 
-                        return (
-                            <motion.div 
-                                layout
-                                key={project.id} 
-                                variants={itemVariants} 
-                                initial="hidden"
-                                animate="show"
-                                exit="exit"
-                                className={spanClasses}
-                            >
-                                <MagneticProjectCard 
-                                    project={project} 
-                                    isFeatured={index === 0 || index === 4} 
-                                    sequenceNumber={index === 0 ? '01' : index === 4 ? '02' : undefined}
-                                    onClick={handleProjectClick} 
-                                />
-                            </motion.div>
-                        );
-                    })}
+                            return (
+                                <motion.div 
+                                    layout
+                                    key={project.id} 
+                                    variants={itemVariants} 
+                                    initial="hidden"
+                                    animate="show"
+                                    exit="exit"
+                                    className={spanClasses}
+                                >
+                                    <MagneticProjectCard 
+                                        project={project} 
+                                        isFeatured={project.isFeatured} 
+                                        sequenceNumber={project.isFeatured ? `0${filteredProjects.filter(p => p.isFeatured).findIndex(p => p.id === project.id) + 1}` : undefined}
+                                        onClick={handleProjectClick} 
+                                    />
+                                </motion.div>
+                            );
+                        })
+                    )}
                 </AnimatePresence>
             </motion.div>
         </div>

@@ -1,0 +1,70 @@
+name: Sauvegarde Hebdomadaire D1 vers R2
+
+on:
+  schedule:
+    # Exécution automatique tous les dimanches à 03:00 UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch: # Permet le déclenchement manuel depuis l'interface GitHub Actions
+
+jobs:
+  backup:
+    name: Export D1 & Archivage R2
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupération du contexte du dépôt
+      - name: Checkout du code
+        uses: actions/checkout@v5
+
+      # 2. Configuration minimale de Node.js pour exécuter wrangler via npx
+      - name: Configuration de Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # 3. Export de la base D1 de production vers un fichier SQL local
+      - name: Export de la base D1 (production)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "Démarrage de l'export de la base D1 'portfolio-db'..."
+          npx wrangler d1 export portfolio-db --remote --output=backup.sql
+
+      # 4. Vérification du fichier et génération du nom horodaté (sans exposer le contenu)
+      - name: Vérification du fichier et génération du nom horodaté
+        id: backup_meta
+        run: |
+          if [ ! -s backup.sql ]; then
+            echo "::error::Le fichier backup.sql est vide ou introuvable."
+            exit 1
+          fi
+          
+          # Nom de fichier horodaté en UTC : backup-YYYY-MM-DD-HHhMM.sql
+          TIMESTAMP=$(date -u +"%Y-%m-%d-%Hh%M")
+          BACKUP_FILENAME="backup-${TIMESTAMP}.sql"
+          
+          echo "filename=${BACKUP_FILENAME}" >> $GITHUB_OUTPUT
+          
+          echo "Sauvegarde générée avec succès :"
+          echo "- Nom du fichier cible : ${BACKUP_FILENAME}"
+          echo "- Taille du fichier :"
+          ls -lh backup.sql | awk '{print "  " $5 " (" $9 ")"}'
+
+      # 5. Dépôt du fichier SQL exporté dans le bucket R2 privé de sauvegarde
+      - name: Upload de la sauvegarde vers R2 (portfolio-backups)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          BACKUP_FILE="${{ steps.backup_meta.outputs.filename }}"
+          echo "Upload vers le bucket R2 privé 'portfolio-backups/${BACKUP_FILE}'..."
+          npx wrangler r2 object put "portfolio-backups/${BACKUP_FILE}" --file=backup.sql --remote
+          echo "Upload terminé avec succès."
+
+      # 6. Confirmation finale dans les logs
+      - name: Confirmation de sauvegarde
+        run: |
+          echo "✅ Sauvegarde D1 de production exportée et archivée dans R2 :"
+          echo "   Bucket : portfolio-backups"
+          echo "   Fichier : ${{ steps.backup_meta.outputs.filename }}"

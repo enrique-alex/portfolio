@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Tests & Validation TypeScript
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupération du code source
+      - name: Checkout du code
+        uses: actions/checkout@v5
+
+      # 2. Configuration de l'environnement Node.js (LTS 22)
+      - name: Configuration de Node.js 22 (LTS)
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      # 3. Installation stricte et reproductible des dépendances
+      - name: Installation des dépendances (npm ci)
+        run: npm ci
+
+      # 4. Vérification de typage statique TypeScript (zéro erreur tolérée)
+      - name: Vérification TypeScript (tsc)
+        run: npx tsc --noEmit
+
+      # 5. Exécution de la suite complète de tests Vitest + D1 isolé (workerd)
+      - name: Exécution des tests (Vitest)
+        run: npm test
