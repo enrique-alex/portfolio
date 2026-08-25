@@ -1,5 +1,32 @@
 import type { ProjectFormInput } from "@/lib/validation/project";
 
+interface ProjectByIdAdminRawRow {
+  id: string;
+  slug: string;
+  year: number;
+  technologies: string;
+  theme_color_r: number;
+  theme_color_g: number;
+  theme_color_b: number;
+  github_url: string | null;
+  cover_image: string | null;
+  gallery: string | null;
+  sort_order: number;
+  is_featured: number;
+  titleFr: string | null;
+  categoryFr: string | null;
+  shortDescriptionFr: string | null;
+  detailedDescriptionFr: string | null;
+  technicalChallengesFr: string | null;
+  impactFr: string | null;
+  titleEn: string | null;
+  categoryEn: string | null;
+  shortDescriptionEn: string | null;
+  detailedDescriptionEn: string | null;
+  technicalChallengesEn: string | null;
+  impactEn: string | null;
+}
+
 export async function getProjectByIdForAdmin(
   db: D1Database,
   id: string
@@ -18,7 +45,7 @@ export async function getProjectByIdForAdmin(
     WHERE p.id = ?
   `);
 
-  const result = await statement.bind(id).first<any>();
+  const result = await statement.bind(id).first<ProjectByIdAdminRawRow>();
 
   if (!result) {
     return null;

@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
               "default-src 'self'; connect-src 'self' https://api.web3forms.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://pub-f2abb97fd5a44520b79d8e56bf020956.r2.dev; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;",
           },
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          // Note : Cross-Origin-Resource-Policy (cross-origin) et Cross-Origin-Embedder-Policy (unsafe-none)
+          // sont assouplis afin de permettre le chargement des images publiques hébergées sur Cloudflare R2,
+          // qui ne renvoient pas d'en-tête CORP compatible avec require-corp. C'est un compromis conscient et documenté.
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
           { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
           {

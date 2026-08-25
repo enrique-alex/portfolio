@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 import Link from "next/link";
 import { Trash2, ExternalLink } from "lucide-react";

@@ -9,6 +9,17 @@ export interface ProjectAdminListItem {
   isFeatured: boolean;
 }
 
+interface ProjectAdminRawRow {
+  id: string;
+  slug: string;
+  year: number;
+  sortOrder: number;
+  titleFr: string;
+  titleEn: string;
+  category: string;
+  isFeaturedNum: number;
+}
+
 /**
  * Récupère tous les projets pour le panel d'administration, incluant les traductions FR et EN.
  * Trie par sort_order croissant.
@@ -32,7 +43,7 @@ export async function getProjectsForAdmin(db: D1Database): Promise<ProjectAdminL
     ORDER BY p.sort_order ASC
   `);
 
-  const { results } = await statement.all<any>();
+  const { results } = await statement.all<ProjectAdminRawRow>();
   if (!results) return [];
   
   return results.map(row => ({

@@ -1,7 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getProjectsForAdmin } from "@/lib/db/admin-projects";
 import { ProjectsAdminTable } from "@/components/admin/ProjectsAdminTable";
-import { LogoutButton } from "@/components/admin/LogoutButton";
 
 export const dynamic = 'force-dynamic';
 
