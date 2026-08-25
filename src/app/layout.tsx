@@ -24,8 +24,8 @@ export const metadata = {
     images: [
       {
         url: "/og-image.png",
-        width: 1024,
-        height: 1024,
+        width: 1376,
+        height: 768,
         alt: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
       },
     ],
