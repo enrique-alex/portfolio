@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import Preloader from '@/components/ui/Preloader';
+import Preloader, { checkHasBooted, executeBootCompletion } from '@/components/ui/Preloader';
 
 describe('Preloader - Industrial Boot Sequence (Étape 1)', () => {
   let originalWindow: typeof globalThis.window;
@@ -27,37 +27,98 @@ describe('Preloader - Industrial Boot Sequence (Étape 1)', () => {
     expect(typeof Preloader).toBe('function');
   });
 
-  it('should dispatch plc-boot-complete and preloader-complete events immediately when seen-preloader is true', () => {
-    const dispatchSpy = vi.fn();
-    const fakeSessionStorage = {
-      getItem: vi.fn((key: string) => (key === 'seen-preloader' ? 'true' : null)),
-      setItem: vi.fn(),
-    };
+  describe('checkHasBooted', () => {
+    it('should return false when window is undefined', () => {
+      // @ts-expect-error Mocking window
+      delete globalThis.window;
+      expect(checkHasBooted()).toBe(false);
+    });
 
-    const fakeWindow = {
-      dispatchEvent: dispatchSpy,
-      matchMedia: vi.fn(() => ({ matches: false })),
-      __preloaderDone: false,
-    };
+    it('should return true when plc_boot_done is true in sessionStorage', () => {
+      const fakeSessionStorage = {
+        getItem: vi.fn((key: string) => (key === 'plc_boot_done' ? 'true' : null)),
+        setItem: vi.fn(),
+      };
+      // @ts-expect-error Mocking sessionStorage
+      globalThis.sessionStorage = fakeSessionStorage;
+      // @ts-expect-error Mocking window
+      globalThis.window = {};
 
-    // @ts-expect-error Mocking window in unit test
-    globalThis.window = fakeWindow;
-    // @ts-expect-error Mocking sessionStorage in unit test
-    globalThis.sessionStorage = fakeSessionStorage;
+      expect(checkHasBooted()).toBe(true);
+      expect(fakeSessionStorage.getItem).toHaveBeenCalledWith('plc_boot_done');
+    });
 
-    const html = renderToString(React.createElement(Preloader));
-    expect(html).toBe('');
+    it('should return true when seen-preloader is true in sessionStorage', () => {
+      const fakeSessionStorage = {
+        getItem: vi.fn((key: string) => (key === 'seen-preloader' ? 'true' : null)),
+        setItem: vi.fn(),
+      };
+      // @ts-expect-error Mocking sessionStorage
+      globalThis.sessionStorage = fakeSessionStorage;
+      // @ts-expect-error Mocking window
+      globalThis.window = {};
+
+      expect(checkHasBooted()).toBe(true);
+      expect(fakeSessionStorage.getItem).toHaveBeenCalledWith('seen-preloader');
+    });
+
+    it('should return false on first arrival (neither flag set)', () => {
+      const fakeSessionStorage = {
+        getItem: vi.fn(() => null),
+        setItem: vi.fn(),
+      };
+      // @ts-expect-error Mocking sessionStorage
+      globalThis.sessionStorage = fakeSessionStorage;
+      // @ts-expect-error Mocking window
+      globalThis.window = {};
+
+      expect(checkHasBooted()).toBe(false);
+    });
+
+    it('should return false gracefully if sessionStorage throws SecurityError', () => {
+      const fakeSessionStorage = {
+        getItem: vi.fn(() => {
+          throw new Error('SecurityError: Access is denied');
+        }),
+        setItem: vi.fn(),
+      };
+      // @ts-expect-error Mocking sessionStorage
+      globalThis.sessionStorage = fakeSessionStorage;
+      // @ts-expect-error Mocking window
+      globalThis.window = {};
+
+      expect(checkHasBooted()).toBe(false);
+    });
   });
 
-  it('should support plc_boot_done flag in sessionStorage', () => {
-    const fakeSessionStorage = {
-      getItem: vi.fn((key: string) => (key === 'plc_boot_done' ? 'true' : null)),
-      setItem: vi.fn(),
-    };
-    // @ts-expect-error Mocking sessionStorage in unit test
-    globalThis.sessionStorage = fakeSessionStorage;
-    const html = renderToString(React.createElement(Preloader));
-    expect(html).toBe('');
+  describe('executeBootCompletion', () => {
+    it('should set sessionStorage plc_boot_done and dispatch completion events', () => {
+      const dispatchSpy = vi.fn();
+      const fakeSessionStorage = {
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+      };
+      const fakeWindow = {
+        dispatchEvent: dispatchSpy,
+        __preloaderDone: false,
+      };
+
+      // @ts-expect-error Mocking window
+      globalThis.window = fakeWindow;
+      // @ts-expect-error Mocking sessionStorage
+      globalThis.sessionStorage = fakeSessionStorage;
+
+      executeBootCompletion();
+
+      expect(fakeSessionStorage.setItem).toHaveBeenCalledWith('plc_boot_done', 'true');
+      expect(fakeSessionStorage.setItem).toHaveBeenCalledWith('seen-preloader', 'true');
+      expect(fakeWindow.__preloaderDone).toBe(true);
+      expect(dispatchSpy).toHaveBeenCalledTimes(2);
+
+      const dispatchedEventNames = dispatchSpy.mock.calls.map((call: unknown[]) => (call[0] as CustomEvent).type);
+      expect(dispatchedEventNames).toContain('plc-boot-complete');
+      expect(dispatchedEventNames).toContain('preloader-complete');
+    });
   });
 });
 

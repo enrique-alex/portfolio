@@ -17,6 +17,38 @@ const BOOT_LOGS = [
   { tag: 'SCADA_NET', msg: 'Industrial Ethernet IP Stack // Telemetry Link Active', status: '[ONLINE]', delay: '1.55s' },
 ];
 
+export function checkHasBooted(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return (
+      typeof sessionStorage !== 'undefined' &&
+      (sessionStorage.getItem('plc_boot_done') === 'true' ||
+       sessionStorage.getItem('seen-preloader') === 'true')
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function executeBootCompletion(): void {
+  if (typeof window !== 'undefined') {
+    window.__preloaderDone = true;
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('plc_boot_done', 'true');
+        sessionStorage.setItem('seen-preloader', 'true');
+      }
+    } catch {
+      // Safe storage fallback
+    }
+    window.dispatchEvent(new CustomEvent('plc-boot-complete'));
+    window.dispatchEvent(new CustomEvent('preloader-complete'));
+  }
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = '';
+  }
+}
+
 export default function Preloader() {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -33,23 +65,8 @@ export default function Preloader() {
       timeoutRef.current = null;
     }
 
-    if (typeof window !== 'undefined') {
-      window.__preloaderDone = true;
-      try {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('plc_boot_done', 'true');
-          sessionStorage.setItem('seen-preloader', 'true');
-        }
-      } catch {
-        // Safe storage fallback
-      }
-      window.dispatchEvent(new CustomEvent('plc-boot-complete'));
-      window.dispatchEvent(new CustomEvent('preloader-complete'));
-    }
+    executeBootCompletion();
 
-    if (typeof document !== 'undefined') {
-      document.body.style.overflow = '';
-    }
     setVisible(false);
     if (containerRef.current) {
       containerRef.current.style.display = 'none';
@@ -61,12 +78,7 @@ export default function Preloader() {
     if (typeof window === 'undefined') return;
 
     // Vérification de la session : absent -> joue la séquence ; présent -> masque immédiatement
-    const hasBooted =
-      typeof sessionStorage !== 'undefined' &&
-      (sessionStorage.getItem('plc_boot_done') === 'true' ||
-       sessionStorage.getItem('seen-preloader') === 'true');
-
-    if (hasBooted) {
+    if (checkHasBooted()) {
       completeBoot();
       return;
     }

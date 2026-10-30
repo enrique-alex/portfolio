@@ -260,5 +260,32 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
 
     scene.destroy();
   });
+
+  it('should induce sinusoidal dispersion wave under scroll velocity vy (Étape 4)', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 40 });
+    const buf = scene.currentPositionsBuffer;
+    const initialZ = buf[2];
+
+    // Simulate scroll velocity by directly injecting kinetic energy and running frame
+    kineticEnergy.setEnergy(0.5);
+    scene.renderFrameForTesting(0.016, 1000, false);
+
+    // Particle Z must have dispersion wave component
+    expect(buf[2]).not.toBe(initialZ);
+
+    // Reset energy and allow settling
+    kineticEnergy.setEnergy(0);
+    for (let f = 0; f < 15; f++) {
+      scene.renderFrameForTesting(0.016, 1016 + f * 16, false);
+    }
+    expect(buf[2]).toBeCloseTo(initialZ, 2);
+
+    scene.destroy();
+  });
 });
 

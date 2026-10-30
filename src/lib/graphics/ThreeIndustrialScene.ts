@@ -78,6 +78,8 @@ export class ThreeIndustrialScene {
   private normPointerX: number = 0;
   private normPointerY: number = 0;
   private isPointerActive: boolean = false;
+  private lastTouchX: number = 0;
+  private lastTouchY: number = 0;
 
   private lastScrollY: number = 0;
   private scrollVelocityY: number = 0;
@@ -192,6 +194,12 @@ export class ThreeIndustrialScene {
       this.targetMouseX = this.normPointerX;
       this.targetMouseY = this.normPointerY;
       this.isPointerActive = true;
+
+      // Injection d'énergie cinétique selon la vitesse du curseur
+      const moveSpeed = Math.hypot(e.movementX || 0, e.movementY || 0);
+      if (moveSpeed > 0) {
+        kineticEnergy.addEnergy(Math.min(moveSpeed * 0.001, 0.04));
+      }
     };
     this.boundPointerLeave = () => {
       this.isPointerActive = false;
@@ -202,24 +210,37 @@ export class ThreeIndustrialScene {
     // Tactile mobile ({ passive: true })
     this.boundTouchStart = (e: TouchEvent) => {
       if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
         const w = window.innerWidth || 1;
         const h = window.innerHeight || 1;
-        this.normPointerX = (e.touches[0].clientX / w) * 2 - 1;
-        this.normPointerY = -(e.touches[0].clientY / h) * 2 + 1;
+        this.normPointerX = (touch.clientX / w) * 2 - 1;
+        this.normPointerY = -(touch.clientY / h) * 2 + 1;
         this.targetMouseX = this.normPointerX;
         this.targetMouseY = this.normPointerY;
+        this.lastTouchX = touch.clientX;
+        this.lastTouchY = touch.clientY;
         this.isPointerActive = true;
       }
     };
     this.boundTouchMove = (e: TouchEvent) => {
       if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
         const w = window.innerWidth || 1;
         const h = window.innerHeight || 1;
-        this.normPointerX = (e.touches[0].clientX / w) * 2 - 1;
-        this.normPointerY = -(e.touches[0].clientY / h) * 2 + 1;
+        this.normPointerX = (touch.clientX / w) * 2 - 1;
+        this.normPointerY = -(touch.clientY / h) * 2 + 1;
         this.targetMouseX = this.normPointerX;
         this.targetMouseY = this.normPointerY;
         this.isPointerActive = true;
+
+        const deltaX = touch.clientX - this.lastTouchX;
+        const deltaY = touch.clientY - this.lastTouchY;
+        this.lastTouchX = touch.clientX;
+        this.lastTouchY = touch.clientY;
+        const touchSpeed = Math.hypot(deltaX, deltaY);
+        if (touchSpeed > 0) {
+          kineticEnergy.addEnergy(Math.min(touchSpeed * 0.002, 0.04));
+        }
       }
     };
     this.boundTouchEnd = () => {
@@ -228,6 +249,7 @@ export class ThreeIndustrialScene {
     window.addEventListener('touchstart', this.boundTouchStart, { passive: true });
     window.addEventListener('touchmove', this.boundTouchMove, { passive: true });
     window.addEventListener('touchend', this.boundTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', this.boundTouchEnd, { passive: true });
 
     // Scroll & trigger topologique
     this.lastScrollY = window.scrollY || window.pageYOffset || 0;
@@ -725,6 +747,7 @@ export class ThreeIndustrialScene {
         uEnergy: { value: 0.0 },
         uTouch: { value: new THREE.Vector2(0, 0) },
         uTouchActive: { value: 0.0 },
+        uMeshScale: { value: 1.0 },
       },
       vertexShader: `
         uniform float uSize;
@@ -732,6 +755,7 @@ export class ThreeIndustrialScene {
         uniform float uEnergy;
         uniform vec2 uTouch;
         uniform float uTouchActive;
+        uniform float uMeshScale;
 
         varying float vEnergy;
 
@@ -746,7 +770,8 @@ export class ThreeIndustrialScene {
 
           // Rayonnement d'énergie sous le toucher et avec la cinétique
           float dist = length(position.xy - uTouch);
-          float touchGlow = uTouchActive * smoothstep(0.70, 0.0, dist);
+          float glowRadius = 0.70 / max(uMeshScale, 0.001);
+          float touchGlow = uTouchActive * smoothstep(glowRadius, 0.0, dist);
           vEnergy = clamp(uEnergy * 1.5 + touchGlow * 1.0, 0.0, 1.0);
         }
       `,
@@ -1046,21 +1071,39 @@ export class ThreeIndustrialScene {
     const targetX = this.normPointerX * halfW;
     const targetY = this.normPointerY * halfH;
 
-    // 3. Champ de répulsion volumétrique (Touch & Mouse Repulsion Field)
-    const influenceRadius = 0.65;
+    // Conversion spatiale dans le repère local de la sculpture 3D (rotation & échelle responsive)
+    let localPointerX = targetX;
+    let localPointerY = targetY;
+    let localPointerZ = 0;
+    let effectiveRadius = 0.65;
     const intensity = 1.0;
 
+    if (this.pointsMesh) {
+      this.pointsMesh.updateMatrixWorld();
+      const tempVec = new THREE.Vector3(targetX, targetY, 0);
+      this.pointsMesh.worldToLocal(tempVec);
+      localPointerX = tempVec.x;
+      localPointerY = tempVec.y;
+      localPointerZ = tempVec.z;
+      const meshScale = this.pointsMesh.scale.x || 1.0;
+      effectiveRadius = 0.65 / meshScale;
+    }
+
+    // 3. Champ de répulsion volumétrique (Touch & Mouse Repulsion Field)
     if (this.isPointerActive && !isReduced) {
+      const effRadSq = effectiveRadius * effectiveRadius;
       for (let i = 0; i < count; i++) {
         const px = this.basePositions[i * 3];
         const py = this.basePositions[i * 3 + 1];
-        const dx = px - targetX;
-        const dy = py - targetY;
-        const dSq = dx * dx + dy * dy;
+        const pz = this.basePositions[i * 3 + 2];
+        const dx = px - localPointerX;
+        const dy = py - localPointerY;
+        const dz = (pz - localPointerZ) * 0.5;
+        const dSq = dx * dx + dy * dy + dz * dz;
 
-        if (dSq < influenceRadius * influenceRadius) {
+        if (dSq < effRadSq) {
           const d = Math.sqrt(dSq);
-          const force = Math.pow(1.0 - d / influenceRadius, 2.0) * intensity;
+          const force = Math.pow(1.0 - d / effectiveRadius, 2.0) * intensity;
           const invD = 1.0 / Math.max(d, 0.0001);
           this.offsetX[i] += (dx * invD) * force * 0.45;
           this.offsetY[i] += (dy * invD) * force * 0.45;
@@ -1071,8 +1114,10 @@ export class ThreeIndustrialScene {
 
     // 4. Amortissement élastique continu (* 0.88) & injection de la position finale
     const wavePhase = (time / 1000) * 3.0;
-    const hasWave = !isReduced && (energy > 0.001 || Math.abs(this.scrollVelocityY) > 0.05);
-    const waveAmp = hasWave ? energy * 0.25 : 0.0;
+    const scrollEnergy = Math.min(Math.abs(this.scrollVelocityY) * 0.015, 0.35);
+    const effectiveEnergy = Math.max(energy, scrollEnergy);
+    const hasWave = !isReduced && effectiveEnergy > 0.001;
+    const waveAmp = hasWave ? effectiveEnergy * 0.35 : 0.0;
     let hasActiveOffsets = false;
 
     for (let i = 0; i < count; i++) {
@@ -1107,8 +1152,9 @@ export class ThreeIndustrialScene {
     // Mise à jour des uniforms du shader
     if (this.pointsMaterial) {
       this.pointsMaterial.uniforms.uEnergy.value = energy;
-      this.pointsMaterial.uniforms.uTouch.value.set(targetX, targetY);
+      this.pointsMaterial.uniforms.uTouch.value.set(localPointerX, localPointerY);
       this.pointsMaterial.uniforms.uTouchActive.value = this.isPointerActive && !isReduced ? 1.0 : 0.0;
+      this.pointsMaterial.uniforms.uMeshScale.value = this.pointsMesh ? this.pointsMesh.scale.x : 1.0;
     }
 
     // Gestion de l'affichage des arêtes (desktop uniquement)
