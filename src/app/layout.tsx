@@ -2,6 +2,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import { ProjectsProvider } from "@/components/theme/ProjectsProvider";
+import DualBodyCursor from "@/components/animations/DualBodyCursor";
 import type { Viewport } from 'next';
 
 export const viewport: Viewport = {
@@ -70,6 +71,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>
             <ProjectsProvider>
+              <DualBodyCursor />
               {children}
             </ProjectsProvider>
           </LanguageProvider>

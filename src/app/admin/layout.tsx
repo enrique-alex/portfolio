@@ -1,4 +1,4 @@
-import CursorFluid from "@/components/animations/CursorFluid";
+import KineticCanvas from "@/components/animations/KineticCanvas";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -22,8 +22,8 @@ export default function AdminGlobalLayout({
       <div className="fixed top-0 -z-10 h-[500px] w-[500px] rounded-full bg-brand-blue/10 blur-[120px]"></div>
       <div className="fixed bottom-[10%] right-[5%] -z-10 h-[300px] w-[300px] translate-x-1/2 rounded-full bg-brand-red/10 blur-[100px]"></div>
 
-      {/* L'animation WebGL Fluide en arrière-plan */}
-      <CursorFluid />
+      {/* L'animation WebGL Fluide réactive en arrière-plan */}
+      <KineticCanvas />
 
       {/* Le contenu spécifique admin (login ou dashboard) par-dessus l'arrière-plan */}
       <div className="relative z-10 min-h-screen">

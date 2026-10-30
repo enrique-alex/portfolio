@@ -1,4 +1,4 @@
-import CursorFluid from "@/components/animations/CursorFluid";
+import KineticCanvas from "@/components/animations/KineticCanvas";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Preloader from "@/components/ui/Preloader";
@@ -13,8 +13,8 @@ export default function SiteLayout({
       {/* L'animation d'ouverture 2026 */}
       <Preloader />
 
-      {/* L'animation WebGL Fluide en arrière-plan */}
-      <CursorFluid />
+      {/* L'animation WebGL Fluide réactive en arrière-plan */}
+      <KineticCanvas />
       
       {/* La barre de navigation par-dessus l'animation */}
       <Navbar />
