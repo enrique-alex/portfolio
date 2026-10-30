@@ -75,6 +75,17 @@ export class ThreeIndustrialScene {
   private pointsMaterial: THREE.ShaderMaterial | null = null;
   private geometry: THREE.BufferGeometry | null = null;
   private positionAttribute: THREE.BufferAttribute | null = null;
+  private highlightAttribute: THREE.BufferAttribute | null = null;
+  private distAttribute: THREE.BufferAttribute | null = null;
+
+  private earthCloudLoaded: boolean = false;
+  private earthCloudPromise: Promise<void> | null = null;
+  private earthHighlights: Float32Array;
+  private earthDistances: Float32Array;
+  private currentHighlights: Float32Array;
+  private currentDistances: Float32Array;
+  private form2Weight: number = 0.0;
+  private tempPointerVec: THREE.Vector3 = new THREE.Vector3();
 
   private currentTopologyIndex: number = 0;
   private targetTopologyIndex: number = 0;
@@ -131,6 +142,11 @@ export class ThreeIndustrialScene {
     this.offsetY = new Float32Array(this.pointCount);
     this.offsetZ = new Float32Array(this.pointCount);
 
+    this.earthHighlights = new Float32Array(this.pointCount);
+    this.earthDistances = new Float32Array(this.pointCount);
+    this.currentHighlights = new Float32Array(this.pointCount);
+    this.currentDistances = new Float32Array(this.pointCount);
+
     this.scene = new THREE.Scene();
     const aspect =
       typeof window !== 'undefined' ? (window.innerWidth || 1) / (window.innerHeight || 1) : 1;
@@ -154,6 +170,61 @@ export class ThreeIndustrialScene {
     }
 
     this.init();
+
+    // Chargement différé : import dynamique du masque à la première nécessité
+    if (typeof window !== 'undefined') {
+      if ('requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => {
+          this.loadEarthCloud();
+        });
+      } else {
+        setTimeout(() => {
+          this.loadEarthCloud();
+        }, 50);
+      }
+    }
+  }
+
+  /**
+   * Chargement différé pur du globe terrestre avec le masque Land RLE
+   */
+  public async loadEarthCloud(): Promise<void> {
+    if (this.earthCloudLoaded || this.isDestroyed) return;
+    if (this.earthCloudPromise) return this.earthCloudPromise;
+
+    this.earthCloudPromise = (async () => {
+      try {
+        const [{ generateEarthCloud }, maskModule] = await Promise.all([
+          import('./earthCloud'),
+          import('./landMask'),
+        ]);
+
+        if (this.isDestroyed) return;
+
+        const earth = generateEarthCloud(this.pointCount, 42, maskModule);
+
+        this.topologyBuffers[1].set(earth.positions);
+        this.earthHighlights.set(earth.highlights);
+        this.earthDistances.set(earth.distances);
+        this.earthCloudLoaded = true;
+      } catch (err) {
+        console.warn('[ThreeIndustrialScene] Erreur de chargement du nuage Terre :', err);
+      }
+    })();
+
+    return this.earthCloudPromise;
+  }
+
+  public get isEarthCloudLoaded(): boolean {
+    return this.earthCloudLoaded;
+  }
+
+  private computePointSize(): number {
+    const R = 2.05;
+    const aTerre = 0.26344 * 4.0 * Math.PI * R * R;
+    const activeCount = this.isMobile ? Math.min(this.pointCount, 5000) : this.pointCount;
+    const avgSpacing = Math.sqrt(aTerre / (Math.max(1, activeCount) * 0.866));
+    return 0.60 * avgSpacing;
   }
 
   private init(): void {
@@ -617,81 +688,76 @@ export class ThreeIndustrialScene {
     this.positionAttribute.setUsage(THREE.DynamicDrawUsage);
     this.geometry.setAttribute('position', this.positionAttribute);
 
+    this.highlightAttribute = new THREE.BufferAttribute(this.currentHighlights, 1);
+    this.highlightAttribute.setUsage(THREE.DynamicDrawUsage);
+    this.geometry.setAttribute('aHighlight', this.highlightAttribute);
+
+    this.distAttribute = new THREE.BufferAttribute(this.currentDistances, 1);
+    this.distAttribute.setUsage(THREE.DynamicDrawUsage);
+    this.geometry.setAttribute('aDist', this.distAttribute);
+
     const rawDpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
     const initialDpr = Math.min(rawDpr, 1.5);
+    const height = typeof window !== 'undefined' ? window.innerHeight || 800 : 800;
+    const fovRad = (this.camera.fov * Math.PI) / 180;
+    const initialScale = height / (2.0 * Math.tan(fovRad * 0.5));
 
     this.pointsMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        uDpr: { value: initialDpr },
+        uTime: { value: 0.0 },
+        uPixelRatio: { value: initialDpr },
+        uScale: { value: initialScale },
+        uPointSize: { value: this.computePointSize() },
+        uForm2Weight: { value: 0.0 },
+        uMotion: { value: 1.0 },
         uBaseColor: { value: new THREE.Color(0xE5E3C0) },
-        uEnergyColor: { value: new THREE.Color(0x00F0FF) },
-        uOpacity: { value: 0.90 },
-        uEnergy: { value: 0.0 },
-        uTouch: { value: new THREE.Vector2(0, 0) },
-        uTouchActive: { value: 0.0 },
-        uMeshScale: { value: 1.0 },
       },
       vertexShader: `
-        uniform float uDpr;
-        uniform float uEnergy;
-        uniform vec2 uTouch;
-        uniform float uTouchActive;
-        uniform float uMeshScale;
-
-        varying float vEnergy;
-        varying float vDepthNorm;
+        uniform float uTime;
+        uniform float uPixelRatio;
+        uniform float uScale;
+        uniform float uPointSize;
+        uniform float uForm2Weight;
+        uniform float uMotion;
+        attribute float aHighlight;
+        attribute float aDist;
+        varying float vHighlight;
+        varying float vFade;
 
         void main() {
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_Position = projectionMatrix * mvPosition;
-
-          // Calibrage optique : gl_PointSize = (4.0 / -mvPosition.z) * min(uDpr, 1.5);
-          // Ajusté pour un rendu voluptueux, tangible et sans pixellisation
-          float pz = max(-mvPosition.z, 0.001);
-          float optDpr = min(uDpr, 1.5);
-          gl_PointSize = clamp((4.0 / pz) * optDpr * 5.0, 2.5, 9.0);
-
-          // Normalisation de la profondeur Z (caméra à z = 4.8)
-          // Foreground (-2.8) -> vDepthNorm = 0.0 ; Background (-6.8) -> vDepthNorm = 1.0
-          vDepthNorm = clamp((-mvPosition.z - 2.8) / 4.0, 0.0, 1.0);
-
-          // Rayonnement d'énergie cinétique et tactile
-          float dist = length(position.xy - uTouch);
-          float glowRadius = 1.10 / max(uMeshScale, 0.001);
-          float touchGlow = uTouchActive * smoothstep(glowRadius, 0.0, dist);
-          vEnergy = clamp(uEnergy * 1.5 + touchGlow * 1.0, 0.0, 1.0);
+          float h = aHighlight * uForm2Weight;
+          vHighlight = h;
+          float pLen = length(position);
+          vec3 n = pLen > 0.0001 ? position / pLen : vec3(0.0, 1.0, 0.0);
+          float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5; // onde sortante depuis le Cameroun
+          vec3 p = position + n * (h * wave * 0.035 * uMotion);
+          vec4 mv = modelViewMatrix * vec4(p, 1.0);
+          // Estompage de la face arrière avec le vrai vecteur de vue (horizon correct en perspective)
+          vec3 vn = normalize(normalMatrix * n);
+          float facing = dot(vn, normalize(-mv.xyz));
+          vFade = mix(1.0, smoothstep(0.02, 0.45, facing), uForm2Weight);
+          float pz = max(-mv.z, 0.001);
+          float size = uPointSize * uScale * uPixelRatio / pz;
+          size *= 1.0 + h * 0.5 * wave * uMotion;
+          gl_PointSize = clamp(size, 1.5, 14.0);
+          gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
         uniform vec3 uBaseColor;
-        uniform vec3 uEnergyColor;
-        uniform float uOpacity;
-
-        varying float vEnergy;
-        varying float vDepthNorm;
+        varying float vHighlight;
+        varying float vFade;
 
         void main() {
-          // Découpe circulaire nette et antialiasée (smoothstep doux sur les bords)
-          vec2 coord = gl_PointCoord - vec2(0.5);
-          float dist = length(coord);
-          if (dist > 0.5) discard;
-          float circleAlpha = smoothstep(0.5, 0.15, dist);
-
-          // Modulation en fonction de Z :
-          // Arrière-plan assombri (alpha ≈ 0.35, teinte plus sombre)
-          // Avant-plan net et lumineux (alpha ≈ 0.90, reflet or pâle)
-          float frontFactor = 1.0 - vDepthNorm;
-          float depthAlpha = mix(0.35, 0.90, frontFactor);
-
-          vec3 backColor = uBaseColor * 0.40;
-          vec3 frontColor = mix(uBaseColor, vec3(1.0, 0.96, 0.82), 0.35);
-          vec3 shadedColor = mix(backColor, frontColor, frontFactor);
-
-          // Lueur cyan technique (#00F0FF) sous énergie cinétique sur les crêtes de vélocité
-          vec3 finalColor = mix(shadedColor, uEnergyColor, vEnergy * 0.75);
-          float finalAlpha = circleAlpha * depthAlpha * uOpacity;
-
-          gl_FragColor = vec4(finalColor, finalAlpha);
+          float d = length(gl_PointCoord - vec2(0.5));
+          if (d > 0.5) discard;
+          float disc = 1.0 - smoothstep(0.22, 0.5, d);
+          vec3 colBase = uBaseColor; // lin / beige #E5E3C0
+          vec3 colCameroon = vec3(1.0, 0.72, 0.14); // or ambré #FFB724
+          vec3 col = mix(colBase, colCameroon, vHighlight);
+          float a = disc * (0.75 + vHighlight * 0.25) * vFade;
+          if (a < 0.02) discard;
+          gl_FragColor = vec4(col, a);
         }
       `,
       transparent: true,
@@ -700,11 +766,12 @@ export class ThreeIndustrialScene {
     });
 
     this.pointsMesh = new THREE.Points(this.geometry, this.pointsMaterial);
+    this.pointsMesh.rotation.order = 'YXZ';
     this.pointsMesh.frustumCulled = false;
 
     const aspect = typeof window !== 'undefined' ? (window.innerWidth || 1) / (window.innerHeight || 1) : 1;
-    const initialScale = aspect < 1.0 ? Math.max(0.55, aspect * 1.05) : 1.0;
-    this.pointsMesh.scale.set(initialScale, initialScale, initialScale);
+    const initialMeshScale = aspect < 1.0 ? Math.max(0.55, aspect * 1.05) : 1.0;
+    this.pointsMesh.scale.set(initialMeshScale, initialMeshScale, initialMeshScale);
 
     if (this.geometry) {
       const activeCount = this.isMobile ? Math.min(this.pointCount, 5000) : this.pointCount;
@@ -741,6 +808,10 @@ export class ThreeIndustrialScene {
         if (el) {
           foundSection = true;
           const rect = el.getBoundingClientRect();
+          // Préchargement différé anticipé à l'approche de la Forme 2
+          if (rect.top <= vh * 1.5 && (sectionIds[i] === 'profile' || sectionIds[i] === 'academic')) {
+            this.loadEarthCloud();
+          }
           if (rect.top <= triggerY && rect.bottom >= triggerY) {
             targetIdx = sectionTopologyMap[sectionIds[i]] ?? 0;
             break;
@@ -775,6 +846,10 @@ export class ThreeIndustrialScene {
   public setTopology(index: number): void {
     if (index < 0 || index >= this.topologyBuffers.length || index === this.targetTopologyIndex) {
       return;
+    }
+
+    if (index === 1 && !this.earthCloudLoaded) {
+      this.loadEarthCloud();
     }
 
     for (let i = 0; i < this.pointCount * 3; i++) {
@@ -827,8 +902,13 @@ export class ThreeIndustrialScene {
     this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(width, height, false);
 
+    const fovRad = (this.camera.fov * Math.PI) / 180;
+    const uScale = height / (2.0 * Math.tan(fovRad * 0.5));
+
     if (this.pointsMaterial) {
-      this.pointsMaterial.uniforms.uDpr.value = dpr;
+      this.pointsMaterial.uniforms.uPixelRatio.value = this.renderer.getPixelRatio();
+      this.pointsMaterial.uniforms.uScale.value = uScale;
+      this.pointsMaterial.uniforms.uPointSize.value = this.computePointSize();
     }
   }
 
@@ -859,6 +939,7 @@ export class ThreeIndustrialScene {
     // Chaque point i possède un facteur d'inertie individuel : speed_i = 0.038 + (i % 100) * 0.0002
     const targetBuf = this.topologyBuffers[this.targetTopologyIndex];
     let hasMorphDelta = false;
+    const isForm2Target = this.targetTopologyIndex === 1 && this.earthCloudLoaded;
 
     for (let i = 0; i < count; i++) {
       const speed_i = isReduced ? 0.15 : 0.038 + (i % 100) * 0.0002;
@@ -873,12 +954,45 @@ export class ThreeIndustrialScene {
           this.basePositions[idx + c] = targetBuf[idx + c];
         }
       }
+
+      // Morphing progressif des attributs Cameroun
+      const targetH = isForm2Target ? this.earthHighlights[i] : 0.0;
+      const targetD = isForm2Target ? this.earthDistances[i] : 0.0;
+
+      const diffH = targetH - this.currentHighlights[i];
+      if (Math.abs(diffH) > 0.0001) {
+        this.currentHighlights[i] += diffH * speed_i;
+      } else {
+        this.currentHighlights[i] = targetH;
+      }
+
+      const diffD = targetD - this.currentDistances[i];
+      if (Math.abs(diffD) > 0.0001) {
+        this.currentDistances[i] += diffD * speed_i;
+      } else {
+        this.currentDistances[i] = targetD;
+      }
+    }
+
+    if (this.highlightAttribute) {
+      this.highlightAttribute.needsUpdate = true;
+    }
+    if (this.distAttribute) {
+      this.distAttribute.needsUpdate = true;
     }
 
     if (hasMorphDelta) {
       this.morphProgress = Math.min(1.0, this.morphProgress + 0.04);
     } else {
       this.morphProgress = 1.0;
+    }
+
+    // Gestion fluide du poids de la Forme 2
+    const clampedDt = Math.min(dt, 0.05);
+    const targetForm2Weight = this.targetTopologyIndex === 1 ? 1.0 : 0.0;
+    this.form2Weight += (targetForm2Weight - this.form2Weight) * (1.0 - Math.exp(-6.0 * clampedDt));
+    if (Math.abs(targetForm2Weight - this.form2Weight) < 0.001) {
+      this.form2Weight = targetForm2Weight;
     }
 
     // 2. Conversion spatiale unifiée dans le plan de coupe caméra (z = 0)
@@ -896,11 +1010,11 @@ export class ThreeIndustrialScene {
 
     if (this.pointsMesh) {
       this.pointsMesh.updateMatrixWorld();
-      const tempVec = new THREE.Vector3(targetX, targetY, 0);
-      this.pointsMesh.worldToLocal(tempVec);
-      localPointerX = tempVec.x;
-      localPointerY = tempVec.y;
-      localPointerZ = tempVec.z;
+      this.tempPointerVec.set(targetX, targetY, 0);
+      this.pointsMesh.worldToLocal(this.tempPointerVec);
+      localPointerX = this.tempPointerVec.x;
+      localPointerY = this.tempPointerVec.y;
+      localPointerZ = this.tempPointerVec.z;
       const meshScale = this.pointsMesh.scale.x || 1.0;
       effectiveRadius = 1.10 / meshScale;
     }
@@ -986,19 +1100,66 @@ export class ThreeIndustrialScene {
 
     // Mise à jour des uniforms
     if (this.pointsMaterial) {
-      this.pointsMaterial.uniforms.uEnergy.value = energy;
-      this.pointsMaterial.uniforms.uTouch.value.set(localPointerX, localPointerY);
-      this.pointsMaterial.uniforms.uTouchActive.value = this.isPointerActive && !isReduced ? 1.0 : 0.0;
-      this.pointsMaterial.uniforms.uMeshScale.value = this.pointsMesh ? this.pointsMesh.scale.x : 1.0;
+      this.pointsMaterial.uniforms.uTime.value = time * 0.001;
+      this.pointsMaterial.uniforms.uMotion.value = isReduced ? 0.0 : 1.0;
+      this.pointsMaterial.uniforms.uForm2Weight.value = this.form2Weight;
     }
 
-    // Rotation orbitale douce
-    if (!isReduced && this.pointsMesh) {
-      const rotationSpeedY = 0.06 * dt + this.mouseX * 0.01;
-      this.pointsMesh.rotation.y += rotationSpeedY;
-      this.pointsMesh.rotation.x = this.mouseY * 0.12;
-      this.pointsMesh.position.x = this.mouseX * 0.15;
-      this.pointsMesh.position.y = this.mouseY * 0.15;
+    // Rotation & Orientation
+    if (this.pointsMesh) {
+      if (this.targetTopologyIndex === 1) {
+        // Forme 2 active : alignement précis vers le Cameroun (4.5°N, 12.0°E)
+        const f = 1.0 - Math.exp(-4.5 * clampedDt);
+
+        const swayAmp = isReduced ? 0.0 : (2.5 * Math.PI) / 180.0;
+        const swayY = Math.sin((time / 1000.0) * 0.75) * swayAmp;
+        const swayX = Math.cos((time / 1000.0) * 0.5) * (swayAmp * 0.4);
+
+        const targetRotY =
+          (-12.0 * Math.PI) / 180.0 + swayY + (!isReduced ? this.mouseX * 0.03 : 0.0);
+        const targetRotX =
+          (4.5 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
+
+        // Plus court chemin angulaire
+        const deltaY = Math.atan2(
+          Math.sin(targetRotY - this.pointsMesh.rotation.y),
+          Math.cos(targetRotY - this.pointsMesh.rotation.y)
+        );
+        this.pointsMesh.rotation.y += deltaY * f;
+
+        const deltaX = Math.atan2(
+          Math.sin(targetRotX - this.pointsMesh.rotation.x),
+          Math.cos(targetRotX - this.pointsMesh.rotation.x)
+        );
+        this.pointsMesh.rotation.x += deltaX * f;
+        this.pointsMesh.rotation.z = 0.0;
+
+        // Amortissement de position
+        this.pointsMesh.position.x += (0.0 - this.pointsMesh.position.x) * f;
+        this.pointsMesh.position.y += (0.0 - this.pointsMesh.position.y) * f;
+      } else if (!isReduced) {
+        // Section inactive : rotation planétaire douce existante
+        const rotationSpeedY = 0.06 * dt + this.mouseX * 0.01;
+        this.pointsMesh.rotation.y += rotationSpeedY;
+        this.pointsMesh.rotation.x = this.mouseY * 0.12;
+        this.pointsMesh.position.x = this.mouseX * 0.15;
+        this.pointsMesh.position.y = this.mouseY * 0.15;
+      } else {
+        // Section inactive en prefers-reduced-motion : retour amorti vers le neutre
+        const f = 1.0 - Math.exp(-4.5 * clampedDt);
+        const deltaY = Math.atan2(
+          Math.sin(0.0 - this.pointsMesh.rotation.y),
+          Math.cos(0.0 - this.pointsMesh.rotation.y)
+        );
+        this.pointsMesh.rotation.y += deltaY * f;
+        const deltaX = Math.atan2(
+          Math.sin(0.0 - this.pointsMesh.rotation.x),
+          Math.cos(0.0 - this.pointsMesh.rotation.x)
+        );
+        this.pointsMesh.rotation.x += deltaX * f;
+        this.pointsMesh.position.x += (0.0 - this.pointsMesh.position.x) * f;
+        this.pointsMesh.position.y += (0.0 - this.pointsMesh.position.y) * f;
+      }
     }
 
     if (this.renderer) {
@@ -1011,7 +1172,6 @@ export class ThreeIndustrialScene {
     const isDark = document.documentElement.classList.contains('dark');
     if (this.pointsMaterial) {
       this.pointsMaterial.uniforms.uBaseColor.value.setHex(isDark ? 0xE5E3C0 : 0x524B38);
-      this.pointsMaterial.uniforms.uEnergyColor.value.setHex(isDark ? 0x00F0FF : 0x0284C7);
     }
   }
 
@@ -1108,6 +1268,14 @@ export class ThreeIndustrialScene {
     }
 
     if (this.geometry) {
+      if (this.highlightAttribute) {
+        this.geometry.deleteAttribute('aHighlight');
+        this.highlightAttribute = null;
+      }
+      if (this.distAttribute) {
+        this.geometry.deleteAttribute('aDist');
+        this.distAttribute = null;
+      }
       this.geometry.dispose();
       this.geometry = null;
     }

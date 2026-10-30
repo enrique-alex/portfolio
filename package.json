@@ -12,6 +12,7 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "generate:seed": "tsx scripts/generate-seed-sql.ts",
     "generate:admin-secrets": "node scripts/generate-admin-secrets.mjs",
+    "gen:land": "node scripts/gen-land-mask.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -39,9 +40,11 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "topojson-client": "^3.1.0",
     "tsx": "^4",
     "typescript": "^5",
     "vitest": "^4.1.11",
+    "world-atlas": "^2.0.2",
     "wrangler": "^4.112.0"
   }
 }
