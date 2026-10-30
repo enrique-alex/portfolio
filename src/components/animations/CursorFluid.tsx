@@ -48,19 +48,10 @@ export default function CursorFluid() {
 
     useEffect(() => {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const isMobileOrTouch = window.matchMedia('(pointer: coarse)').matches;
+        if (prefersReducedMotion) return;
 
-        if (prefersReducedMotion || isMobileOrTouch) return;
-
-        const enableFluid = () => setShouldRender(true);
-
-        if ('requestIdleCallback' in window) {
-            const idleId = window.requestIdleCallback(enableFluid, { timeout: 1500 });
-            return () => window.cancelIdleCallback(idleId);
-        } else {
-            const timeoutId = setTimeout(enableFluid, 500);
-            return () => clearTimeout(timeoutId);
-        }
+        // Activation immédiate sur PC et mobile dès le montage côté client
+        setShouldRender(true);
     }, []);
 
     useEffect(() => {
@@ -91,10 +82,11 @@ export default function CursorFluid() {
                 WebGLFluid = ((await import('./webgl-fluid.js')).default || await import('./webgl-fluid.js')) as WebGLFluidFn;
 
                 if (WebGLFluid) {
+                    const isTouch = window.matchMedia('(pointer: coarse)').matches;
                     fluidInstance.current = WebGLFluid(canvasRef.current!, {
                     TRIGGER: 'hover',
-                    IMMEDIATE: false, // Ne pas exploser pendant le Preloader
-                    NUM_SPLATS: 3,
+                    IMMEDIATE: true,
+                    NUM_SPLATS: isTouch ? 2 : 3,
                     CURL: 20,
                     SUNRAYS: true,
                     SUNRAYS_RESOLUTION: 196,
@@ -122,10 +114,10 @@ export default function CursorFluid() {
             }
         };
 
-        // Démarrer l'initialisation WebGL IMMÉDIATEMENT en arrière-plan pendant que 
-        // le Preloader tourne. Cela permet de compiler les shaders lourds sans bloquer 
-        // le Main Thread au moment crucial où le Preloader disparaît et le Hero s'affiche.
-        loadFluid();
+        loadFluid().then(() => {
+            // Déclenche l'explosion initiale de particules WebGL
+            window.dispatchEvent(new CustomEvent('webgl-explode'));
+        });
 
         // Résonance WebGL via Custom Event
         const handleResonance = (e: Event) => {
