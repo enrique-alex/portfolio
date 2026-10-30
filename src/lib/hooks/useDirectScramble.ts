@@ -90,7 +90,11 @@ export function useDirectScramble({
     }
 
     // Si le boot est déjà terminé, démarrage immédiat avec texte final (LCP protégé)
-    if (window.__preloaderDone || sessionStorage.getItem('seen-preloader') === 'true') {
+    if (
+      window.__preloaderDone ||
+      sessionStorage.getItem('plc_boot_done') === 'true' ||
+      sessionStorage.getItem('seen-preloader') === 'true'
+    ) {
       setFinalText();
       return;
     }

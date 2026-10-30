@@ -9,70 +9,75 @@ declare global {
 }
 
 const BOOT_LOGS = [
-  { tag: 'BOOT_ROM', msg: 'ARM Cortex-M7 @ 480MHz // RTOS Kernel Init', status: '[OK]', delay: '0.05s' },
-  { tag: 'BUS_SCAN', msg: 'CANopen (1Mbps) / MODBUS-RTU RS-485 Transceiver', status: '[SYNCED]', delay: '0.18s' },
-  { tag: 'FIELD_IO', msg: '32-Ch Optoisolated High-Speed Digital I/O Ring', status: '[VERIFIED]', delay: '0.32s' },
-  { tag: 'ANALOG_IN', msg: '16-Ch 24-Bit ADC (4-20mA / 0-10V RTD Instrumentation)', status: '[CALIBRATED]', delay: '0.46s' },
-  { tag: 'SYS_RTC', msg: 'PTP IEEE 1588 Hardware Clock Synchronization', status: '[LOCKED]', delay: '0.60s' },
-  { tag: 'SCADA_NET', msg: 'Industrial Ethernet IP Stack // Telemetry Link Active', status: '[ONLINE]', delay: '0.74s' },
+  { tag: 'BOOT_ROM', msg: 'ARM Cortex-M7 @ 480MHz // RTOS Kernel Init', status: '[OK]', delay: '0.10s' },
+  { tag: 'BUS_SCAN', msg: 'CANopen (1Mbps) / MODBUS-RTU RS-485 Transceiver', status: '[SYNCED]', delay: '0.35s' },
+  { tag: 'FIELD_IO', msg: '32-Ch Optoisolated High-Speed Digital I/O Ring', status: '[VERIFIED]', delay: '0.65s' },
+  { tag: 'ANALOG_IN', msg: '16-Ch 24-Bit ADC (4-20mA / 0-10V RTD Instrumentation)', status: '[CALIBRATED]', delay: '0.95s' },
+  { tag: 'SYS_RTC', msg: 'PTP IEEE 1588 Hardware Clock Synchronization', status: '[LOCKED]', delay: '1.25s' },
+  { tag: 'SCADA_NET', msg: 'Industrial Ethernet IP Stack // Telemetry Link Active', status: '[ONLINE]', delay: '1.55s' },
 ];
 
 export default function Preloader() {
   const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const completedRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    // SSR guard
-    if (typeof window === 'undefined') return;
+  const completeBoot = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
 
-    const isBot =
-      Boolean(navigator.webdriver) ||
-      /bot|google|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|headlesschrome|chrome-lighthouse|nexus/i.test(
-        navigator.userAgent
-      );
-    const hasSeen = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('seen-preloader') === 'true';
-    const isReducedMotion =
-      typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
 
-    const completeBoot = () => {
-      if (completedRef.current) return;
-      completedRef.current = true;
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-
+    if (typeof window !== 'undefined') {
       window.__preloaderDone = true;
       try {
         if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('plc_boot_done', 'true');
           sessionStorage.setItem('seen-preloader', 'true');
         }
       } catch {
         // Safe storage fallback
       }
-
-      document.body.style.overflow = '';
-      if (containerRef.current) {
-        containerRef.current.style.display = 'none';
-      }
-
       window.dispatchEvent(new CustomEvent('plc-boot-complete'));
       window.dispatchEvent(new CustomEvent('preloader-complete'));
-    };
+    }
 
-    if (window.__preloaderDone || hasSeen || isBot || isReducedMotion) {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+    }
+    setVisible(false);
+    if (containerRef.current) {
+      containerRef.current.style.display = 'none';
+    }
+  };
+
+  useEffect(() => {
+    // SSR guard
+    if (typeof window === 'undefined') return;
+
+    // Vérification de la session : absent -> joue la séquence ; présent -> masque immédiatement
+    const hasBooted =
+      typeof sessionStorage !== 'undefined' &&
+      (sessionStorage.getItem('plc_boot_done') === 'true' ||
+       sessionStorage.getItem('seen-preloader') === 'true');
+
+    if (hasBooted) {
       completeBoot();
       return;
     }
 
+    // Premier chargement client : activation immédiate
     setMounted(true);
+    setVisible(true);
     document.body.style.overflow = 'hidden';
 
-    // Sécurité temporelle de secours : débloque après la durée stricte de l'animation CSS (1.4s)
-    timeoutRef.current = setTimeout(completeBoot, 1400);
+    // Sécurité temporelle de secours : débloque exactement à 2.3s
+    timeoutRef.current = setTimeout(completeBoot, 2300);
 
     return () => {
       if (timeoutRef.current) {
@@ -85,34 +90,11 @@ export default function Preloader() {
 
   const handleAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
     if (e.animationName === 'plc-curtain-exit') {
-      if (completedRef.current) return;
-      completedRef.current = true;
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-
-      if (typeof window !== 'undefined') {
-        window.__preloaderDone = true;
-        try {
-          if (typeof sessionStorage !== 'undefined') {
-            sessionStorage.setItem('seen-preloader', 'true');
-          }
-        } catch {
-          // Safe storage fallback
-        }
-        window.dispatchEvent(new CustomEvent('plc-boot-complete'));
-        window.dispatchEvent(new CustomEvent('preloader-complete'));
-      }
-      document.body.style.overflow = '';
-      if (containerRef.current) {
-        containerRef.current.style.display = 'none';
-      }
+      completeBoot();
     }
   };
 
-  if (!mounted) {
+  if (!mounted || !visible) {
     return null;
   }
 
@@ -143,11 +125,11 @@ export default function Preloader() {
           }
         }
         .plc-curtain-anim {
-          animation: plc-curtain-exit 0.42s cubic-bezier(0.7, 0, 0.2, 1) 0.92s forwards;
+          animation: plc-curtain-exit 0.5s cubic-bezier(0.7, 0, 0.2, 1) 1.8s forwards;
           will-change: clip-path;
         }
         .plc-bar-progress {
-          animation: plc-bar-fill 0.85s steps(16) 0.05s forwards;
+          animation: plc-bar-fill 1.7s steps(16) 0.1s forwards;
           will-change: clip-path;
         }
       `}</style>

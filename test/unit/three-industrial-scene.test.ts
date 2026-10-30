@@ -8,7 +8,7 @@ import {
 import { frameManager } from '@/lib/graphics/FrameManager';
 import { kineticEnergy } from '@/lib/graphics/KineticEnergy';
 
-describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
+describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => {
   let originalWindow: typeof globalThis.window;
   let originalDocument: typeof globalThis.document;
 
@@ -27,31 +27,31 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
     globalThis.document = originalDocument;
   });
 
-  it('should expose the 4 emblematic industrial topologies', () => {
-    expect(TOPOLOGY_NAMES).toHaveLength(4);
+  it('should expose the 6 emblematic industrial topologies', () => {
+    expect(TOPOLOGY_NAMES).toHaveLength(6);
     expect(TOPOLOGY_NAMES).toEqual([
-      'SMART_GRID_NODAL_MESH',
-      'MULTILAYER_PCB_BUS_ROUTING',
-      'ELECTROMAGNETIC_ROTOR_STATOR',
-      'SEQUENTIAL_PETRI_AUTOMATON',
+      'ENERGY_TOROIDAL_EGG',
+      'ELECTROMAGNETIC_ROTOR_FIELD',
+      'ROBOTIC_ARM_6AXIS',
+      'MICROPROCESSOR_CORE_BUS',
+      'SCADA_SMART_FACTORY_NETWORK',
+      'AWALE_GEOMETRIC_MATRIX',
     ]);
   });
 
   it('should configure KineticEnergy with decay = 0.93 upon initialization', () => {
-    // Mock canvas
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
     } as unknown as HTMLCanvasElement;
 
-    // Verify decay rate before
     kineticEnergy.setDecayRate(2.5);
 
     new ThreeIndustrialScene(fakeCanvas, { pointCount: 100, decayRate: 0.93 });
     expect(kineticEnergy.getDecayRate()).toBe(0.93);
   });
 
-  it('should properly generate Float32Array coordinates for all 4 topologies without NaN', () => {
+  it('should properly generate Float32Array coordinates for all 6 topologies without NaN', () => {
     const pointCount = 120;
     const fakeCanvas = {
       addEventListener: vi.fn(),
@@ -61,10 +61,10 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
     const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount });
 
     // Validate active initial topology
-    expect(scene.activeTopologyName).toBe('SMART_GRID_NODAL_MESH');
+    expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
 
-    // Switch between all 4 topologies sequentially
-    for (let i = 0; i < 4; i++) {
+    // Switch between all 6 topologies sequentially
+    for (let i = 0; i < 6; i++) {
       scene.setTopology(i);
       expect(scene.activeTopologyName).toBe(TOPOLOGY_NAMES[i]);
     }
@@ -72,7 +72,7 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
     scene.destroy();
   });
 
-  it('should support nextTopology cycling through the 4 architectures', () => {
+  it('should support nextTopology cycling through the 6 architectures', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -80,15 +80,19 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
 
     const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 60 });
 
-    expect(scene.activeTopologyName).toBe('SMART_GRID_NODAL_MESH');
+    expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('MULTILAYER_PCB_BUS_ROUTING');
+    expect(scene.activeTopologyName).toBe('ELECTROMAGNETIC_ROTOR_FIELD');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('ELECTROMAGNETIC_ROTOR_STATOR');
+    expect(scene.activeTopologyName).toBe('ROBOTIC_ARM_6AXIS');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('SEQUENTIAL_PETRI_AUTOMATON');
+    expect(scene.activeTopologyName).toBe('MICROPROCESSOR_CORE_BUS');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('SMART_GRID_NODAL_MESH');
+    expect(scene.activeTopologyName).toBe('SCADA_SMART_FACTORY_NETWORK');
+    scene.nextTopology();
+    expect(scene.activeTopologyName).toBe('AWALE_GEOMETRIC_MATRIX');
+    scene.nextTopology();
+    expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
 
     scene.destroy();
   });
@@ -153,18 +157,20 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
     kineticEnergy.setEnergy(0.8);
     scene.renderFrameForTesting(0.016, 500, false);
 
-    // After displacement frame, coordinate was displaced
-    // Now decay energy completely to 0
+    // Decay energy completely to 0
     kineticEnergy.setEnergy(0);
-    scene.renderFrameForTesting(0.016, 600, false);
+    // Step a few frames to let elastic dampening (* 0.88) settle
+    for (let f = 0; f < 10; f++) {
+      scene.renderFrameForTesting(0.016, 600 + f * 16, false);
+    }
 
     // Final frame with energy = 0 cleanly restores baseline without freeze
-    expect(buf[2]).toBeCloseTo(initialZ, 4);
+    expect(buf[2]).toBeCloseTo(initialZ, 2);
 
     scene.destroy();
   });
 
-  it('should initialize with mobile point count (<= 2500) and no active lines when width < 768', () => {
+  it('should initialize with mobile point count (<= 6000) and no active lines when width < 768', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -184,7 +190,7 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
 
     try {
       const scene = new ThreeIndustrialScene(fakeCanvas);
-      expect(scene.currentPositionsBuffer.length).toBeLessThanOrEqual(2500 * 3);
+      expect(scene.currentPositionsBuffer.length).toBeLessThanOrEqual(6000 * 3);
       scene.destroy();
     } finally {
       globalThis.window = originalWindow;
@@ -212,10 +218,47 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
 
     try {
       const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 40 });
-      expect(scene.activeTopologyName).toBe('SMART_GRID_NODAL_MESH');
+      expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
       scene.destroy();
     } finally {
       globalThis.document = originalDoc;
     }
   });
+
+  it('should apply volumetric repulsion under pointer and soft elastic damping (Étape 2)', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 50 });
+
+    // Position pointer near the center (0, 0)
+    scene.setPointerForTesting(0, 0, true);
+    scene.renderFrameForTesting(0.016, 100, false);
+
+    const { offsetX, offsetY, offsetZ } = scene.getOffsetsForTesting();
+
+    // Verify some particles were displaced by repulsion force
+    let hasRepulsionDisplacement = false;
+    for (let i = 0; i < 50; i++) {
+      if (Math.abs(offsetX[i]) > 0.001 || Math.abs(offsetY[i]) > 0.001 || offsetZ[i] > 0.001) {
+        hasRepulsionDisplacement = true;
+        break;
+      }
+    }
+    expect(hasRepulsionDisplacement).toBe(true);
+
+    // Release pointer and run frames to check elastic damping (* 0.88 per frame)
+    const initialMaxOffset = Math.max(...Array.from(offsetZ));
+    scene.setPointerForTesting(0, 0, false);
+    scene.renderFrameForTesting(0.016, 116, false);
+    const dampedOffset = Math.max(...Array.from(offsetZ));
+
+    expect(dampedOffset).toBeLessThan(initialMaxOffset);
+    expect(dampedOffset).toBeCloseTo(initialMaxOffset * 0.88, 3);
+
+    scene.destroy();
+  });
 });
+

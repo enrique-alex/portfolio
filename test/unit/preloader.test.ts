@@ -48,4 +48,16 @@ describe('Preloader - Industrial Boot Sequence (Étape 1)', () => {
     const html = renderToString(React.createElement(Preloader));
     expect(html).toBe('');
   });
+
+  it('should support plc_boot_done flag in sessionStorage', () => {
+    const fakeSessionStorage = {
+      getItem: vi.fn((key: string) => (key === 'plc_boot_done' ? 'true' : null)),
+      setItem: vi.fn(),
+    };
+    // @ts-expect-error Mocking sessionStorage in unit test
+    globalThis.sessionStorage = fakeSessionStorage;
+    const html = renderToString(React.createElement(Preloader));
+    expect(html).toBe('');
+  });
 });
+
