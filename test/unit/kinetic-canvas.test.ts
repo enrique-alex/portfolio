@@ -3,9 +3,11 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import KineticCanvas, {
   initKineticWebGL,
+  initThreeIndustrialScene,
   QUAD_VERTICES,
   KINETIC_WEBGL_CONTEXT_OPTIONS,
 } from '@/components/animations/KineticCanvas';
+import { ThreeIndustrialScene, TOPOLOGY_NAMES } from '@/lib/graphics/ThreeIndustrialScene';
 import { frameManager } from '@/lib/graphics/FrameManager';
 import { kineticEnergy, KineticEnergy } from '@/lib/graphics/KineticEnergy';
 import {
@@ -660,6 +662,86 @@ describe('KineticCanvas & Shaders GLSL (Phases 3 & 4)', () => {
       expect(env.gl2?.calls.boundVertexArrays.length).toBeGreaterThanOrEqual(1);
 
       cleanup();
+    });
+  });
+
+  describe('10. ThreeIndustrialScene Pure Mathematical Topologies & Guaranteed Point Counts', () => {
+    it('should export initThreeIndustrialScene and mount the 5 mathematical topologies with guaranteed points', () => {
+      expect(typeof initThreeIndustrialScene).toBe('function');
+
+      const fakeCanvas = {
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as HTMLCanvasElement;
+
+      const origWindow = globalThis.window;
+      // @ts-expect-error Mocking window for desktop
+      globalThis.window = {
+        innerWidth: 1920,
+        innerHeight: 1080,
+        devicePixelRatio: 1,
+        matchMedia: vi.fn().mockReturnValue({ matches: false }),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+
+      try {
+        const cleanupDesktop = initThreeIndustrialScene(fakeCanvas);
+        expect(typeof cleanupDesktop).toBe('function');
+        cleanupDesktop();
+      } finally {
+        globalThis.window = origWindow;
+      }
+    });
+
+    it('should guarantee point counts N=9000 on desktop and N=5000 on mobile with the 5 mathematical topologies', () => {
+      const fakeCanvas = {
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as HTMLCanvasElement;
+
+      const origWindow = globalThis.window;
+
+      // 1. Desktop environment (innerWidth >= 768)
+      // @ts-expect-error Mocking desktop window
+      globalThis.window = {
+        innerWidth: 1440,
+        innerHeight: 900,
+        devicePixelRatio: 2,
+        matchMedia: vi.fn().mockReturnValue({ matches: false }),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+
+      const desktopScene = new ThreeIndustrialScene(fakeCanvas);
+      expect(desktopScene.currentPositionsBuffer.length).toBe(9000 * 3);
+      expect(TOPOLOGY_NAMES).toEqual([
+        'GOLDEN_TOROIDAL_OVOID',
+        'MOBIUS_VOLUMETRIC_STRIP',
+        'INTERTWINED_TORUS_KNOT',
+        'MINIMAL_GYROID_SHEET',
+        'FERMAT_VORTEX_NEBULA',
+      ]);
+      expect(desktopScene.getTopologyBuffer(0).length).toBe(9000 * 3);
+      desktopScene.destroy();
+
+      // 2. Mobile environment (innerWidth < 768)
+      // @ts-expect-error Mocking mobile window
+      globalThis.window = {
+        innerWidth: 390,
+        innerHeight: 844,
+        devicePixelRatio: 3,
+        matchMedia: vi.fn().mockReturnValue({ matches: true }),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+
+      const mobileScene = new ThreeIndustrialScene(fakeCanvas);
+      expect(mobileScene.currentPositionsBuffer.length).toBe(5000 * 3);
+      expect(mobileScene.getTopologyBuffer(0).length).toBe(5000 * 3);
+      mobileScene.destroy();
+
+      globalThis.window = origWindow;
     });
   });
 });

@@ -8,7 +8,7 @@ import {
 import { frameManager } from '@/lib/graphics/FrameManager';
 import { kineticEnergy } from '@/lib/graphics/KineticEnergy';
 
-describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => {
+describe('ThreeIndustrialScene & 5 Pure Mathematical Topologies', () => {
   let originalWindow: typeof globalThis.window;
   let originalDocument: typeof globalThis.document;
 
@@ -27,15 +27,14 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     globalThis.document = originalDocument;
   });
 
-  it('should expose the 6 emblematic industrial topologies', () => {
-    expect(TOPOLOGY_NAMES).toHaveLength(6);
+  it('should expose the 5 pure mathematical art topologies', () => {
+    expect(TOPOLOGY_NAMES).toHaveLength(5);
     expect(TOPOLOGY_NAMES).toEqual([
-      'ENERGY_TOROIDAL_EGG',
-      'ELECTROMAGNETIC_ROTOR_FIELD',
-      'ROBOTIC_ARM_6AXIS',
-      'MICROPROCESSOR_CORE_BUS',
-      'SCADA_SMART_FACTORY_NETWORK',
-      'AWALE_GEOMETRIC_MATRIX',
+      'GOLDEN_TOROIDAL_OVOID',
+      'MOBIUS_VOLUMETRIC_STRIP',
+      'INTERTWINED_TORUS_KNOT',
+      'MINIMAL_GYROID_SHEET',
+      'FERMAT_VORTEX_NEBULA',
     ]);
   });
 
@@ -51,7 +50,7 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     expect(kineticEnergy.getDecayRate()).toBe(0.93);
   });
 
-  it('should properly generate Float32Array coordinates for all 6 topologies without NaN', () => {
+  it('should properly generate Float32Array coordinates for all 5 topologies without NaN and normalized inside R ≈ 2.0', () => {
     const pointCount = 120;
     const fakeCanvas = {
       addEventListener: vi.fn(),
@@ -60,19 +59,111 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
 
     const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount });
 
-    // Validate active initial topology
-    expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
+    // Verify camera is positioned at z = 4.8
+    expect(scene.cameraInstance.position.z).toBeCloseTo(4.8, 2);
+    expect(scene.cameraInstance.fov).toBe(45);
 
-    // Switch between all 6 topologies sequentially
-    for (let i = 0; i < 6; i++) {
+    // Initial topology is Golden Toroidal Ovoid
+    expect(scene.activeTopologyName).toBe('GOLDEN_TOROIDAL_OVOID');
+
+    // Switch between all 5 topologies sequentially and verify coordinates
+    for (let i = 0; i < 5; i++) {
       scene.setTopology(i);
       expect(scene.activeTopologyName).toBe(TOPOLOGY_NAMES[i]);
+
+      const tBuf = scene.getTopologyBuffer(i);
+      expect(tBuf.length).toBe(pointCount * 3);
+
+      let cx = 0;
+      let cy = 0;
+      let cz = 0;
+      let maxR = 0;
+
+      for (let p = 0; p < pointCount; p++) {
+        const px = tBuf[p * 3];
+        const py = tBuf[p * 3 + 1];
+        const pz = tBuf[p * 3 + 2];
+        expect(Number.isFinite(px)).toBe(true);
+        expect(Number.isFinite(py)).toBe(true);
+        expect(Number.isFinite(pz)).toBe(true);
+
+        cx += px;
+        cy += py;
+        cz += pz;
+        const r = Math.hypot(px, py, pz);
+        if (r > maxR) maxR = r;
+      }
+
+      cx /= pointCount;
+      cy /= pointCount;
+      cz /= pointCount;
+
+      // Centered at (0, 0, 0)
+      expect(Math.abs(cx)).toBeLessThan(0.02);
+      expect(Math.abs(cy)).toBeLessThan(0.02);
+      expect(Math.abs(cz)).toBeLessThan(0.02);
+
+      // Bounding sphere radius R ≈ 1.95 - 2.0
+      expect(maxR).toBeGreaterThanOrEqual(1.90);
+      expect(maxR).toBeLessThanOrEqual(2.05);
+    }
+
+    const buf = scene.currentPositionsBuffer;
+    expect(buf.length).toBe(pointCount * 3);
+    for (let j = 0; j < buf.length; j++) {
+      expect(Number.isFinite(buf[j])).toBe(true);
+      expect(Number.isNaN(buf[j])).toBe(false);
     }
 
     scene.destroy();
   });
 
-  it('should support nextTopology cycling through the 6 architectures', () => {
+  it('should verify Golden Toroidal Ovoid features a pronounced central oblique toroidal cavity and volumetric thickness', () => {
+    const pointCount = 1000;
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount });
+    const ovoidBuf = scene.getTopologyBuffer(0); // Topologie 1: GOLDEN_TOROIDAL_OVOID
+
+    // Oblique axis unit vector
+    const tiltX = 0.48;
+    const tiltY = 0.28;
+    const rawAx = Math.sin(tiltY);
+    const rawAy = Math.sin(tiltX) * Math.cos(tiltY);
+    const rawAz = Math.cos(tiltX) * Math.cos(tiltY);
+    const aLen = Math.hypot(rawAx, rawAy, rawAz);
+    const ax = rawAx / aLen, ay = rawAy / aLen, az = rawAz / aLen;
+
+    let minDperp = 999;
+    let maxDperp = 0;
+
+    for (let i = 0; i < pointCount; i++) {
+      const x = ovoidBuf[i * 3];
+      const y = ovoidBuf[i * 3 + 1];
+      const z = ovoidBuf[i * 3 + 2];
+
+      const h = x * ax + y * ay + z * az;
+      const px = x - h * ax;
+      const py = y - h * ay;
+      const pz = z - h * az;
+      const dPerp = Math.hypot(px, py, pz);
+
+      if (dPerp < minDperp) minDperp = dPerp;
+      if (dPerp > maxDperp) maxDperp = dPerp;
+    }
+
+    // Cavity must be clearly carved (min perpendicular distance to axis > 0.5)
+    expect(minDperp).toBeGreaterThanOrEqual(0.50);
+    // Outer lip reaches radius ~1.7 - 2.0
+    expect(maxDperp).toBeGreaterThanOrEqual(1.70);
+
+    scene.destroy();
+  });
+
+  it('should support nextTopology cycling through the 5 mathematical topologies', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -80,19 +171,17 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
 
     const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 60 });
 
-    expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
+    expect(scene.activeTopologyName).toBe('GOLDEN_TOROIDAL_OVOID');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('ELECTROMAGNETIC_ROTOR_FIELD');
+    expect(scene.activeTopologyName).toBe('MOBIUS_VOLUMETRIC_STRIP');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('ROBOTIC_ARM_6AXIS');
+    expect(scene.activeTopologyName).toBe('INTERTWINED_TORUS_KNOT');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('MICROPROCESSOR_CORE_BUS');
+    expect(scene.activeTopologyName).toBe('MINIMAL_GYROID_SHEET');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('SCADA_SMART_FACTORY_NETWORK');
+    expect(scene.activeTopologyName).toBe('FERMAT_VORTEX_NEBULA');
     scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('AWALE_GEOMETRIC_MATRIX');
-    scene.nextTopology();
-    expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
+    expect(scene.activeTopologyName).toBe('GOLDEN_TOROIDAL_OVOID');
 
     scene.destroy();
   });
@@ -122,7 +211,7 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     cleanup();
   });
 
-  it('should interpolate coordinates smoothly during morphing and advance morphProgress', () => {
+  it('should interpolate coordinates smoothly during morphing with micro-dephasing and advance morphProgress', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -153,7 +242,7 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     const buf = scene.currentPositionsBuffer;
     const initialZ = buf[2];
 
-    // Inject energy to cause kinetic wave / displacement
+    // Inject energy to cause kinetic wave / micro-harmonic swimming
     kineticEnergy.setEnergy(0.8);
     scene.renderFrameForTesting(0.016, 500, false);
 
@@ -170,7 +259,7 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     scene.destroy();
   });
 
-  it('should initialize with mobile point count (<= 6000) and no active lines when width < 768', () => {
+  it('should initialize with mobile point count (5000) when width < 768 and desktop point count (9000)', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -189,9 +278,28 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     };
 
     try {
-      const scene = new ThreeIndustrialScene(fakeCanvas);
-      expect(scene.currentPositionsBuffer.length).toBeLessThanOrEqual(6000 * 3);
-      scene.destroy();
+      const mobileScene = new ThreeIndustrialScene(fakeCanvas);
+      expect(mobileScene.currentPositionsBuffer.length).toBe(5000 * 3);
+      mobileScene.destroy();
+    } finally {
+      globalThis.window = originalWindow;
+    }
+
+    // Desktop scenario
+    // @ts-expect-error Mocking desktop window
+    globalThis.window = {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      devicePixelRatio: 1,
+      matchMedia: vi.fn().mockReturnValue({ matches: false }),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    };
+
+    try {
+      const desktopScene = new ThreeIndustrialScene(fakeCanvas);
+      expect(desktopScene.currentPositionsBuffer.length).toBe(9000 * 3);
+      desktopScene.destroy();
     } finally {
       globalThis.window = originalWindow;
     }
@@ -218,14 +326,14 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
 
     try {
       const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 40 });
-      expect(scene.activeTopologyName).toBe('ENERGY_TOROIDAL_EGG');
+      expect(scene.activeTopologyName).toBe('GOLDEN_TOROIDAL_OVOID');
       scene.destroy();
     } finally {
       globalThis.document = originalDoc;
     }
   });
 
-  it('should apply volumetric repulsion under pointer and soft elastic damping (Étape 2)', () => {
+  it('should apply volumetric repulsion under pointer and soft elastic damping', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -261,7 +369,7 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     scene.destroy();
   });
 
-  it('should induce sinusoidal dispersion wave under scroll velocity vy (Étape 4)', () => {
+  it('should induce flocking micro-swimming wave under scroll velocity vy', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -288,4 +396,3 @@ describe('ThreeIndustrialScene & 6 Volumetric Topologies (Étape 3 & 4)', () => 
     scene.destroy();
   });
 });
-
