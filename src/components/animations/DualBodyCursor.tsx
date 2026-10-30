@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { frameManager } from '@/lib/graphics/FrameManager';
+import { magneticManager } from '@/lib/graphics/MagneticManager';
 
 const LERP_SPEED = 18; // Vitesse de convergence exponentielle continue
 
@@ -113,6 +114,7 @@ export default function DualBodyCursor() {
       const y = e.clientY;
       targetX.current = x;
       targetY.current = y;
+      magneticManager.setCursor(x, y);
 
       if (!hasMoved.current) {
         hasMoved.current = true;
@@ -157,6 +159,7 @@ export default function DualBodyCursor() {
     };
 
     const onMouseLeave = () => {
+      magneticManager.setCursor(-9999, -9999);
       if (dotRef.current) dotRef.current.style.opacity = '0';
       if (ringRef.current) ringRef.current.style.opacity = '0';
     };

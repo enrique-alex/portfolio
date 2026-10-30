@@ -5,6 +5,7 @@ import { frameManager } from '@/lib/graphics/FrameManager';
 import { KineticEnergy } from '@/lib/graphics/KineticEnergy';
 import { getQuadVertexShader } from '@/lib/graphics/shaders/quad.vert';
 import { getKineticFluidFragmentShader } from '@/lib/graphics/shaders/kinetic-fluid.frag';
+import { initThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
 
 export const QUAD_VERTICES = new Float32Array([
   -1, -1,
@@ -317,6 +318,8 @@ export function initKineticWebGL(canvas: HTMLCanvasElement): () => void {
   };
 }
 
+export { initThreeIndustrialScene };
+
 export default function KineticCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -324,7 +327,7 @@ export default function KineticCanvas() {
     const canvas = canvasRef.current;
     if (!canvas || typeof window === 'undefined') return;
 
-    return initKineticWebGL(canvas);
+    return initThreeIndustrialScene(canvas);
   }, []);
 
   return (

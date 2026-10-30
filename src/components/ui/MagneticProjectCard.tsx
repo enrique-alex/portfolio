@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Project } from '@/lib/data';
 
@@ -96,43 +96,51 @@ export default function MagneticProjectCard({
     onClick: (p: Project) => void;
 }) {
     const cardRef = useRef<HTMLDivElement>(null);
+    const rectRef = useRef<DOMRect | null>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isTouchDevice, setIsTouchDevice] = useState(false);
 
     useEffect(() => {
         setMounted(true);
-        setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
+        const isTouch = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+        setIsTouchDevice(isTouch);
     }, []);
 
-    // --- Animation 1: Magnetic Tilt 3D ---
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const springConfig = { damping: 20, stiffness: 150, mass: 0.5 };
-    const xSpring = useSpring(mouseX, springConfig);
-    const ySpring = useSpring(mouseY, springConfig);
-
-    const rotateX = useTransform(ySpring, [0, 500], [5, -5]);
-    const rotateY = useTransform(xSpring, [0, 500], [-5, 5]);
-
-    // --- Animation 2: Dynamic Spotlight ---
-    const spotlightTemplate = useMotionTemplate`
-        radial-gradient(400px circle at ${mouseX}px ${mouseY}px, rgba(255,255,255,0.06), transparent 80%)
-    `;
+    // --- Animation Tilt allégée par variables CSS pures (--rx, --ry) : zéro useSpring / useMotionValue ---
+    function handleMouseEnter() {
+        if (isTouchDevice || !cardRef.current) return;
+        rectRef.current = cardRef.current.getBoundingClientRect();
+        setIsHovered(true);
+    }
 
     function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
         if (!cardRef.current || isTouchDevice) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
+        if (!rectRef.current) {
+            rectRef.current = cardRef.current.getBoundingClientRect();
+        }
+        const rect = rectRef.current;
+        const width = rect.width || 1;
+        const height = rect.height || 1;
+        const px = (e.clientX - rect.left) / width - 0.5;
+        const py = (e.clientY - rect.top) / height - 0.5;
+
+        // Déflexion angulaire légère plafonnée à ±5 deg
+        const rx = (-py * 8).toFixed(2);
+        const ry = (px * 8).toFixed(2);
+
+        cardRef.current.style.setProperty('--rx', `${rx}deg`);
+        cardRef.current.style.setProperty('--ry', `${ry}deg`);
+        cardRef.current.style.setProperty('--mx', `${(e.clientX - rect.left).toFixed(0)}px`);
+        cardRef.current.style.setProperty('--my', `${(e.clientY - rect.top).toFixed(0)}px`);
     }
 
     function handleMouseLeave() {
-        if (isTouchDevice) return;
+        rectRef.current = null;
+        if (!cardRef.current || isTouchDevice) return;
         setIsHovered(false);
-        mouseX.set(250);
-        mouseY.set(250);
+        cardRef.current.style.setProperty('--rx', '0deg');
+        cardRef.current.style.setProperty('--ry', '0deg');
     }
 
     // --- WebGL Resonance (Heritage) ---
@@ -155,19 +163,20 @@ export default function MagneticProjectCard({
             layoutId={`project-${project.id}`}
             onClick={() => onClick(project)}
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => !isTouchDevice && setIsHovered(true)}
+            onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             whileTap={{ scale: 0.98 }}
             style={{
-                rotateX: (!isTouchDevice && isHovered) ? rotateX : 0,
-                rotateY: (!isTouchDevice && isHovered) ? rotateY : 0,
-                transformStyle: isTouchDevice ? "flat" : "preserve-3d",
+                transform: (!isTouchDevice && isHovered)
+                    ? 'perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))'
+                    : 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+                transition: 'transform 0.18s cubic-bezier(0.2, 0, 0.2, 1)',
             }}
             className={`group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border ${
                 isFeatured 
-                ? "border-zinc-300 dark:border-white/10 bg-zinc-100/60 dark:bg-zinc-900/50 hover:bg-zinc-100/90 dark:hover:bg-zinc-900/80 p-8 lg:p-12" 
-                : "border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] p-8 md:p-10"
-            } ${isTouchDevice ? '' : 'backdrop-blur-xl'} transition-transform duration-300`}
+                ? "border-zinc-300 dark:border-white/10 bg-zinc-100/90 dark:bg-zinc-900/90 hover:bg-zinc-100 dark:hover:bg-zinc-900 p-8 lg:p-12" 
+                : "border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100/80 dark:hover:bg-zinc-900/80 p-8 md:p-10"
+            } transition-colors duration-200`}
         >
             {/* COVER IMAGE (conditional) */}
             {hasCover && (
@@ -245,16 +254,18 @@ export default function MagneticProjectCard({
                 </div>
             )}
 
-            {/* Dynamic Spotlight */}
+            {/* Dynamic Spotlight en CSS natif */}
             {mounted && !isTouchDevice && (
-                <motion.div
-                    className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:mix-blend-screen"
-                    style={{ background: spotlightTemplate }}
+                <div
+                    className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:mix-blend-screen"
+                    style={{
+                        background: 'radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.06), transparent 80%)',
+                    }}
                 />
             )}
 
             {/* CONTENU PRINCIPAL */}
-            <div className={`relative z-10 flex h-full flex-col justify-between ${hasCover ? 'text-white' : ''}`} style={{ transform: "translateZ(30px)" }}>
+            <div className={`relative z-10 flex h-full flex-col justify-between ${hasCover ? 'text-white' : ''}`}>
                 <div>
                     {/* 3. HEADER : Annee + Badge Compteur Modules */}
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-2">

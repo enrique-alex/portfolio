@@ -1,16 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-
-const LOADING_PHRASES = [
-  "Initializing System Subroutines...",
-  "Calibrating Neural Interface...",
-  "Establishing Secure Handoff...",
-  "Compiling Core Assets...",
-  "Synchronizing Server Clocks...",
-  "Awaiting Final Telemetry..."
-];
+import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -18,220 +8,231 @@ declare global {
   }
 }
 
+const BOOT_LOGS = [
+  { tag: 'BOOT_ROM', msg: 'ARM Cortex-M7 @ 480MHz // RTOS Kernel Init', status: '[OK]', delay: '0.05s' },
+  { tag: 'BUS_SCAN', msg: 'CANopen (1Mbps) / MODBUS-RTU RS-485 Transceiver', status: '[SYNCED]', delay: '0.18s' },
+  { tag: 'FIELD_IO', msg: '32-Ch Optoisolated High-Speed Digital I/O Ring', status: '[VERIFIED]', delay: '0.32s' },
+  { tag: 'ANALOG_IN', msg: '16-Ch 24-Bit ADC (4-20mA / 0-10V RTD Instrumentation)', status: '[CALIBRATED]', delay: '0.46s' },
+  { tag: 'SYS_RTC', msg: 'PTP IEEE 1588 Hardware Clock Synchronization', status: '[LOCKED]', delay: '0.60s' },
+  { tag: 'SCADA_NET', msg: 'Industrial Ethernet IP Stack // Telemetry Link Active', status: '[ONLINE]', delay: '0.74s' },
+];
+
 export default function Preloader() {
-  const shouldReduceMotion = useReducedMotion();
-  const [progress, setProgress] = useState(0);
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [isTouch, setIsTouch] = useState(false);
-  const [isComplete, setIsComplete] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.__preloaderDone === true || sessionStorage.getItem('seen-preloader') === 'true';
-  });
+  const [mounted, setMounted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const completedRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Skip preloader immediately for bots, headless testing, and audit tools (PageSpeed / Lighthouse)
-    const isBot = typeof window !== 'undefined' && (
-      Boolean(navigator.webdriver) ||
-      /bot|google|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|headlesschrome|chrome-lighthouse|nexus/i.test(navigator.userAgent)
-    );
-    const isTouchCoarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-    setIsTouch(isTouchCoarse);
+    // SSR guard
+    if (typeof window === 'undefined') return;
 
-    const hasSeen = typeof window !== 'undefined' && sessionStorage.getItem('seen-preloader') === 'true';
-    if (shouldReduceMotion || isBot || hasSeen) {
-      setProgress(100);
-      setIsComplete(true);
-      if (typeof window !== 'undefined') {
-        window.__preloaderDone = true;
-        sessionStorage.setItem('seen-preloader', 'true');
+    const isBot =
+      Boolean(navigator.webdriver) ||
+      /bot|google|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|headlesschrome|chrome-lighthouse|nexus/i.test(
+        navigator.userAgent
+      );
+    const hasSeen = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('seen-preloader') === 'true';
+    const isReducedMotion =
+      typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const completeBoot = () => {
+      if (completedRef.current) return;
+      completedRef.current = true;
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('preloader-complete'));
-      }, 10);
+
+      window.__preloaderDone = true;
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('seen-preloader', 'true');
+        }
+      } catch {
+        // Safe storage fallback
+      }
+
+      document.body.style.overflow = '';
+      if (containerRef.current) {
+        containerRef.current.style.display = 'none';
+      }
+
+      window.dispatchEvent(new CustomEvent('plc-boot-complete'));
+      window.dispatchEvent(new CustomEvent('preloader-complete'));
+    };
+
+    if (window.__preloaderDone || hasSeen || isBot || isReducedMotion) {
+      completeBoot();
       return;
     }
 
-    // Ultra-snappy simulation to preserve LCP and avoid CPU thrashing
-    const intervalDelay = isTouchCoarse ? 25 : 20;
-    const stepIncrement = isTouchCoarse ? 35 : 25;
-    const pauseDuration = 80;
+    setMounted(true);
+    document.body.style.overflow = 'hidden';
 
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          if (typeof window !== 'undefined') {
-            window.__preloaderDone = true;
+    // Sécurité temporelle de secours : débloque après la durée stricte de l'animation CSS (1.4s)
+    timeoutRef.current = setTimeout(completeBoot, 1400);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  const handleAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
+    if (e.animationName === 'plc-curtain-exit') {
+      if (completedRef.current) return;
+      completedRef.current = true;
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
+      if (typeof window !== 'undefined') {
+        window.__preloaderDone = true;
+        try {
+          if (typeof sessionStorage !== 'undefined') {
             sessionStorage.setItem('seen-preloader', 'true');
           }
-          setTimeout(() => {
-            setIsComplete(true);
-            window.dispatchEvent(new CustomEvent('preloader-complete'));
-          }, pauseDuration);
-          return 100;
+        } catch {
+          // Safe storage fallback
         }
-        // Fast step increment
-        const increment = Math.floor(Math.random() * stepIncrement) + 20;
-        return Math.min(prev + increment, 100);
-      });
-    }, intervalDelay);
-
-    // Changing phrases 
-    const phraseInterval = setInterval(() => {
-      setPhraseIndex(prev => (prev + 1) % LOADING_PHRASES.length);
-    }, 400);
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(phraseInterval);
-    };
-  }, [shouldReduceMotion]);
-
-  // Prevent scrolling while preloader is active
-  useEffect(() => {
-    if (!isComplete) {
-      document.body.style.overflow = 'hidden';
-    } else {
+        window.dispatchEvent(new CustomEvent('plc-boot-complete'));
+        window.dispatchEvent(new CustomEvent('preloader-complete'));
+      }
       document.body.style.overflow = '';
+      if (containerRef.current) {
+        containerRef.current.style.display = 'none';
+      }
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isComplete]);
+  };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <AnimatePresence>
-      {!isComplete && (
-        <motion.div
-          key="preloader"
-          initial={{ opacity: 1 }}
-          exit={{ 
-            opacity: 0,
-            scale: 1.03,
-            filter: shouldReduceMotion ? "blur(0px)" : isTouch ? "blur(2px)" : "blur(6px)"
+    <>
+      <style>{`
+        @keyframes plc-step-reveal {
+          0% { opacity: 0; transform: translateY(3px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes plc-bar-fill {
+          0% { clip-path: inset(0 100% 0 0); }
+          100% { clip-path: inset(0 0% 0 0); }
+        }
+        @keyframes plc-curtain-exit {
+          0% {
+            clip-path: inset(0 0 0% 0);
+            opacity: 1;
+          }
+          99% {
+            clip-path: inset(0 0 100% 0);
+            opacity: 1;
+          }
+          100% {
+            clip-path: inset(0 0 100% 0);
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
+        .plc-curtain-anim {
+          animation: plc-curtain-exit 0.42s cubic-bezier(0.7, 0, 0.2, 1) 0.92s forwards;
+          will-change: clip-path;
+        }
+        .plc-bar-progress {
+          animation: plc-bar-fill 0.85s steps(16) 0.05s forwards;
+          will-change: clip-path;
+        }
+      `}</style>
+
+      <div
+        ref={containerRef}
+        onAnimationEnd={handleAnimationEnd}
+        aria-hidden="true"
+        className="plc-curtain-anim fixed inset-0 z-[9999] flex flex-col justify-between bg-[#07090E] p-6 sm:p-10 font-mono text-zinc-300 select-none overflow-hidden"
+      >
+        {/* Grille technique de fond & scanlines d'atelier */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
           }}
-          transition={{ duration: isTouch ? 0.3 : 0.5, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#050505]"
-        >
-          {/* Background Ambient Glow */}
-          <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-blue/5 via-transparent to-transparent opacity-60"></div>
+        />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, #000, #000 2px, transparent 2px, transparent 4px)',
+          }}
+        />
 
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            
-            {/* SVG Complex Loading Graphic */}
-            <div className="relative mb-12 flex h-48 w-48 items-center justify-center">
-              
-              {/* Outer Rotating Dashed Ring (Omitted on touch) */}
-              {!isTouch && (
-                <motion.svg
-                  viewBox="0 0 100 100"
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full text-zinc-300 dark:text-zinc-800"
-                  animate={{ rotate: shouldReduceMotion ? 0 : 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="48"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="0.5"
-                    strokeDasharray="4 4"
-                  />
-                </motion.svg>
-              )}
+        {/* Header Terminal */}
+        <div className="relative z-10 flex flex-wrap items-center justify-between border-b border-zinc-800 pb-4 text-xs tracking-wider text-zinc-400">
+          <div className="flex items-center gap-3">
+            <span className="flex h-2.5 w-2.5 items-center justify-center">
+              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            </span>
+            <span className="font-bold text-zinc-200">PLC-SYS // INDUSTRIAL BOOT SEQUENCE</span>
+          </div>
+          <div className="flex items-center gap-4 text-[11px] text-zinc-500">
+            <span>CORE: M7-480MHZ</span>
+            <span>BUS: ISO 11898</span>
+            <span className="text-emerald-400 font-semibold">WATCHDOG ARMED</span>
+          </div>
+        </div>
 
-              {/* Middle Pulsing Ring (Omitted on touch) */}
-              {!isTouch && (
-                <motion.svg
-                  viewBox="0 0 100 100"
-                  aria-hidden="true"
-                  className="absolute inset-2 h-full w-full text-brand-blue/30"
-                  animate={{ rotate: shouldReduceMotion ? 0 : -360 }}
-                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="44"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeDasharray="20 10"
-                  />
-                </motion.svg>
-              )}
-
-              {/* Inner Progress Ring (Fills up) */}
-              <svg
-                viewBox="0 0 100 100"
-                aria-hidden="true"
-                className="absolute inset-4 h-full w-full -rotate-90 text-brand-blue"
-              >
-                <motion.circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  initial={{ strokeDasharray: "0 251" }}
-                  animate={{ strokeDasharray: `${(progress / 100) * 251} 251` }}
-                  transition={{ duration: shouldReduceMotion ? 0 : undefined, ease: "easeOut" }}
-                />
-              </svg>
-
-              {/* Center Tech Core (Hexagon) */}
-              <div className="absolute flex h-full w-full items-center justify-center">
-                <motion.div
-                  className="flex h-16 w-16 items-center justify-center border border-zinc-900/10 bg-white/50 backdrop-blur-md dark:border-white/10 dark:bg-black/50"
-                  style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: shouldReduceMotion ? 1 : [0.8, 1, 0.8], opacity: 1 }}
-                  transition={{ duration: shouldReduceMotion ? 0 : 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <span className="font-mono text-[10px] font-bold tracking-widest text-zinc-900 dark:text-white">
-                    CORE
-                  </span>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Typography & Stats */}
-            <div className="flex flex-col items-center">
-              <div className="flex items-end gap-2 overflow-hidden h-16">
-                <motion.span 
-                  className="font-mono text-5xl font-black tracking-tighter text-zinc-900 dark:text-white sm:text-7xl"
-                  initial={{ y: shouldReduceMotion ? 0 : 50 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : "spring", stiffness: 200, damping: 20 }}
-                >
-                  {progress}
-                </motion.span>
-                <span className="mb-2 font-mono text-xl font-medium text-brand-blue">%</span>
-              </div>
-              
-              <div className="mt-4 flex flex-col items-center gap-2">
-                <div className="h-px w-24 bg-gradient-to-r from-transparent via-zinc-400 to-transparent dark:via-zinc-600"></div>
-                <p className="font-mono text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">
-                  {LOADING_PHRASES[phraseIndex]}
-                </p>
-                <div className="h-px w-24 bg-gradient-to-r from-transparent via-zinc-400 to-transparent dark:via-zinc-600"></div>
-              </div>
-            </div>
-
+        {/* Corps Central : Séquence d'initialisation pas-à-pas (Zéro JS, pur CSS steps(1)) */}
+        <div className="relative z-10 my-auto flex flex-col justify-center max-w-3xl space-y-2.5 py-6">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+            --- TELEMETRY EXECUTION FLOW ---
           </div>
 
-          {/* Bottom Grid Floor Illusion */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-1/3 bg-[linear-gradient(to_bottom,transparent,#80808012_1px),linear-gradient(to_right,transparent,#80808012_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_top,black,transparent)]"
-            style={{ transform: "perspective(500px) rotateX(60deg)", transformOrigin: "bottom" }}
-          ></div>
+          {BOOT_LOGS.map((log) => (
+            <div
+              key={log.tag}
+              style={{
+                opacity: 0,
+                animation: `plc-step-reveal 0.01s steps(1) ${log.delay} forwards`,
+              }}
+              className="flex items-start justify-between text-xs sm:text-sm font-mono leading-tight gap-4"
+            >
+              <div className="flex items-center gap-3 truncate">
+                <span className="text-sky-400 font-semibold tracking-wide">[{log.tag}]</span>
+                <span className="text-zinc-300 truncate">{log.msg}</span>
+              </div>
+              <span className="text-emerald-400 font-bold shrink-0">{log.status}</span>
+            </div>
+          ))}
+        </div>
 
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {/* Footer : Barre crénelée animée via clip-path: inset() avec steps(16) */}
+        <div className="relative z-10 border-t border-zinc-800 pt-4">
+          <div className="mb-2 flex items-center justify-between text-[11px] text-zinc-400 tracking-wider">
+            <span>BUS INTEGRITY & IO FIRMWARE REVISION: 4.12.0</span>
+            <span className="font-bold text-sky-400">100% READY</span>
+          </div>
+
+          {/* Rail de la barre crénelée */}
+          <div className="relative h-3 w-full rounded-xs bg-zinc-900 border border-zinc-800 overflow-hidden">
+            {/* Texture de créneaux (16 crans réguliers) */}
+            <div
+              className="plc-bar-progress absolute inset-0 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-400"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(90deg, transparent, transparent 6.25%, rgba(0,0,0,0.4) 6.25%, rgba(0,0,0,0.4) 6.7%)',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

@@ -1,70 +1,48 @@
 'use client';
 
-import { useRef, ReactNode, MouseEvent, useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { useRef, ReactNode, useEffect } from 'react';
+import { magneticManager } from '@/lib/graphics/MagneticManager';
 
 interface MagneticProps {
-    children: ReactNode;
-    /** Puissance de l'attraction magnétique (valeur typique : 0.2 - 0.5) */
-    intensity?: number;
+  children: ReactNode;
+  /** Puissance de l'attraction magnétique (valeur typique : 0.15 - 0.4) */
+  intensity?: number;
+  className?: string;
 }
 
-export default function Magnetic({ children, intensity = 0.3 }: MagneticProps) {
-    const ref = useRef<HTMLDivElement>(null);
-    const shouldReduceMotion = useReducedMotion();
-    const [isTouch, setIsTouch] = useState(false);
+/**
+ * Magnetic - Élément magnétique industrialisé haute performance
+ * 
+ * - Zéro écouteur local mousemove.
+ * - Zéro instance Framer Motion (suppression intégrale de useSpring / useMotionValue).
+ * - Délègue le calcul et le positionnement au contrôleur globalisé MagneticManager via translate3d.
+ * - Bounding boxes mises en cache, évitant tout reflow forcé.
+ */
+export default function Magnetic({ children, intensity = 0.25, className = '' }: MagneticProps) {
+  const ref = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setIsTouch(window.matchMedia('(pointer: coarse)').matches);
-    }, []);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return;
 
-    // Initialisation des valeurs de position
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
+    // Sur écran tactile ou coarse pointer, l'attraction n'est pas activée
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) {
+      return;
+    }
 
-    // Configuration stricte du ressort physique dictée par les spécifications
-    const springConfig = { stiffness: 150, damping: 15, mass: 0.1 };
-    const springX = useSpring(x, springConfig);
-    const springY = useSpring(y, springConfig);
+    magneticManager.register(el, intensity);
 
-    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-        if (!ref.current || isTouch || shouldReduceMotion) return;
-        
-        // Extraction des limites géométriques du composant
-        const rect = ref.current.getBoundingClientRect();
-        
-        // Calcul du vecteur centre
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        // Vecteurs de distance
-        const distanceX = e.clientX - centerX;
-        const distanceY = e.clientY - centerY;
-        
-        // Application de l'attraction (multipliée par l'intensité)
-        x.set(distanceX * intensity);
-        y.set(distanceY * intensity);
+    return () => {
+      magneticManager.unregister(el);
     };
+  }, [intensity]);
 
-    const handleMouseLeave = () => {
-        if (isTouch || shouldReduceMotion) return;
-        // Retour physique à la position d'origine {0,0}
-        x.set(0);
-        y.set(0);
-    };
-
-    const isCoarseOrReduced = isTouch || Boolean(shouldReduceMotion);
-
-    return (
-        <motion.div
-            ref={ref}
-            onMouseMove={isCoarseOrReduced ? undefined : handleMouseMove}
-            onMouseLeave={isCoarseOrReduced ? undefined : handleMouseLeave}
-            style={isCoarseOrReduced ? undefined : { x: springX, y: springY }}
-            className={`inline-flex cursor-pointer relative z-40 ${isCoarseOrReduced ? '' : 'will-change-transform'}`}
-        >
-            {children}
-        </motion.div>
-    );
+  return (
+    <div
+      ref={ref}
+      className={`industrial-mag inline-flex cursor-pointer relative z-40 will-change-transform ${className}`}
+    >
+      {children}
+    </div>
+  );
 }
