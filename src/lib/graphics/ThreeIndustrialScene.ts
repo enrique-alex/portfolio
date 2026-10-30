@@ -1304,7 +1304,7 @@ export class ThreeIndustrialScene {
         this.linesMesh.geometry.dispose();
       }
       if (Array.isArray(this.linesMesh.material)) {
-        this.linesMesh.material.forEach((m) => m.dispose());
+        this.linesMesh.material.forEach((m: THREE.Material) => m.dispose());
       } else {
         this.linesMesh.material.dispose();
       }
