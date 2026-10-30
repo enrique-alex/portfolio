@@ -77,4 +77,25 @@ describe('DualBodyCursor Component', () => {
       globalThis.window = originalWindow;
     }
   });
+
+  it('should return null on server even if client would have fine pointer (strict SSR match)', () => {
+    const mediaQueryMock = {
+      matches: true,
+      media: '(pointer: fine)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    };
+    const originalWindow = globalThis.window;
+    // @ts-expect-error Mocking window
+    globalThis.window = {
+      matchMedia: vi.fn().mockReturnValue(mediaQueryMock),
+    };
+
+    try {
+      const html = renderToString(React.createElement(DualBodyCursor));
+      expect(html).toBe('');
+    } finally {
+      globalThis.window = originalWindow;
+    }
+  });
 });

@@ -324,7 +324,9 @@ describe('KineticCanvas & Shaders GLSL (Phases 3 & 4)', () => {
     it('should render a valid canvas with strictly defined Tailwind classes on server (SSR)', () => {
       const html = renderToString(React.createElement(KineticCanvas));
       expect(html).toContain('<canvas');
-      expect(html).toContain('fixed inset-0 -z-10 pointer-events-none w-full h-full');
+      expect(html).toContain('id="gl"');
+      expect(html).toContain('fixed inset-0 z-0 pointer-events-none w-full h-full');
+      expect(html).toContain('touch-action:pan-y');
       expect(html).toContain('aria-hidden="true"');
     });
 

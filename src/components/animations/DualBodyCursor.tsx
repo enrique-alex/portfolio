@@ -95,16 +95,16 @@ export default function DualBodyCursor() {
         if (dist < 0.1) {
           currentRingX.current = targetX.current;
           currentRingY.current = targetY.current;
-          ringRef.current.style.transform = `translate3d(${targetX.current}px, ${targetY.current}px, 0) translate(-50%, -50%)`;
+          ringRef.current.style.transform = `translate3d(${targetX.current}px, ${targetY.current}px, 0)`;
           stopFrameLoop();
           return;
         }
 
-        const factor = 1 - Math.exp(-LERP_SPEED * dt);
-        currentRingX.current += dx * factor;
-        currentRingY.current += dy * factor;
+        // Règle CliffIsCurious : ringPos += (mousePos - ringPos) * 0.18
+        currentRingX.current += dx * 0.18;
+        currentRingY.current += dy * 0.18;
 
-        ringRef.current.style.transform = `translate3d(${currentRingX.current}px, ${currentRingY.current}px, 0) translate(-50%, -50%)`;
+        ringRef.current.style.transform = `translate3d(${currentRingX.current}px, ${currentRingY.current}px, 0)`;
       });
     };
 
@@ -116,26 +116,27 @@ export default function DualBodyCursor() {
       targetY.current = y;
       magneticManager.setCursor(x, y);
 
-      if (!hasMoved.current) {
+      const isReEntering = !hasMoved.current || (dotRef.current && dotRef.current.style.opacity === '0');
+      if (isReEntering) {
         hasMoved.current = true;
         currentRingX.current = x;
         currentRingY.current = y;
 
-        // Positionnement immédiat avant d'afficher pour éviter tout flash en (0, 0)
+        // Positionnement immédiat avant d'afficher pour éviter tout flash ou swoop
         if (dotRef.current) {
-          dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+          dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
           dotRef.current.style.opacity = '1';
         }
         if (ringRef.current) {
-          ringRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+          ringRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
           ringRef.current.style.opacity = '1';
         }
         return;
       }
 
-      // 1. Rendu DOM direct instantané sur #cur-dot
+      // 1. Rendu DOM direct instantané sur #cur
       if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+        dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         if (dotRef.current.style.opacity !== '1') {
           dotRef.current.style.opacity = '1';
         }
@@ -150,7 +151,7 @@ export default function DualBodyCursor() {
         currentRingX.current = x;
         currentRingY.current = y;
         if (ringRef.current) {
-          ringRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+          ringRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         }
         stopFrameLoop();
       } else {
@@ -162,6 +163,7 @@ export default function DualBodyCursor() {
       magneticManager.setCursor(-9999, -9999);
       if (dotRef.current) dotRef.current.style.opacity = '0';
       if (ringRef.current) ringRef.current.style.opacity = '0';
+      stopFrameLoop();
     };
 
     const onVisibilityChange = () => {
@@ -191,23 +193,23 @@ export default function DualBodyCursor() {
 
   return (
     <>
-      {/* #cur-dot : Point central instantané */}
+      {/* #cur : Point direct instantané */}
       <div
-        id="cur-dot"
+        id="cur"
         ref={dotRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[9999] h-2 w-2 rounded-full bg-white opacity-0 transition-opacity duration-200"
+        className="pointer-events-none fixed top-0 left-0 z-[9999] h-2 w-2 -ml-1 -mt-1 rounded-full bg-white opacity-0 transition-opacity duration-150"
         style={{
           mixBlendMode: 'difference',
           willChange: 'transform',
         }}
       />
-      {/* #cur-ring : Anneau externe lissé par Lerp temporel */}
+      {/* #ring : Anneau suiveur lissé */}
       <div
-        id="cur-ring"
+        id="ring"
         ref={ringRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[9999] h-8 w-8 rounded-full border border-white opacity-0 transition-opacity duration-200"
+        className="pointer-events-none fixed top-0 left-0 z-[9999] h-8 w-8 -ml-4 -mt-4 rounded-full border border-white opacity-0 transition-opacity duration-150"
         style={{
           mixBlendMode: 'difference',
           willChange: 'transform',

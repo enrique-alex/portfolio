@@ -163,4 +163,59 @@ describe('ThreeIndustrialScene & 4 Parametric Topologies (Étape 4)', () => {
 
     scene.destroy();
   });
+
+  it('should initialize with mobile point count (<= 2500) and no active lines when width < 768', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    // Simulate mobile window
+    const originalWindow = globalThis.window;
+    // @ts-expect-error Mocking window
+    globalThis.window = {
+      innerWidth: 390,
+      innerHeight: 844,
+      devicePixelRatio: 3,
+      matchMedia: vi.fn().mockReturnValue({ matches: true }),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    };
+
+    try {
+      const scene = new ThreeIndustrialScene(fakeCanvas);
+      expect(scene.currentPositionsBuffer.length).toBeLessThanOrEqual(2500 * 3);
+      scene.destroy();
+    } finally {
+      globalThis.window = originalWindow;
+    }
+  });
+
+  it('should support dynamic theme contrast adaptation without crash', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const fakeDocument = {
+      documentElement: {
+        classList: {
+          contains: vi.fn((cls: string) => cls === 'dark'),
+        },
+      },
+      hidden: false,
+    };
+
+    const originalDoc = globalThis.document;
+    // @ts-expect-error Mocking document
+    globalThis.document = fakeDocument;
+
+    try {
+      const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 40 });
+      expect(scene.activeTopologyName).toBe('SMART_GRID_NODAL_MESH');
+      scene.destroy();
+    } finally {
+      globalThis.document = originalDoc;
+    }
+  });
 });

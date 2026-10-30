@@ -13,14 +13,10 @@ export default function Home() {
 
       {/* 
         Le Background Ambient
-        Un maillage très subtil (Grid) couplé à des halos lumineux qui se fondent avec l'animation de fond
+        Un maillage très subtil (Grid) couplé à l'animation WebGL d'arrière-plan
       */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-
-        {/* Halos lumineux (Glows) confinés pour éviter l'overflow horizontal */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-blue/20 blur-[120px]"></div>
-        <div className="absolute top-[20%] right-0 h-[300px] w-[300px] rounded-full bg-brand-red/10 blur-[100px]"></div>
       </div>
 
       <HeroSection />

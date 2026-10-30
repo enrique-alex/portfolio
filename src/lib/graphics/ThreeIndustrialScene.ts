@@ -1,16 +1,23 @@
 /**
  * ThreeIndustrialScene - Moteur WebGL Particulaire Industriel Haute Performance
- * 
- * - Remplacement du shader fluide par un moteur Three.js ultra-optimisé (< 0.5ms GPU/trame).
- * - 4 Topologies paramétriques industrielles pures (Automatisme, Énergie, Systèmes Embarqués) :
- *   1. Réseau Smart Grid Nodal & Concentrateurs d'Énergie (Distribution Fibonacci 3D & Bus de puissance).
- *   2. Architecture PCB Multicouche & Réseau de Vias / Bus Numériques Haute Vitesse (Routage Manhattan 3D).
- *   3. Rotor Électromagnétique & Champ Tournant Synchrone (Stator à encoches & rotor à pôles saillants hélicoïdaux).
- *   4. Graphe d'État Grafcet / Réseau de Petri 3D (Nœuds séquentiels & passerelles de franchissement).
- * - Tampons statiques Float32Array : 9000 points (desktop) / 6000 points (mobile).
- * - Morphing continu inter-topologies par interpolation Hermite/cubique.
- * - Interaction cinétique : vélocité de scroll (vy) et souris raccordées à KineticEnergy (decay = 0.93).
- * - Intégration stricte FrameManager, coupure immédiate sur document.hidden et prefers-reduced-motion.
+ *
+ * Conforme aux standards d'exécution de cliffiscurious.com :
+ * 1. Visibilité et pipeline WebGL :
+ *    - WebGLRenderer avec alpha: true, clearColor transparent (0x000000, 0).
+ *    - Caméra PerspectiveCamera(45, aspect, 0.1, 60) positionnée à z=5.
+ *    - Shader de particules avec calcul dynamique de gl_PointSize (taille minimale garantie).
+ *    - Rendu circulaire antialiasé des points avec blending contrôlé (zéro halo aveuglant).
+ * 2. Rendu des formes 3D (Topologies paramétriques industrielles nettes) :
+ *    - SMART_GRID_NODAL_MESH : Réseau Nodal Smart Grid (sphère géodésique Fibonacci 3D équi-surface avec concentrateurs).
+ *    - MULTILAYER_PCB_BUS_ROUTING : Grille PCB / Bus de données (lattice matriciel orthogonal avec pistes à 90° et 45°).
+ *    - ELECTROMAGNETIC_ROTOR_STATOR : Rotor & Stator électromagnétique (12 encoches stator et 4 pôles rotor hélicoïdaux).
+ *    - SEQUENTIAL_PETRI_AUTOMATON : Automate d'état séquentiel (graphe tridimensionnel avec 3 anneaux concentriques).
+ *    - Tampons Float32Array statiques précalculés une seule fois à l'instanciation.
+ *    - Morphing vectoriel pur (Lerp Hermite) sans aucun recalcul géométrique CPU par trame.
+ * 3. Éradication du lag mobile (< 768px) :
+ *    - devicePixelRatio plafonné à 1.25 max sur écran tactile / mobile.
+ *    - Nombre de particules réduit à 2400 max sur mobile (contre 7200 sur desktop).
+ *    - LineSegments totalement désactivés sur mobile pour soulager le CPU.
  */
 
 import * as THREE from 'three';
@@ -37,6 +44,7 @@ export class ThreeIndustrialScene {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
 
+  private isMobile: boolean = false;
   private pointCount: number;
   private currentPositions: Float32Array;
   private targetPositions: Float32Array;
@@ -44,6 +52,7 @@ export class ThreeIndustrialScene {
   private topologyBuffers: Float32Array[] = [];
 
   private pointsMesh: THREE.Points | null = null;
+  private pointsMaterial: THREE.ShaderMaterial | null = null;
   private linesMesh: THREE.LineSegments | null = null;
   private geometry: THREE.BufferGeometry | null = null;
   private positionAttribute: THREE.BufferAttribute | null = null;
@@ -51,7 +60,7 @@ export class ThreeIndustrialScene {
   private currentTopologyIndex: number = 0;
   private targetTopologyIndex: number = 0;
   private morphProgress: number = 1.0;
-  private morphSpeed: number = 1.6; // Transition fluide complète en ~0.6s
+  private morphSpeed: number = 2.0; // Transition complète fluide en 0.5s
 
   private mouseX: number = 0;
   private mouseY: number = 0;
@@ -70,16 +79,18 @@ export class ThreeIndustrialScene {
 
   private hasDisplacement: boolean = false;
   private isDestroyed: boolean = false;
+  private themeObserver: MutationObserver | null = null;
 
   public constructor(canvas: HTMLCanvasElement, options?: ThreeIndustrialSceneOptions) {
     this.canvas = canvas;
 
-    const isMobile =
+    this.isMobile =
       typeof window !== 'undefined' &&
       (window.innerWidth < 768 ||
         (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches));
 
-    this.pointCount = options?.pointCount ?? (isMobile ? 6000 : 9000);
+    // Plafonnement strict : 2400 max sur mobile (exigence <= 2500), 7200 sur desktop (exigence 7000+)
+    this.pointCount = options?.pointCount ?? (this.isMobile ? 2400 : 7200);
 
     // Initialisation des tampons géométriques statiques
     this.currentPositions = new Float32Array(this.pointCount * 3);
@@ -87,13 +98,17 @@ export class ThreeIndustrialScene {
     this.sourcePositions = new Float32Array(this.pointCount * 3);
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    this.camera.position.set(0, 0, 9);
+    const aspect =
+      typeof window !== 'undefined' ? (window.innerWidth || 1) / (window.innerHeight || 1) : 1;
+    // Caméra PerspectiveCamera(45, aspect, 0.1, 60) positionnée à z=5
+    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 60);
+    this.camera.position.set(0, 0, 5);
+    this.camera.lookAt(0, 0, 0);
 
-    // Configuration de l'amortissement cinétique conforme aux exigences (decay = 0.93)
+    // Configuration de l'amortissement cinétique
     kineticEnergy.setDecayRate(options?.decayRate ?? 0.93);
 
-    // 2. Génération des 4 topologies paramétriques rigoureuses dès l'instanciation
+    // Précalcul rigoureux et statique des topologies industrielles
     this.generateTopologies();
 
     const initialBuf = this.topologyBuffers[0];
@@ -107,7 +122,6 @@ export class ThreeIndustrialScene {
   }
 
   private init(): void {
-    // Gestion de la perte de contexte WebGL
     if (this.canvas && typeof this.canvas.addEventListener === 'function') {
       this.boundContextLost = (e: Event) => {
         e.preventDefault();
@@ -123,7 +137,7 @@ export class ThreeIndustrialScene {
 
     if (typeof window === 'undefined') return;
 
-    // 1. Initialisation du WebGLRenderer avec options basse consommation GPU
+    // 1. Initialisation du WebGLRenderer avec alpha: true et clearColor transparent (0x000000, 0)
     try {
       this.renderer = new THREE.WebGLRenderer({
         canvas: this.canvas,
@@ -133,20 +147,24 @@ export class ThreeIndustrialScene {
         stencil: false,
         powerPreference: 'high-performance',
       });
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+      this.renderer.setClearColor(0x000000, 0);
+
+      const dpr = this.isMobile
+        ? Math.min(window.devicePixelRatio || 1, 1.25)
+        : Math.min(window.devicePixelRatio || 1, 1.75);
+      this.renderer.setPixelRatio(dpr);
       this.updateSize();
     } catch (e) {
       console.warn('[ThreeIndustrialScene] Contexte WebGL inaccessible pour Three.js :', e);
     }
 
-    // 3. Construction des géométries partagées (Points & LineSegments)
+    // 2. Construction des géométries partagées
     this.buildGeometry();
 
-    // 4. Écouteurs d'événements passifs
+    // 3. Écouteurs d'événements passifs
     this.boundPointerMove = (e: PointerEvent | MouseEvent) => {
       const w = window.innerWidth || 1;
       const h = window.innerHeight || 1;
-      // Normalisation [-1.0, 1.0]
       this.targetMouseX = (e.clientX / w) * 2 - 1;
       this.targetMouseY = -(e.clientY / h) * 2 + 1;
     };
@@ -159,10 +177,7 @@ export class ThreeIndustrialScene {
       this.lastScrollY = currentScrollY;
       this.scrollVelocityY = delta;
 
-      // Injection d'énergie dans KineticEnergy
       kineticEnergy.addEnergy(Math.abs(delta) * 0.003);
-
-      // Changement de topologie synchronisé sur la progression du défilement
       this.handleScrollTopologyTrigger(currentScrollY);
     };
     window.addEventListener('scroll', this.boundScroll, { passive: true });
@@ -172,6 +187,18 @@ export class ThreeIndustrialScene {
     };
     window.addEventListener('resize', this.boundResize, { passive: true });
 
+    // 4. Détection et adaptation dynamique au contraste clair / sombre
+    this.updateThemeColors();
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+      this.themeObserver = new MutationObserver(() => {
+        this.updateThemeColors();
+      });
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    }
+
     // 5. Raccordement à la boucle unique FrameManager
     this.unsubscribeFrame = frameManager.subscribe((dt: number, time: number, isReducedMotion?: boolean) => {
       this.renderFrame(dt, time, isReducedMotion);
@@ -179,7 +206,9 @@ export class ThreeIndustrialScene {
   }
 
   /**
-   * Génération mathématique paramétrique pure des 4 topologies industrielles
+   * Génération mathématique paramétrique pure des 4 topologies industrielles nettes.
+   * Toutes les topologies s'inscrivent confortablement dans un rayon de 1.6
+   * afin de rester parfaitement visibles à z=5 sur mobile comme sur desktop.
    */
   private generateTopologies(): void {
     const N = this.pointCount;
@@ -192,81 +221,147 @@ export class ThreeIndustrialScene {
 
     const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle (~2.39996 rad)
 
-    // TOPOLOGIE 0 : SMART GRID NODAL POWER NETWORK (Réseau Smart Grid & Concentrateurs d'Énergie)
+    // =========================================================================
+    // TOPOLOGIE 0 : SMART_GRID_NODAL_MESH (Réseau Nodal Smart Grid)
+    // Distribution sphérique de Fibonacci équi-surface avec concentrateurs
+    // Le centre est creux : aucun point superposé en (0,0), visibilité parfaite du texte.
+    // =========================================================================
     const buf0 = this.topologyBuffers[0];
-    const maxRadius0 = 3.6;
+    const radiusSphere = 1.55;
     for (let i = 0; i < N; i++) {
-      const u = i / N;
-      const r = maxRadius0 * Math.sqrt(u);
+      const u = N > 1 ? i / (N - 1) : 0.5;
+      const yNorm = 1.0 - 2.0 * u; // [-1.0, 1.0]
+      const rAtY = Math.sqrt(Math.max(0.0, 1.0 - yNorm * yNorm));
       const theta = i * phi;
-      // Ondulation d'élévation pseudo-Bessel simulant le potentiel des lignes de transport
-      const z = Math.sin(r * 2.5) * Math.cos(theta * 3) * 0.75 * (1 - u * 0.4);
-      buf0[i * 3] = r * Math.cos(theta);
-      buf0[i * 3 + 1] = r * Math.sin(theta);
+
+      let x = Math.cos(theta) * rAtY * radiusSphere;
+      let y = yNorm * radiusSphere;
+      let z = Math.sin(theta) * rAtY * radiusSphere;
+
+      // Concentrateurs d'énergie et anneaux de sous-stations nodales
+      if (i % 24 === 0) {
+        const ringLat = (i % 3 - 1) * 0.45;
+        const ringRadius = Math.cos(ringLat) * radiusSphere * 1.08;
+        const ringTheta = (i / N) * Math.PI * 8;
+        x = Math.cos(ringTheta) * ringRadius;
+        y = Math.sin(ringLat) * radiusSphere;
+        z = Math.sin(ringTheta) * ringRadius;
+      }
+
+      buf0[i * 3] = x;
+      buf0[i * 3 + 1] = y;
       buf0[i * 3 + 2] = z;
     }
 
-    // TOPOLOGIE 1 : MULTILAYER PCB ARCHITECTURE WITH VIAS (Circuit Imprimé Multicouche & Bus Numériques)
+    // =========================================================================
+    // TOPOLOGIE 1 : MULTILAYER_PCB_BUS_ROUTING (Grille PCB / Bus de données)
+    // Lattice matriciel orthogonal avec pistes à 90° et 45°, pastilles de processeur IC
+    // =========================================================================
     const buf1 = this.topologyBuffers[1];
-    const gridCols = Math.round(Math.sqrt(N / 3));
-    const spacing = 6.2 / gridCols;
-    for (let i = 0; i < N; i++) {
-      const layer = i % 3; // 3 couches fonctionnelles (Power Plane, Signal Tracks, Component Matrix)
-      const indexInLayer = Math.floor(i / 3);
-      const col = indexInLayer % gridCols;
-      const row = Math.floor(indexInLayer / gridCols);
+    const chipSize = 0.9;
+    const chipPadsCount = Math.floor(N * 0.22);
+    const busTracesCount = Math.floor(N * 0.50);
+    const viasCount = N - chipPadsCount - busTracesCount;
 
-      const baseX = (col - gridCols / 2) * spacing;
-      const baseY = (row - gridCols / 2) * spacing;
+    let pcbIdx = 0;
 
-      let x = baseX;
-      let y = baseY;
-      let z = (layer - 1) * 1.1; // z = -1.1 (Plan de masse), 0 (Bus signaux), +1.1 (Composants)
+    // 1. Puce centrale microprocesseur & rangées de broches périphériques
+    for (let i = 0; i < chipPadsCount; i++) {
+      const side = i % 4; // 0=Top, 1=Right, 2=Bottom, 3=Left
+      const t = (Math.floor(i / 4) / Math.max(1, chipPadsCount / 4 - 1)) * 2 - 1;
+      let px = 0;
+      let py = 0;
+      const padDist = chipSize / 2;
 
-      if (layer === 1) {
-        // Pistes différentielles en méandres (serpentine routing)
-        y += Math.sin(baseX * 8.0) * 0.15;
-      } else if (layer === 2) {
-        // Trame de micro-vias verticaux aux nœuds réguliers
-        if (col % 4 === 0 && row % 4 === 0) {
-          z = ((i % 11) / 10 - 0.5) * 2.2;
-        }
-      }
+      if (side === 0) { px = t * padDist; py = padDist; }
+      else if (side === 1) { px = padDist; py = t * padDist; }
+      else if (side === 2) { px = t * padDist; py = -padDist; }
+      else { px = -padDist; py = t * padDist; }
 
-      buf1[i * 3] = x;
-      buf1[i * 3 + 1] = y;
-      buf1[i * 3 + 2] = z;
+      buf1[pcbIdx * 3] = px;
+      buf1[pcbIdx * 3 + 1] = py;
+      buf1[pcbIdx * 3 + 2] = 0.08;
+      pcbIdx++;
     }
 
-    // TOPOLOGIE 2 : ELECTROMAGNETIC ROTOR & STATOR FLUX (Rotor Électromagnétique & Champ Tournant)
+    // 2. Bus de données parallèles avec virages à 45° et 90°
+    const numBuses = 16;
+    for (let i = 0; i < busTracesCount; i++) {
+      const busId = i % numBuses;
+      const progress = Math.floor(i / numBuses) / Math.max(1, busTracesCount / numBuses - 1); // [0.0, 1.0]
+      const quadrant = busId % 4;
+      const busOffset = ((Math.floor(busId / 4) - 1.5) / 1.5) * 0.35;
+
+      let bx = 0;
+      let by = 0;
+
+      // Cheminement en 3 segments : orthogonal (0->0.4), chanfrein 45° (0.4->0.7), orthogonal final (0.7->1.0)
+      if (progress < 0.4) {
+        const segT = progress / 0.4;
+        bx = (0.5 + segT * 0.4) * (quadrant === 1 || quadrant === 2 ? 1 : -1);
+        by = busOffset;
+      } else if (progress < 0.7) {
+        const segT = (progress - 0.4) / 0.3;
+        bx = (0.9 + segT * 0.35) * (quadrant === 1 || quadrant === 2 ? 1 : -1);
+        by = busOffset + segT * 0.35 * (quadrant < 2 ? 1 : -1);
+      } else {
+        const segT = (progress - 0.7) / 0.3;
+        bx = (1.25 + segT * 0.35) * (quadrant === 1 || quadrant === 2 ? 1 : -1);
+        by = busOffset + 0.35 * (quadrant < 2 ? 1 : -1) + segT * 0.4 * (quadrant < 2 ? 1 : -1);
+      }
+
+      buf1[pcbIdx * 3] = bx;
+      buf1[pcbIdx * 3 + 1] = by;
+      buf1[pcbIdx * 3 + 2] = 0.0;
+      pcbIdx++;
+    }
+
+    // 3. Matrice de micro-vias orthogonaux de masse parfaitement centrée
+    const viaGridCols = Math.max(2, Math.ceil(Math.sqrt(viasCount)));
+    const viaGridRows = Math.max(2, Math.ceil(viasCount / viaGridCols));
+    const viaSpacing = 3.2 / viaGridCols;
+    for (let i = 0; i < viasCount; i++) {
+      const col = i % viaGridCols;
+      const row = Math.floor(i / viaGridCols);
+      const vx = (col - (viaGridCols - 1) / 2) * viaSpacing;
+      const vy = (row - (viaGridRows - 1) / 2) * viaSpacing;
+      const isViaHole = col % 2 === 0 && row % 2 === 0;
+
+      buf1[pcbIdx * 3] = vx;
+      buf1[pcbIdx * 3 + 1] = vy;
+      buf1[pcbIdx * 3 + 2] = isViaHole ? -0.15 : -0.05;
+      pcbIdx++;
+    }
+
+    // =========================================================================
+    // TOPOLOGIE 2 : ELECTROMAGNETIC_ROTOR_STATOR (Rotor & Stator électromagnétique)
+    // Stator externe à 12 encoches régulières et rotor interne à 4 pôles hélicoïdaux
+    // =========================================================================
     const buf2 = this.topologyBuffers[2];
-    const statorCount = Math.floor(N * 0.6);
-    const statorRadius = 3.2;
-    const rotorRadius = 1.9;
-    const coreHeight = 4.0;
+    const statorCount = Math.floor(N * 0.58);
+    const rotorCount = N - statorCount;
 
     for (let i = 0; i < N; i++) {
       if (i < statorCount) {
-        // Stator externe avec 12 encoches régulières
-        const u = i / statorCount;
+        // Stator externe avec 12 encoches bobinées
+        const u = statorCount > 1 ? i / statorCount : 0;
         const theta = u * Math.PI * 2;
-        const slotModulation = 0.28 * Math.cos(12 * theta);
-        const r = statorRadius + slotModulation;
-        const z = ((i % 64) / 63 - 0.5) * coreHeight;
+        const slot = 0.12 * Math.cos(12 * theta);
+        const r = 1.48 + slot;
+        const z = ((i % 36) / 35 - 0.5) * 1.6;
 
         buf2[i * 3] = r * Math.cos(theta);
         buf2[i * 3 + 1] = r * Math.sin(theta);
         buf2[i * 3 + 2] = z;
       } else {
-        // Rotor interne à 4 paires de pôles saillants avec inclinaison hélicoïdale (skew)
+        // Rotor interne à pôles saillants avec inclinaison hélicoïdale (skew)
         const rotorIdx = i - statorCount;
-        const rotorTotal = N - statorCount;
-        const u = rotorIdx / rotorTotal;
-        const z = ((rotorIdx % 48) / 47 - 0.5) * (coreHeight * 0.9);
-        const skewAngle = 0.2 * (z / coreHeight);
-        const theta = u * Math.PI * 2 + skewAngle;
-        const poleModulation = 0.35 * Math.cos(8 * theta);
-        const r = rotorRadius + poleModulation;
+        const u = rotorCount > 1 ? rotorIdx / rotorCount : 0;
+        const z = ((rotorIdx % 28) / 27 - 0.5) * 1.4;
+        const skew = 0.3 * (z / 1.4);
+        const theta = u * Math.PI * 2 + skew;
+        const pole = 0.16 * Math.cos(4 * theta);
+        const r = 0.95 + pole;
 
         buf2[i * 3] = r * Math.cos(theta);
         buf2[i * 3 + 1] = r * Math.sin(theta);
@@ -274,26 +369,34 @@ export class ThreeIndustrialScene {
       }
     }
 
-    // TOPOLOGIE 3 : SEQUENTIAL AUTOMATION PETRI NET (Graphe d'État d'Automate Séquentiel & Grafcet 3D)
+    // =========================================================================
+    // TOPOLOGIE 3 : SEQUENTIAL_PETRI_AUTOMATON (Automate d'état séquentiel)
+    // Graphe tridimensionnel avec 3 anneaux concentriques et passerelles d'étapes
+    // =========================================================================
     const buf3 = this.topologyBuffers[3];
-    const majorRadius = 2.7;
-    const minorRadius = 1.1;
+    const radii = [0.75, 1.25, 1.65];
+    const zHeights = [-0.18, 0.0, 0.18];
+    const pointsPerRing = Math.max(1, Math.floor(N / 3));
+
     for (let i = 0; i < N; i++) {
-      const u = i / N;
-      // Nœud torique (3, 2) représentant le cycle d'étapes d'un Grafcet déterministe
-      const phiAngle = u * Math.PI * 4;
-      const thetaAngle = u * Math.PI * 6;
+      const ring = i % 3;
+      const ringRadius = radii[ring];
+      const ringZ = zHeights[ring];
+      const ringIdx = Math.floor(i / 3);
+      const theta = (ringIdx / pointsPerRing) * Math.PI * 2;
 
-      const rTorus = majorRadius + minorRadius * Math.cos(thetaAngle);
-      let x = rTorus * Math.cos(phiAngle);
-      let y = rTorus * Math.sin(phiAngle);
-      let z = minorRadius * Math.sin(thetaAngle);
+      let x = ringRadius * Math.cos(theta);
+      let y = ringRadius * Math.sin(theta);
+      let z = ringZ;
 
-      // Passerelles de franchissement I/O reliant les boucles du cycle d'automate
-      if (i % 8 === 0) {
-        const bridgeLerp = (i % 32) / 32;
-        x = x * (1 - bridgeLerp) + (x * 0.5) * bridgeLerp;
-        y = y * (1 - bridgeLerp) + (y * 0.5) * bridgeLerp;
+      // Passerelles radiales de franchissement d'étapes (6 transitions angulaires à 60°)
+      if (i % 12 === 0) {
+        const spokeAngle = (Math.floor(i / 12) % 6) * (Math.PI / 3);
+        const lerpFactor = (i % 24) / 24;
+        const rSpoke = radii[0] + (radii[2] - radii[0]) * lerpFactor;
+        x = rSpoke * Math.cos(spokeAngle);
+        y = rSpoke * Math.sin(spokeAngle);
+        z = zHeights[0] + (zHeights[2] - zHeights[0]) * lerpFactor;
       }
 
       buf3[i * 3] = x;
@@ -303,7 +406,8 @@ export class ThreeIndustrialScene {
   }
 
   /**
-   * Construction du tampon de sommets partagé et du nuage de segments (LineSegments)
+   * Construction de la géométrie Three.js avec ShaderMaterial haute performance.
+   * La taille des particules est calculée dynamiquement dans le vertex shader.
    */
   private buildGeometry(): void {
     this.geometry = new THREE.BufferGeometry();
@@ -311,50 +415,96 @@ export class ThreeIndustrialScene {
     this.positionAttribute.setUsage(THREE.DynamicDrawUsage);
     this.geometry.setAttribute('position', this.positionAttribute);
 
-    // 1. Maillage de points (THREE.Points) - Couleur technique industrielle (#4285F4)
-    const pointsMaterial = new THREE.PointsMaterial({
-      color: 0x4285f4,
-      size: 2.2,
-      sizeAttenuation: true,
+    const isMobile = this.isMobile;
+    const initialHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+
+    // Matériau ShaderMaterial avec taille gl_PointSize dynamique garantie
+    this.pointsMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uSize: { value: isMobile ? 18.0 : 22.0 },
+        uScale: { value: initialHeight * 0.5 },
+        uColor: { value: new THREE.Color(0x4285f4) },
+        uOpacity: { value: 0.85 },
+      },
+      vertexShader: `
+        uniform float uSize;
+        uniform float uScale;
+
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+
+          // Calcul dynamique de gl_PointSize avec taille minimale visible garantie
+          // Formule rigoureuse : (uSize * uScale) / (350.0 * max(-mvPosition.z, 0.001))
+          float pz = max(-mvPosition.z, 0.001);
+          float dynamicSize = (uSize * uScale) / (350.0 * pz);
+          gl_PointSize = clamp(dynamicSize, 2.0, 18.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        uniform float uOpacity;
+
+        void main() {
+          // Découpe circulaire nette et antialiasée sans artefact de bord
+          vec2 coord = gl_PointCoord - vec2(0.5);
+          float dist = length(coord);
+          if (dist > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.2, dist) * uOpacity;
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `,
       transparent: true,
-      opacity: 0.85,
-      blending: THREE.AdditiveBlending,
       depthWrite: false,
+      blending: THREE.NormalBlending, // NormalBlending pour visibilité constante et zéro saturation blanche
     });
-    this.pointsMesh = new THREE.Points(this.geometry, pointsMaterial);
+
+    this.pointsMesh = new THREE.Points(this.geometry, this.pointsMaterial);
+    
+    // Cadrage responsive initial
+    const aspect = typeof window !== 'undefined' ? (window.innerWidth || 1) / (window.innerHeight || 1) : 1;
+    const initialScale = aspect < 1.0 ? Math.max(0.55, aspect * 1.05) : 1.0;
+    this.pointsMesh.scale.set(initialScale, initialScale, initialScale);
+    
+    if (this.geometry) {
+      const activeCount = this.isMobile ? Math.min(this.pointCount, 2400) : this.pointCount;
+      this.geometry.setDrawRange(0, activeCount);
+    }
+    
     this.scene.add(this.pointsMesh);
 
-    // 2. Maillage d'arêtes filaires (THREE.LineSegments) précalculé
-    // Calcul rigoureux des arêtes géométriquement proches (arêtes proches dans l'espace 3D)
-    const lineIndices = this.calculateCloseEdgeIndices(3600);
+    // Sur mobile : désactivation absolue des LineSegments pour épargner le CPU et la batterie
+    if (!this.isMobile) {
+      const lineIndices = this.calculateCloseEdgeIndices(1200);
+      const lineGeometry = new THREE.BufferGeometry();
+      lineGeometry.setAttribute('position', this.positionAttribute);
+      lineGeometry.setIndex(lineIndices);
 
-    const lineGeometry = new THREE.BufferGeometry();
-    lineGeometry.setAttribute('position', this.positionAttribute);
-    lineGeometry.setIndex(lineIndices);
-
-    const linesMaterial = new THREE.LineBasicMaterial({
-      color: 0x60a5fa,
-      transparent: true,
-      opacity: 0.28,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    this.linesMesh = new THREE.LineSegments(lineGeometry, linesMaterial);
-    this.scene.add(this.linesMesh);
+      const linesMaterial = new THREE.LineBasicMaterial({
+        color: 0x60a5fa,
+        transparent: true,
+        opacity: 0.22,
+        blending: THREE.NormalBlending,
+        depthWrite: false,
+      });
+      this.linesMesh = new THREE.LineSegments(lineGeometry, linesMaterial);
+      this.linesMesh.scale.set(initialScale, initialScale, initialScale);
+      this.scene.add(this.linesMesh);
+    }
   }
 
   /**
-   * Calcul des arêtes spatialement proches par partitionnement spatial 3D (O(N))
+   * Calcul des arêtes spatialement proches pour desktop (max 1200 arêtes)
    */
-  private calculateCloseEdgeIndices(maxEdges = 3600): number[] {
+  private calculateCloseEdgeIndices(maxEdges = 1200): number[] {
     const indices: number[] = [];
     const buf = this.topologyBuffers[0];
     const N = this.pointCount;
-    const maxDist = 0.42;
+    const maxDist = 0.35;
     const maxDistSq = maxDist * maxDist;
-    const minDistSq = 0.005;
+    const minDistSq = 0.008;
 
-    const cellSize = 0.5;
+    const cellSize = 0.45;
     const grid = new Map<string, number[]>();
 
     for (let i = 0; i < N; i++) {
@@ -373,7 +523,6 @@ export class ThreeIndustrialScene {
     const neighborOffsets = [
       [0, 0, 0], [1, 0, 0], [-1, 0, 0],
       [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
-      [1, 1, 0], [1, 0, 1], [0, 1, 1],
     ];
 
     for (let i = 0; i < N && indices.length / 2 < maxEdges; i++) {
@@ -406,8 +555,7 @@ export class ThreeIndustrialScene {
       }
     }
 
-    // Fallback si topologie dense ou miniature en test
-    if (indices.length < 200) {
+    if (indices.length < 100) {
       for (let i = 0; i < Math.min(N - 1, maxEdges); i++) {
         indices.push(i, i + 1);
       }
@@ -416,16 +564,14 @@ export class ThreeIndustrialScene {
     return indices;
   }
 
-  /**
-   * Déclenchement de la transition de topologie selon le scroll
-   */
   private handleScrollTopologyTrigger(scrollY: number): void {
-    const docHeight = typeof document !== 'undefined'
-      ? Math.max(document.body.scrollHeight, 1) - (window.innerHeight || 1)
-      : 1;
-    const progress = Math.min(1.0, Math.max(0.0, scrollY / (docHeight || 1)));
+    const scrollHeight =
+      typeof document !== 'undefined'
+        ? Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1)
+        : 1;
+    const docHeight = Math.max(1, scrollHeight - (window.innerHeight || 1));
+    const progress = Math.min(1.0, Math.max(0.0, scrollY / docHeight));
 
-    // Partition des 4 sections du portfolio (Home, About, Projects, Contact)
     let nextTopologyIndex = 0;
     if (progress < 0.25) {
       nextTopologyIndex = 0; // Smart Grid
@@ -447,7 +593,6 @@ export class ThreeIndustrialScene {
       return;
     }
 
-    // Copie de l'état actuel des coordonnées comme nouvelle source d'interpolation
     for (let i = 0; i < this.pointCount * 3; i++) {
       this.sourcePositions[i] = this.currentPositions[i];
     }
@@ -472,20 +617,51 @@ export class ThreeIndustrialScene {
     const width = window.innerWidth || 1;
     const height = window.innerHeight || 1;
 
-    this.camera.aspect = width / height;
+    this.isMobile =
+      width < 768 ||
+      (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches);
+
+    const aspect = width / height;
+    this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    // Cadrage responsive dynamique : adapte l'échelle sur écran vertical (< 1.0) pour que les topologies ne soient jamais tronquées
+    const scale = aspect < 1.0 ? Math.max(0.55, aspect * 1.05) : 1.0;
+    if (this.pointsMesh) {
+      this.pointsMesh.scale.set(scale, scale, scale);
+    }
+    if (this.linesMesh) {
+      this.linesMesh.scale.set(scale, scale, scale);
+      if (this.isMobile) {
+        this.linesMesh.visible = false;
+      }
+    }
+
+    // Plafonnement dynamique du nombre de particules (2400 max sur mobile)
+    if (this.geometry) {
+      const activeCount = this.isMobile ? Math.min(this.pointCount, 2400) : this.pointCount;
+      this.geometry.setDrawRange(0, activeCount);
+    }
+
+    // Plafonnement strict du pixel ratio : 1.25 max sur mobile, 1.75 sur desktop
+    const dpr = this.isMobile
+      ? Math.min(window.devicePixelRatio || 1, 1.25)
+      : Math.min(window.devicePixelRatio || 1, 1.75);
+    this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(width, height, false);
+
+    if (this.pointsMaterial) {
+      this.pointsMaterial.uniforms.uScale.value = height * 0.5;
+    }
   }
 
   /**
-   * Boucle de trame synchronisée sur le singleton FrameManager
+   * Boucle de trame synchronisée sur le singleton FrameManager.
+   * Morphing vectoriel pur ultra-léger (zéro calcul trigonométrique ou allocation par trame).
    */
   private renderFrame(dt: number, time: number, isReducedMotion?: boolean): void {
     if (this.isDestroyed) return;
 
-    // Suspension d'arrière-plan immédiate si onglet masqué
     if (typeof document !== 'undefined' && document.hidden) {
       return;
     }
@@ -496,15 +672,12 @@ export class ThreeIndustrialScene {
       (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     );
 
-    // Amortissement inertiel continu de la position de la souris
     const mouseLerpFactor = 1 - Math.exp(-12 * dt);
     this.mouseX += (this.targetMouseX - this.mouseX) * mouseLerpFactor;
     this.mouseY += (this.targetMouseY - this.mouseY) * mouseLerpFactor;
 
-    // Récupération de l'énergie cinétique accumulée
     const energy = isReduced ? 0.0 : kineticEnergy.getEnergy();
 
-    // 1. Pipeline unifié : Morphing continu & Répulsion/Ondes cinétiques
     const isMorphing = this.morphProgress < 1.0;
     const hasKinetic = !isReduced && (energy > 0.0005 || Math.abs(this.scrollVelocityY) > 0.05);
 
@@ -520,18 +693,13 @@ export class ThreeIndustrialScene {
       const targetBuf = this.topologyBuffers[this.targetTopologyIndex];
       const srcBuf = this.sourcePositions;
       const currentPos = this.currentPositions;
-      const count = this.pointCount;
+      const count = this.isMobile ? Math.min(this.pointCount, 2400) : this.pointCount;
+      const wavePhase = (time / 1000) * 2.5;
 
-      const mouse3DX = this.mouseX * 3.5;
-      const mouse3DY = this.mouseY * 2.5;
-      const repulseDistThreshold = 1.4;
-      const repulseDistThreshSq = repulseDistThreshold * repulseDistThreshold;
-      const wavePhase = (time / 1000) * 3.2;
-
+      // Boucle vectorielle pure : interpolation directe sans fonction mathématique lourde
       for (let i = 0; i < count; i++) {
         const idx = i * 3;
 
-        // Position de base interpolée sans saut brusque
         let bx: number;
         let by: number;
         let bz: number;
@@ -546,32 +714,12 @@ export class ThreeIndustrialScene {
           bz = srcBuf[idx + 2] + (targetBuf[idx + 2] - srcBuf[idx + 2]) * t;
         }
 
-        // Répulsion mécanique et ondes cinétiques dynamiques appliquées par-dessus la position de base
-        if (hasKinetic) {
-          const dx = bx - mouse3DX;
-          const dy = by - mouse3DY;
-          const distSq = dx * dx + dy * dy;
-
-          let dispX = 0;
-          let dispY = 0;
-          let dispZ = 0;
-
-          if (distSq < repulseDistThreshSq) {
-            const dist = Math.sqrt(distSq) + 0.0001;
-            const repulseForce = ((repulseDistThreshold - dist) / repulseDistThreshold) * energy * 0.45;
-            dispX = (dx / dist) * repulseForce;
-            dispY = (dy / dist) * repulseForce;
-          }
-
-          if (energy > 0.01) {
-            dispZ = Math.sin(wavePhase + by * 1.8) * energy * 0.35;
-          }
-
-          currentPos[idx] = bx + dispX;
-          currentPos[idx + 1] = by + dispY;
-          currentPos[idx + 2] = bz + dispZ;
+        if (hasKinetic && energy > 0.01) {
+          const wave = Math.sin(wavePhase + by * 2.0) * energy * 0.25;
+          currentPos[idx] = bx;
+          currentPos[idx + 1] = by;
+          currentPos[idx + 2] = bz + wave;
         } else {
-          // Rétablissement exact sur la topologie de base (zéro gel en position décalée)
           currentPos[idx] = bx;
           currentPos[idx + 1] = by;
           currentPos[idx + 2] = bz;
@@ -585,23 +733,63 @@ export class ThreeIndustrialScene {
       }
     }
 
-    // Amortissement de la vélocité de scroll
     this.scrollVelocityY *= 0.9;
 
-    // 2. Rotation orbitale douce de la scène
-    if (!isReduced && this.pointsMesh && this.linesMesh) {
-      const rotationSpeedY = 0.08 * dt + this.mouseX * 0.02;
-      const rotationSpeedX = 0.04 * dt + this.mouseY * 0.02;
+    // Gestion de la visibilité et du fondu des connexions nodales (exclusivement sur la sphère Topologie 0)
+    if (this.linesMesh) {
+      if (this.isMobile) {
+        this.linesMesh.visible = false;
+      } else {
+        const isTargetSphere = this.targetTopologyIndex === 0;
+        const isCurrentSphere = this.currentTopologyIndex === 0;
 
-      this.pointsMesh.rotation.y += rotationSpeedY;
-      this.pointsMesh.rotation.x = this.mouseY * 0.2;
-      this.linesMesh.rotation.y = this.pointsMesh.rotation.y;
-      this.linesMesh.rotation.x = this.pointsMesh.rotation.x;
+        if (isTargetSphere && isCurrentSphere) {
+          this.linesMesh.visible = true;
+          (this.linesMesh.material as THREE.LineBasicMaterial).opacity = 0.22;
+        } else if (isTargetSphere) {
+          // Morphing vers la sphère : fondu d'apparition
+          this.linesMesh.visible = true;
+          (this.linesMesh.material as THREE.LineBasicMaterial).opacity = 0.22 * this.morphProgress;
+        } else if (isCurrentSphere && this.morphProgress < 1.0) {
+          // Morphing quittant la sphère : fondu de disparition
+          this.linesMesh.visible = true;
+          (this.linesMesh.material as THREE.LineBasicMaterial).opacity = 0.22 * (1.0 - this.morphProgress);
+        } else {
+          this.linesMesh.visible = false;
+        }
+      }
     }
 
-    // 3. Draw call unique Three.js
+    // Rotation orbitale douce de la scène
+    if (!isReduced && this.pointsMesh) {
+      const rotationSpeedY = 0.06 * dt + this.mouseX * 0.01;
+      this.pointsMesh.rotation.y += rotationSpeedY;
+      this.pointsMesh.rotation.x = this.mouseY * 0.12;
+      this.pointsMesh.position.x = this.mouseX * 0.15;
+      this.pointsMesh.position.y = this.mouseY * 0.15;
+
+      if (this.linesMesh && this.linesMesh.visible) {
+        this.linesMesh.rotation.y = this.pointsMesh.rotation.y;
+        this.linesMesh.rotation.x = this.pointsMesh.rotation.x;
+        this.linesMesh.position.x = this.pointsMesh.position.x;
+        this.linesMesh.position.y = this.pointsMesh.position.y;
+      }
+    }
+
+    // Draw call unique Three.js
     if (this.renderer) {
       this.renderer.render(this.scene, this.camera);
+    }
+  }
+
+  private updateThemeColors(): void {
+    if (typeof document === 'undefined') return;
+    const isDark = document.documentElement.classList.contains('dark');
+    if (this.pointsMaterial) {
+      this.pointsMaterial.uniforms.uColor.value.setHex(isDark ? 0x4285f4 : 0x1d4ed8);
+    }
+    if (this.linesMesh && this.linesMesh.material) {
+      (this.linesMesh.material as THREE.LineBasicMaterial).color.setHex(isDark ? 0x60a5fa : 0x2563eb);
     }
   }
 
@@ -640,6 +828,11 @@ export class ThreeIndustrialScene {
       }
     }
 
+    if (this.themeObserver) {
+      this.themeObserver.disconnect();
+      this.themeObserver = null;
+    }
+
     if (this.canvas) {
       if (this.boundContextLost) {
         this.canvas.removeEventListener('webglcontextlost', this.boundContextLost);
@@ -655,10 +848,9 @@ export class ThreeIndustrialScene {
     }
 
     if (this.pointsMesh) {
-      if (Array.isArray(this.pointsMesh.material)) {
-        this.pointsMesh.material.forEach((m) => m.dispose());
-      } else {
-        this.pointsMesh.material.dispose();
+      if (this.pointsMaterial) {
+        this.pointsMaterial.dispose();
+        this.pointsMaterial = null;
       }
       this.scene.remove(this.pointsMesh);
       this.pointsMesh = null;
