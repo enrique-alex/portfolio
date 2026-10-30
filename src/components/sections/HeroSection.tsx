@@ -74,19 +74,19 @@ export default function HeroSection() {
   const { t } = useLanguage();
 
   return (
-      <section id="home" className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center px-4">
+      <section id="home" className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center px-4 overflow-x-clip">
         
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20 pt-24 lg:pt-0">
           
           {/* COLONNE GAUCHE : Typographie & Informations */}
           <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left z-10 w-full">
             {/* Titre Principal (Scramble Hardware Reveal) */}
-            <h1 className="z-10 w-full text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4rem] tracking-tighter leading-[1.05] font-extrabold">
-              <div className={`flex flex-col ${displayText !== TARGET_TEXT ? "font-mono font-normal tracking-tight text-2xl sm:text-4xl md:text-5xl lg:text-6xl" : ""}`}>
+            <h1 className="z-10 w-full text-2xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4rem] tracking-tighter leading-[1.05] font-extrabold">
+              <div className={`flex flex-col ${displayText !== TARGET_TEXT ? "font-mono font-normal tracking-tight text-xl sm:text-4xl md:text-5xl lg:text-6xl" : ""}`}>
                 {displayText ? displayText.split('\n').map((line, i) => (
                   <span 
                     key={i} 
-                    className={`block whitespace-nowrap text-transparent bg-clip-text ${
+                    className={`block break-words sm:whitespace-nowrap text-transparent bg-clip-text ${
                       displayText === TARGET_TEXT 
                         ? (i === 0 
                             ? 'bg-gradient-to-r from-zinc-700 to-zinc-400 dark:from-white/90 dark:to-white/50' 
@@ -108,12 +108,13 @@ export default function HeroSection() {
             {/* Badge "Hardware Status" */}
             <div className="mt-6 mb-2">
               <Magnetic intensity={0.2}>
-                <div className="group relative inline-flex cursor-pointer items-center gap-3 rounded-full border border-black/10 bg-black/5 px-5 py-2 text-sm font-medium text-zinc-900 backdrop-blur-md transition-colors hover:bg-black/10 dark:border-white/5 dark:bg-[#050505]/60 dark:text-zinc-200 dark:hover:bg-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+                <div className="group relative inline-flex cursor-pointer items-center gap-3 rounded-full border border-black/10 bg-black/5 px-5 py-2 text-sm font-medium text-zinc-900 backdrop-blur-md dark:border-white/5 dark:bg-[#050505]/60 dark:text-zinc-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden">
+                  <span className="absolute inset-0 bg-black/5 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60"></span>
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)]"></span>
                   </span>
-                  <span className="tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('hero.badge')} <span className="mx-1">•</span> {t('hero.badge.company')}</span>
+                  <span className="relative tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('hero.badge')} <span className="mx-1">•</span> {t('hero.badge.company')}</span>
                 </div>
               </Magnetic>
             </div>
@@ -128,11 +129,12 @@ export default function HeroSection() {
               <Magnetic intensity={0.25}>
                 <button 
                   onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} 
-                  className="group relative flex items-center gap-4 overflow-hidden rounded-full bg-zinc-900 px-8 py-4 font-semibold text-white transition-all hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className="group relative flex items-center gap-4 overflow-hidden rounded-full bg-zinc-900 px-8 py-4 font-semibold text-white active:scale-95 transition-transform duration-200 dark:bg-white dark:text-zinc-900"
                 >
+                  <span className="absolute inset-0 bg-white/10 dark:bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   <span className="relative z-10 tracking-wide uppercase text-sm">{t('hero.cta.explore')}</span>
-                  <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 dark:bg-black/10 transition-transform group-hover:translate-x-1">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 dark:bg-black/10 transition-transform duration-300 group-hover:translate-x-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
                 </button>
               </Magnetic>
@@ -141,10 +143,11 @@ export default function HeroSection() {
                 <a 
                   href="/cv-enrique-ndjakou.pdf"
                   download="CV_Enrique_Ndjakou.pdf"
-                  className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-black/10 bg-black/5 px-8 py-4 font-semibold text-zinc-900 transition-all hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                  className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-black/10 bg-black/5 px-8 py-4 font-semibold text-zinc-900 active:scale-95 transition-transform duration-200 dark:border-white/10 dark:bg-white/5 dark:text-white"
                 >
-                  <Download className="h-4 w-4 transition-transform group-hover:-translate-y-1" />
-                  <span className="font-mono text-xs uppercase tracking-widest">{t('hero.cta.cv')}</span>
+                  <span className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  <Download className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:-translate-y-1" aria-hidden="true" />
+                  <span className="relative z-10 font-mono text-xs uppercase tracking-widest">{t('hero.cta.cv')}</span>
                 </a>
               </Magnetic>
             </div>
@@ -153,9 +156,9 @@ export default function HeroSection() {
           {/* COLONNE DROITE : Emplacement Photo (Avatar de Haute Technologie) */}
           <div className="relative flex w-full max-w-[280px] sm:max-w-[320px] lg:max-w-md flex-1 items-center justify-center z-10">
             
-            {/* L'Anneau Scientifique (Orbital Rings) */}
-            <div className="absolute inset-0 z-0 animate-[spin_20s_linear_infinite] rounded-full border-[0.5px] border-black/10 border-t-brand-blue/40 dark:border-white/5 dark:border-t-brand-blue/60"></div>
-            <div className="absolute -inset-6 z-0 animate-[spin_30s_linear_infinite_reverse] rounded-full border-[0.5px] border-black/5 border-b-brand-red/30 dark:border-white/[0.03] dark:border-b-brand-red/40"></div>
+            {/* L'Anneau Scientifique (Orbital Rings) - Isolés sur calques GPU */}
+            <div aria-hidden="true" className="orbital-ring orbital-ring-clockwise pointer-events-none absolute inset-0 z-0 rounded-full border-[0.5px] border-black/10 border-t-brand-blue/40 dark:border-white/5 dark:border-t-brand-blue/60"></div>
+            <div aria-hidden="true" className="orbital-ring orbital-ring-counter pointer-events-none absolute -inset-4 sm:-inset-6 z-0 rounded-full border-[0.5px] border-black/5 border-b-brand-red/30 dark:border-white/[0.03] dark:border-b-brand-red/40"></div>
             
             {/* Conteneur Capsule / Portrait */}
             <Magnetic intensity={0.1}>
@@ -163,14 +166,14 @@ export default function HeroSection() {
                 <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group">
                   
                   {/* Overlay Cyberpunk */}
-                  <div className="absolute inset-0 bg-brand-blue/10 mix-blend-overlay z-30 pointer-events-none transition-opacity group-hover:opacity-0"></div>
+                  <div className="absolute inset-0 bg-brand-blue/10 mix-blend-overlay z-30 pointer-events-none transition-opacity duration-500 group-hover:opacity-0"></div>
                   
                   {/* Photo de Profil */}
                   <Image 
                     src="/photo.jpeg" 
                     alt="Enrique Alex NDJAKOU KEMAYOU" 
                     fill 
-                    className="object-cover z-20 grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"
+                    className="object-cover z-20 grayscale hover:grayscale-0 transition-transform duration-700 hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 300px"
                     priority
                     fetchPriority="high"

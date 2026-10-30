@@ -103,6 +103,7 @@ export default function AcademicJourney() {
                   height={svgHeight}
                   className="absolute top-0 left-0"
                   xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
               >
                   {/* Piste de fond non alimentée */}
                   <path
@@ -135,7 +136,7 @@ export default function AcademicJourney() {
             return (
               <div 
                 key={index}
-                className={`relative flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16 w-full ${
+                className={`relative flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16 w-full max-w-full ${
                   isEven ? "md:flex-row" : "md:flex-row-reverse"
                 }`}
               >
@@ -146,14 +147,14 @@ export default function AcademicJourney() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: false, margin: "-20%" }}
                   transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut" }}
-                  className={`flex-1 w-full pl-16 sm:pl-20 md:pl-0 ${isEven ? "md:text-right" : "md:text-left"}`}
+                  className={`flex-1 w-full max-w-full pl-14 sm:pl-20 md:pl-0 ${isEven ? "md:text-right" : "md:text-left"}`}
                 >
-                   <h3 className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter" 
+                   <h3 className="text-3xl sm:text-5xl md:text-6xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter" 
                        style={{ WebkitTextStroke: "1.5px currentColor", color: "transparent" }}>
                      <span className="text-zinc-900/20 dark:text-white/20 select-none">
                        {item.year.split(" - ")[0]}
                      </span>
-                     <span className="block text-3xl md:text-4xl lg:text-5xl text-zinc-400 dark:text-zinc-600 sm:inline-block sm:ml-4" style={{ WebkitTextStroke: "0px" }}>
+                     <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-zinc-400 dark:text-zinc-600 sm:inline-block sm:ml-4" style={{ WebkitTextStroke: "0px" }}>
                         - {item.year.split(" - ")[1]}
                      </span>
                    </h3>
@@ -174,15 +175,15 @@ export default function AcademicJourney() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: false, margin: "-20%" }}
                   transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut", delay: shouldReduceMotion ? 0 : 0.1 }}
-                  className={`flex-1 w-full pl-20 md:pl-0 ${isEven ? "md:text-left" : "md:text-right"}`}
+                  className={`flex-1 w-full max-w-full pl-14 sm:pl-20 md:pl-0 ${isEven ? "md:text-left" : "md:text-right"}`}
                 >
-                   <h4 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 leading-tight tracking-tight">
+                   <h4 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 leading-tight tracking-tight">
                      {item.title}
                    </h4>
                    <p className="text-sm font-bold text-brand-blue tracking-widest uppercase mb-6">
                      {item.school}
                    </p>
-                   <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-base md:text-lg max-w-lg">
+                   <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base md:text-lg max-w-lg">
                      {item.description}
                    </p>
                 </motion.div>

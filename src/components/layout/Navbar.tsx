@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import { Sun, Moon, Languages, Lock } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../theme/LanguageProvider';
+import { Logo } from '../ui/Logo';
 import Link from 'next/link';
 
 function useNavLinks() {
@@ -123,11 +124,15 @@ export default function Navbar() {
           {/* LOGO */}
           <a 
             href="#home" 
-            className="group relative z-50 text-xl font-bold tracking-tighter text-zinc-900 transition-opacity hover:opacity-80 dark:text-white"
-            onClick={() => setActiveSegment('Accueil')}
+            className="group relative z-50 flex items-center gap-2.5 text-xl font-bold tracking-tighter text-zinc-900 transition-all hover:opacity-90 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-lg py-1 px-1.5 -ml-1.5"
+            onClick={() => setActiveSegment(NAV_LINKS[0]?.name || 'Accueil')}
+            aria-label="Enrique Ndjakou - Accueil"
           >
-            Enrique<span className="text-brand-blue">.Ndjakou</span>
-            <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-gradient-to-r from-brand-blue to-transparent transition-all duration-300 group-hover:w-full"></span>
+            <Logo className="h-7 w-7 text-zinc-900 transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-blue dark:text-white dark:group-hover:text-brand-blue" />
+            <span className="relative">
+              Enrique<span className="text-brand-blue">.Ndjakou</span>
+              <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-gradient-to-r from-brand-blue to-transparent transition-all duration-300 group-hover:w-full"></span>
+            </span>
           </a>
 
           {/* NAVIGATION DESKTOP, Liquid Glass Segmented Control */}

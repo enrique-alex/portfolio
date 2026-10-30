@@ -10,7 +10,7 @@ function CategoryIcon({ category }: { category: string }) {
     if (category === 'Systèmes Embarqués' || category === 'Embedded Systems') {
         // Chip / CPU
         return (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
                 <rect x="4" y="4" width="16" height="16" rx="2" />
                 <rect x="9" y="9" width="6" height="6" rx="1" />
                 <line x1="9" y1="1" x2="9" y2="4" />
@@ -27,7 +27,7 @@ function CategoryIcon({ category }: { category: string }) {
     if (category === 'Algorithmique' || category === 'Algorithms') {
         // Graph / Nodes
         return (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
                 <circle cx="6" cy="6" r="3" />
                 <circle cx="18" cy="6" r="3" />
                 <circle cx="12" cy="18" r="3" />
@@ -40,7 +40,7 @@ function CategoryIcon({ category }: { category: string }) {
     if (category === 'Électronique' || category === 'Electronics') {
         // Circuit / Resistor
         return (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
                 <path d="M2 12h4l1.5-3 3 6 3-6 3 6 1.5-3h4" />
                 <circle cx="12" cy="12" r="10" strokeOpacity="0.2" />
             </svg>
@@ -49,7 +49,7 @@ function CategoryIcon({ category }: { category: string }) {
     if (category === 'Automatisme & Régulation' || category === 'Automation & Control') {
         // Feedback loop / Control
         return (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
                 <rect x="3" y="8" width="6" height="8" rx="1" />
                 <rect x="15" y="8" width="6" height="8" rx="1" />
                 <line x1="9" y1="12" x2="15" y2="12" />
@@ -62,7 +62,7 @@ function CategoryIcon({ category }: { category: string }) {
     if (category === 'Informatique Bas Niveau' || category === 'Low-Level Computing') {
         // Microprocessor / Register
         return (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
                 <rect x="5" y="5" width="14" height="14" rx="2" />
                 <line x1="8" y1="9" x2="16" y2="9" />
                 <line x1="8" y1="12" x2="16" y2="12" />
@@ -76,7 +76,7 @@ function CategoryIcon({ category }: { category: string }) {
     }
     // Developpement Logiciel / Software Engineering -> Code brackets
     return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
             <polyline points="16 18 22 12 16 6" />
             <polyline points="8 6 2 12 8 18" />
             <line x1="14" y1="4" x2="10" y2="20" />
@@ -122,13 +122,14 @@ export default function MagneticProjectCard({
     `;
 
     function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-        if (!cardRef.current) return;
+        if (!cardRef.current || isTouchDevice) return;
         const rect = cardRef.current.getBoundingClientRect();
         mouseX.set(e.clientX - rect.left);
         mouseY.set(e.clientY - rect.top);
     }
 
     function handleMouseLeave() {
+        if (isTouchDevice) return;
         setIsHovered(false);
         mouseX.set(250);
         mouseY.set(250);
@@ -136,14 +137,14 @@ export default function MagneticProjectCard({
 
     // --- WebGL Resonance (Heritage) ---
     useEffect(() => {
-        if (isHovered) {
+        if (isHovered && !isTouchDevice) {
              const event = new CustomEvent('webgl-resonance', { detail: { color: project.themeColor } });
              window.dispatchEvent(event);
         } else {
              const event = new CustomEvent('webgl-resonance', { detail: { color: null } });
              window.dispatchEvent(event);
         }
-    }, [isHovered, project.themeColor]);
+    }, [isHovered, isTouchDevice, project.themeColor]);
 
     const tc = project.themeColor;
     const hasCover = Boolean(project.coverImage);
@@ -154,19 +155,19 @@ export default function MagneticProjectCard({
             layoutId={`project-${project.id}`}
             onClick={() => onClick(project)}
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => setIsHovered(true)}
+            onMouseEnter={() => !isTouchDevice && setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
             whileTap={{ scale: 0.98 }}
             style={{
-                rotateX: isHovered ? rotateX : 0,
-                rotateY: isHovered ? rotateY : 0,
-                transformStyle: "preserve-3d",
+                rotateX: (!isTouchDevice && isHovered) ? rotateX : 0,
+                rotateY: (!isTouchDevice && isHovered) ? rotateY : 0,
+                transformStyle: isTouchDevice ? "flat" : "preserve-3d",
             }}
             className={`group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border ${
                 isFeatured 
                 ? "border-zinc-300 dark:border-white/10 bg-zinc-100/60 dark:bg-zinc-900/50 hover:bg-zinc-100/90 dark:hover:bg-zinc-900/80 p-8 lg:p-12" 
                 : "border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] p-8 md:p-10"
-            } backdrop-blur-xl transition-all duration-500 will-change-transform`}
+            } ${isTouchDevice ? '' : 'backdrop-blur-xl'} transition-transform duration-300 will-change-transform`}
         >
             {/* COVER IMAGE (conditional) */}
             {hasCover && (
@@ -188,7 +189,7 @@ export default function MagneticProjectCard({
 
             {/* 1. ACCENT VERTICAL GAUCHE (Theme Color, toujours visible) */}
             <div 
-                className="absolute left-0 top-0 h-full w-[3px] transition-all duration-500 group-hover:w-[5px] group-hover:shadow-lg z-[2]"
+                className="absolute left-0 top-0 h-full w-[3px] origin-left transition-transform duration-300 group-hover:scale-x-[1.67] z-[2]"
                 style={{ 
                     background: `linear-gradient(180deg, rgb(${tc.r},${tc.g},${tc.b}), transparent)`,
                     opacity: isTouchDevice ? 0.7 : (isHovered ? 1 : 0.4),
@@ -321,7 +322,7 @@ export default function MagneticProjectCard({
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={hasCover ? 'text-white' : 'text-zinc-600 dark:text-zinc-300'}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={hasCover ? 'text-white' : 'text-zinc-600 dark:text-zinc-300'}>
                             <line x1="5" y1="12" x2="19" y2="12" />
                             <polyline points="12 5 19 12 12 19" />
                         </svg>

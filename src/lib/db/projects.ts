@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Locale } from "@/lib/i18n";
 import { Project } from "@/lib/data";
+import { FALLBACK_PROJECTS } from "./fallback-projects";
 
 interface D1ProjectRow {
   id: string;
@@ -62,8 +63,8 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
   }
 
   if (!db) {
-    console.warn("⚠️ Base D1 'portfolio_db' non trouvée (mode next dev sans wrangler).");
-    return [];
+    console.warn("⚠️ Base D1 'portfolio_db' non trouvée (mode next dev sans wrangler). Utilisation des projets de secours.");
+    return FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
   }
 
   const query = `
@@ -74,9 +75,13 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
     ORDER BY p.sort_order ASC
   `;
 
-  const { results } = (await db.prepare(query).bind(locale).all()) as { results: D1ProjectRow[] };
-
-  return results.map(mapRowToProject);
+  try {
+    const { results } = (await db.prepare(query).bind(locale).all()) as { results: D1ProjectRow[] };
+    return results.map(mapRowToProject);
+  } catch (error) {
+    console.warn("⚠️ Erreur lors de la requête D1 getProjects. Utilisation des projets de secours:", error);
+    return FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
+  }
 }
 
 export async function getProjectBySlug(slug: string, locale: Locale): Promise<Project | null> {
@@ -90,7 +95,8 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
   }
 
   if (!db) {
-    return null;
+    const list = FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
+    return list.find((p) => p.slug === slug) || null;
   }
 
   const query = `
@@ -100,11 +106,17 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
     WHERE p.slug = ? AND t.locale = ? AND p.deleted_at IS NULL
   `;
 
-  const project = (await db.prepare(query).bind(slug, locale).first()) as D1ProjectRow | null;
+  try {
+    const project = (await db.prepare(query).bind(slug, locale).first()) as D1ProjectRow | null;
 
-  if (!project) {
-    return null;
+    if (!project) {
+      return null;
+    }
+
+    return mapRowToProject(project);
+  } catch (error) {
+    console.warn("⚠️ Erreur lors de la requête D1 getProjectBySlug. Utilisation des projets de secours:", error);
+    const list = FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
+    return list.find((p) => p.slug === slug) || null;
   }
-
-  return mapRowToProject(project);
 }

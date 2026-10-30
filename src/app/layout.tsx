@@ -6,6 +6,8 @@ import type { Viewport } from 'next';
 
 export const viewport: Viewport = {
   viewportFit: 'cover',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export const metadata = {
@@ -61,7 +63,7 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning est indispensable avec next-themes pour éviter le flash au chargement
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
-      <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased">
+      <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased overflow-x-hidden w-full max-w-full">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>
             <ProjectsProvider>

@@ -189,6 +189,7 @@ function SkillBar({ skill, color, index }: { skill: Skill; color: { r: number; g
         <div className="flex items-center gap-2.5">
           <IconComponent 
             size={16} 
+            aria-hidden="true"
             className="flex-shrink-0 text-zinc-600 dark:text-zinc-400" 
           />
           <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{skill.name}</span>
@@ -214,45 +215,42 @@ function SkillBar({ skill, color, index }: { skill: Skill; color: { r: number; g
 }
 
 // ─── Tool Card (with brand color glow on hover) ──────────
-function ToolCard({ tool, isTouch }: { tool: MarqueeTool; isTouch?: boolean }) {
+function ToolCard({ tool, isTouch, 'aria-hidden': ariaHidden }: { tool: MarqueeTool; isTouch?: boolean; 'aria-hidden'?: boolean | 'true' | 'false' }) {
   const IconComp = tool.icon;
   return (
     <div 
+      aria-hidden={ariaHidden}
       className={`tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] ${
         isTouch ? 'bg-white/80 dark:bg-zinc-900/80' : 'bg-white/60 backdrop-blur-sm dark:bg-white/[0.03]'
-      } px-4 py-2.5 sm:px-5 sm:py-3.5 transition-all duration-500 hover:scale-105 dark:border-white/[0.08]`}
+      } px-4 py-2.5 sm:px-5 sm:py-3.5 transition-transform duration-300 hover:scale-105 dark:border-white/[0.08]`}
       style={{
         '--brand': tool.brandColor,
       } as CSSPropertiesWithVars}
     >
       {/* Glow border on hover */}
       <div 
-        className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
           background: `linear-gradient(135deg, ${tool.brandColor}15, transparent 50%, ${tool.brandColor}10)`,
           boxShadow: `inset 0 0 0 1px ${tool.brandColor}30, 0 4px 20px ${tool.brandColor}15, 0 0 40px ${tool.brandColor}08`,
         }}
       />
       {/* Icon wrapper with brand color pulse */}
-      <div className="relative z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-black/[0.04] bg-black/[0.02] transition-all duration-500 group-hover:border-transparent dark:border-white/[0.06] dark:bg-white/[0.04]"
-        style={{
-          // Hover will be driven by the parent group
-        }}
-      >
+      <div className="relative z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-black/[0.04] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.04]">
         <IconComp 
           size={18} 
-          className="flex-shrink-0 text-zinc-500 transition-all duration-500 dark:text-zinc-400" 
-          style={{
-            // Brand color on hover is applied by parent
-          }}
+          aria-hidden="true"
+          className="flex-shrink-0 text-zinc-500 transition-transform duration-300 dark:text-zinc-400" 
         />
         {/* Subtle glow behind icon on hover */}
         <div 
-          className="absolute inset-0 rounded-xl opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-40"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-xl opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-40"
           style={{ background: tool.brandColor }}
         />
       </div>
-      <span className="relative z-10 text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-600 transition-colors duration-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white">
+      <span className="relative z-10 text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-900 dark:text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300">
         {tool.name}
       </span>
     </div>
@@ -260,23 +258,32 @@ function ToolCard({ tool, isTouch }: { tool: MarqueeTool; isTouch?: boolean }) {
 }
 
 // ─── CSS Infinite Marquee (pause on hover) ────────────────
-function InfiniteMarquee({ tools, direction = 'left', speed = 35, isTouch }: { tools: MarqueeTool[]; direction?: 'left' | 'right'; speed?: number; isTouch?: boolean }) {
+function InfiniteMarquee({ tools, direction = 'left', speed = 35, isTouch, label }: { tools: MarqueeTool[]; direction?: 'left' | 'right'; speed?: number; isTouch?: boolean; label: string }) {
   const doubled = [...tools, ...tools];
   
   return (
-    <div className="marquee-container group/marquee relative w-full overflow-hidden py-1">
+    <div 
+      className="marquee-container group/marquee relative w-full overflow-hidden py-1"
+      aria-label={label}
+      role="region"
+    >
       {/* Fade edges with gradient */}
-      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-32 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80" />
-      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-32 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80" />
+      <div aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 h-full w-32 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80" />
+      <div aria-hidden="true" className="pointer-events-none absolute right-0 top-0 z-10 h-full w-32 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80" />
       
       <div 
-        className="marquee-track flex w-max gap-4"
+        className="marquee-track flex w-max gap-4 will-change-transform"
         style={{
           animation: `marquee-${direction} ${speed}s linear infinite`,
         }}
       >
         {doubled.map((tool, i) => (
-          <ToolCard key={`${tool.name}-${i}`} tool={tool} isTouch={isTouch} />
+          <ToolCard 
+            key={`${tool.name}-${i}`} 
+            tool={tool} 
+            isTouch={isTouch} 
+            aria-hidden={i >= tools.length ? "true" : undefined}
+          />
         ))}
       </div>
     </div>
@@ -325,7 +332,7 @@ export default function SkillsSection() {
           transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-            <Activity className="h-4 w-4" />
+            <Activity className="h-4 w-4" aria-hidden="true" />
             <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
               System.Process.Monitor
             </span>
@@ -375,29 +382,33 @@ export default function SkillsSection() {
                       },
                     }}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-all duration-300 lg:w-full ${
+                    className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-transform duration-200 active:scale-[0.99] lg:w-full overflow-hidden ${
                       isActive 
                         ? 'bg-black/[0.04] dark:bg-white/[0.06]'
-                        : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+                        : 'bg-transparent'
                     }`}
                     style={isActive ? {
                       boxShadow: `inset 0 0 0 1px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.2), 0 4px 12px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.08)`
                     } : undefined}
                   >
+                    {!isActive && (
+                      <span aria-hidden="true" className="absolute inset-0 bg-black/[0.02] dark:bg-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+                    )}
                     <div 
-                      className="mb-2 h-2 w-2 rounded-full transition-all duration-300"
+                      aria-hidden="true"
+                      className="relative z-10 mb-2 h-2 w-2 rounded-full transition-opacity duration-200"
                       style={{ 
                         background: `rgb(${cat.color.r},${cat.color.g},${cat.color.b})`,
                         opacity: isActive ? 1 : 0.3,
                         boxShadow: isActive ? `0 0 8px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.5)` : 'none'
                       }}
                     />
-                    <span className={`text-sm font-semibold transition-colors duration-300 ${
-                      isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'
+                    <span className={`relative z-10 text-sm font-semibold text-zinc-900 dark:text-white transition-opacity duration-200 ${
+                      isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
                     }`}>
                       {cat.title}
                     </span>
-                    <span className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block line-clamp-2">
+                    <span className="relative z-10 mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block line-clamp-2">
                       {cat.subtitle}
                     </span>
                   </motion.button>
@@ -512,8 +523,8 @@ export default function SkillsSection() {
               </p>
             </div>
             <div className="flex flex-col gap-5">
-              <InfiniteMarquee tools={topRow} direction="left" speed={45} isTouch={isTouch} />
-              <InfiniteMarquee tools={bottomRow} direction="right" speed={50} isTouch={isTouch} />
+              <InfiniteMarquee tools={topRow} direction="left" speed={45} isTouch={isTouch} label={`${t('skills.marquee.title')} - Piste 1`} />
+              <InfiniteMarquee tools={bottomRow} direction="right" speed={50} isTouch={isTouch} label={`${t('skills.marquee.title')} - Piste 2`} />
             </div>
           </div>
         </motion.div>

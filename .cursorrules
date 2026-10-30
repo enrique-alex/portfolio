@@ -1,0 +1,104 @@
+# Production Software Engineering Rules & Standards
+# Stack: Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS v4, Cloudflare OpenNext / Workers / D1
+
+You are a staff-level software engineer and technical architect. Every line of code, refactor, and architectural decision must follow the strict production standards detailed below. These directives take precedence over any default boilerplate or relaxed conventions.
+
+---
+
+## 1. Next.js 16 App Router & Client/Server Architecture
+
+### 1.1 Strict Server/Client Boundary
+- **Server Components by Default**: Every component is a React Server Component (RSC) unless interactivity is strictly required.
+- **Leaf-Level `'use client'`**: Push the `'use client'` directive as far down the component tree as possible (to interactive buttons, forms, or animated wrappers). Never mark an entire page or layout with `'use client'` if static or server-fetched subtrees exist.
+- **No Client Data Fetching of Core Data**: Fetch page data on the server via RSC or API route handlers. Pass serialized data down to interactive client leaves.
+- **Suspense & Streaming**: Wrap async operations, heavy client components, and third-party widgets in `<Suspense fallback={<Skeleton />}>` to ensure immediate First Contentful Paint (FCP).
+
+### 1.2 Images & Media Optimization
+- **`next/image` Mandatory**: Always use `next/image` with explicit `sizes` matching the responsive layout breakpoints (e.g. `sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"`).
+- **LCP Image Priority**: Add `priority` and `fetchPriority="high"` exclusively to the primary above-the-fold image (Hero avatar). Never add `priority` to below-the-fold images or cards.
+- **Modern Formats**: Serve images in WebP or AVIF. Avoid raw PNG/JPEG formats exceeding 200KB.
+
+---
+
+## 2. TypeScript Strict Standards (Zero `any` Policy)
+
+### 2.1 Typing & Safety
+- **Strictly No `any`**: The use of `any` is forbidden. Use `unknown` with type guards, Zod schemas, or discriminated unions when data types are dynamic or external.
+- **Systematic Props & Returns Typing**:
+  - Every React component must define its props using a dedicated `interface ComponentProps { ... }`.
+  - Every function, custom hook, API route handler, and database query helper must have an explicit return type.
+- **Interfaces over Types**: Use `interface` for object shapes and component props. Reserve `type` for unions, intersections, and mapped types.
+- **Enums Prohibited**: Avoid TypeScript `enum`. Use `const` objects with `as const` and string union types:
+  ```typescript
+  export const PROJECT_STATUS = {
+    ACTIVE: 'ACTIVE',
+    COMPLETED: 'COMPLETED',
+  } as const;
+  export type ProjectStatus = typeof PROJECT_STATUS[keyof typeof PROJECT_STATUS];
+  ```
+- **Type Narrowing**: Implement robust type guards (`isError()`, `instanceof Error`, `typeof val === 'string'`) in all catch blocks:
+  ```typescript
+  try {
+    // ...
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    // ...
+  }
+  ```
+
+---
+
+## 3. Tailwind CSS & Responsive Design (Mobile-First)
+
+### 3.1 Mobile-First Philosophy
+- **Base Styles = Mobile**: All unprefixed Tailwind classes represent the mobile viewport (`< 640px`). Progressively enhance with `sm:`, `md:`, `lg:`, `xl:`, and `2xl:` prefixes.
+- **Zero Unjustified Arbitrary Values**: Use standard Tailwind spacing, sizing, and typography tokens. Arbitrary values (`w-[387px]`, `text-[17.5px]`, `top-[23px]`) are prohibited unless bound to a physical canvas pixel ratio or exact third-party SDK constraint.
+- **Fluid & Safe Viewports**:
+  - Use `min-h-[100dvh]` or `min-h-[100svh]` rather than `100vh` to avoid mobile address bar jumps on iOS Safari and Chrome Android.
+  - Apply safe area insets: `pt-[calc(1rem+env(safe-area-inset-top))]`, `pb-[calc(1rem+env(safe-area-inset-bottom))]`.
+
+### 3.2 Touch Ergonomics & Overflow Prevention
+- **Minimum Tap Target**: Every interactive element (buttons, links, icon toggles) must have a touch target of at least `44x44px` (`min-h-[11] min-w-[11]` or padding expansion).
+- **Zero Horizontal Overflow**: Never use `overflow-x: hidden` on `body` as a fix for layout bugs. Eliminate the root cause:
+  - Avoid `whitespace-nowrap` on headers or dynamic strings without fluid scaling or text truncation (`truncate`, `line-clamp-X`).
+  - Set `max-w-full` on text and flex containers.
+- **Touch-Aware Micro-Interactions**:
+  - Always guard hover effects and 3D tilts against touch devices using `@media (hover: hover) and (pointer: fine)` or `window.matchMedia('(pointer: coarse)')`.
+  - On touch devices, prefer scale feedback (`active:scale-95`) over magnetic pulls and 3D rotations.
+
+---
+
+## 4. Web Performance & Accessibility (WCAG 2.1 AA & Graphics)
+
+### 4.1 Accessibility Standards (WCAG 2.1 AA)
+- **Contrast Ratios**: Minimum `4.5:1` for regular text and `3:1` for bold/large text (≥18px) and UI components across both Dark and Light themes.
+- **Accessible Names on All Controls**:
+  - Every button, link, and input must have an accessible name matching its visible label.
+  - Icon-only buttons must have an explicit `aria-label` describing the action (e.g. `aria-label="Changer de thème"`, `aria-label="Fermer le menu"`).
+- **SVG Semantics**:
+  - Decorative SVGs MUST have `aria-hidden="true"`.
+  - Meaningful SVGs / Icons MUST have `<title>...</title>` or `aria-label="..."`.
+- **Keyboard Navigation & Focus Management**:
+  - Provide visible, high-contrast focus rings (`focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-none`).
+  - Mobile menus and modal overlays MUST trap focus and lock background scrolling (`document.body.style.overflow = 'hidden'`) while open.
+- **Motion Sensitivity**: Respect `prefers-reduced-motion: reduce`:
+  - Disable infinite marquees, particle animations, and 3D tilt effects.
+  - Replace spring transitions with instant or subtle opacity changes.
+
+### 4.2 WebGL, Canvas & Animation Performance
+- **Lifecycle & Memory Management**:
+  - Always clean up `requestAnimationFrame`, resize listeners, and WebGL contexts on component unmount to prevent memory leaks.
+  - Use `IntersectionObserver` to pause render loops and particle physics whenever the canvas or animated container scrolls out of the viewport.
+- **GPU Composited Animations**:
+  - Only animate `transform` and `opacity`. Never animate layout properties (`width`, `height`, `top`, `margin`) or paint properties (`color`, `background-color`, `box-shadow`) in high-frequency CSS or Framer Motion loops.
+  - Use `will-change: transform` sparingly and only during active gestures or transitions.
+- **Hardware-Aware Degradation**: Automatically disable heavy WebGL fluid simulations, cloth simulations, and complex shaders on mobile/touch devices or when low battery / hardware constraints are detected.
+
+---
+
+## 5. Cloudflare D1 & Architecture Resilience
+
+### 5.1 Local & Production Graceful Fallbacks
+- Database queries (`getProjects`, `getProjectBySlug`) must be resilient: if `portfolio_db` is unavailable (e.g. `next dev` mode without Wrangler proxy), gracefully fallback to local seed data rather than returning empty arrays or crashing.
+- Sanitize and validate all user inputs in API routes with strict schemas before executing D1 statements.
+- Never commit secrets or hardcoded passwords; use environment variables and Cloudflare Worker secrets.

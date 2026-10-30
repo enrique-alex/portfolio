@@ -122,6 +122,7 @@ export default function Preloader() {
               {!isTouch && (
                 <motion.svg
                   viewBox="0 0 100 100"
+                  aria-hidden="true"
                   className="absolute inset-0 h-full w-full text-zinc-300 dark:text-zinc-800"
                   animate={{ rotate: shouldReduceMotion ? 0 : 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
@@ -142,6 +143,7 @@ export default function Preloader() {
               {!isTouch && (
                 <motion.svg
                   viewBox="0 0 100 100"
+                  aria-hidden="true"
                   className="absolute inset-2 h-full w-full text-brand-blue/30"
                   animate={{ rotate: shouldReduceMotion ? 0 : -360 }}
                   transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
@@ -161,6 +163,7 @@ export default function Preloader() {
               {/* Inner Progress Ring (Fills up) */}
               <svg
                 viewBox="0 0 100 100"
+                aria-hidden="true"
                 className="absolute inset-4 h-full w-full -rotate-90 text-brand-blue"
               >
                 <motion.circle

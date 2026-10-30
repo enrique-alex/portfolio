@@ -25,11 +25,55 @@
   to { transform: translateX(0); }
 }
 
+.marquee-track {
+  will-change: transform;
+}
+
+@keyframes spin-gpu {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+@keyframes spin-reverse-gpu {
+  from {
+    transform: rotate(360deg) translateZ(0);
+  }
+  to {
+    transform: rotate(0deg) translateZ(0);
+  }
+}
+
+.orbital-ring {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: strict;
+}
+
+.orbital-ring-clockwise {
+  animation: spin-gpu 20s linear infinite;
+}
+
+.orbital-ring-counter {
+  animation: spin-reverse-gpu 30s linear infinite;
+}
+
 .marquee-container:hover .marquee-track {
   animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .orbital-ring,
+  .orbital-ring-clockwise,
+  .orbital-ring-counter {
+    animation: none !important;
+  }
+
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

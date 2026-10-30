@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, ReactNode, MouseEvent } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { useRef, ReactNode, MouseEvent, useState, useEffect } from 'react';
+import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
 
 interface MagneticProps {
     children: ReactNode;
@@ -11,6 +11,13 @@ interface MagneticProps {
 
 export default function Magnetic({ children, intensity = 0.3 }: MagneticProps) {
     const ref = useRef<HTMLDivElement>(null);
+    const shouldReduceMotion = useReducedMotion();
+    const [isTouch, setIsTouch] = useState(false);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsTouch(window.matchMedia('(pointer: coarse)').matches);
+    }, []);
 
     // Initialisation des valeurs de position
     const x = useMotionValue(0);
@@ -22,7 +29,7 @@ export default function Magnetic({ children, intensity = 0.3 }: MagneticProps) {
     const springY = useSpring(y, springConfig);
 
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-        if (!ref.current) return;
+        if (!ref.current || isTouch || shouldReduceMotion) return;
         
         // Extraction des limites géométriques du composant
         const rect = ref.current.getBoundingClientRect();
@@ -41,18 +48,21 @@ export default function Magnetic({ children, intensity = 0.3 }: MagneticProps) {
     };
 
     const handleMouseLeave = () => {
+        if (isTouch || shouldReduceMotion) return;
         // Retour physique à la position d'origine {0,0}
         x.set(0);
         y.set(0);
     };
 
+    const isCoarseOrReduced = isTouch || Boolean(shouldReduceMotion);
+
     return (
         <motion.div
             ref={ref}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{ x: springX, y: springY }}
-            className="inline-flex cursor-pointer relative z-40" // Z-index géré pour ne pas bloquer le WebGL Fluid
+            onMouseMove={isCoarseOrReduced ? undefined : handleMouseMove}
+            onMouseLeave={isCoarseOrReduced ? undefined : handleMouseLeave}
+            style={isCoarseOrReduced ? undefined : { x: springX, y: springY }}
+            className={`inline-flex cursor-pointer relative z-40 ${isCoarseOrReduced ? '' : 'will-change-transform'}`}
         >
             {children}
         </motion.div>
