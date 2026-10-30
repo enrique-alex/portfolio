@@ -82,7 +82,7 @@ export default function DualBodyCursor() {
         if (frameManager.isReducedMotion) {
           currentRingX.current = targetX.current;
           currentRingY.current = targetY.current;
-          ringRef.current.style.transform = `translate3d(${targetX.current}px, ${targetY.current}px, 0) translate(-50%, -50%)`;
+          ringRef.current.style.transform = `translate3d(${targetX.current}px, ${targetY.current}px, 0)`;
           stopFrameLoop();
           return;
         }
@@ -193,9 +193,9 @@ export default function DualBodyCursor() {
 
   return (
     <>
-      {/* #cur : Point direct instantané */}
+      {/* #cur-dot : Point direct instantané */}
       <div
-        id="cur"
+        id="cur-dot"
         ref={dotRef}
         aria-hidden="true"
         className="pointer-events-none fixed top-0 left-0 z-[9999] h-2 w-2 -ml-1 -mt-1 rounded-full bg-white opacity-0 transition-opacity duration-150"

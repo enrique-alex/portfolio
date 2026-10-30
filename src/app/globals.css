@@ -81,3 +81,21 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Masquage propre du curseur par defaut sur Desktop (pointer: fine) avec DualBodyCursor */
+@media (pointer: fine) {
+  html, body, a, button, [role="button"], input, select, textarea {
+    cursor: none !important;
+  }
+
+  *, *::before, *::after {
+    cursor: none !important;
+  }
+}
+
+/* Règle stricte : Ne JAMAIS masquer le curseur sur mobile/touch (pointer: coarse) */
+@media (pointer: coarse) {
+  html, body, a, button, [role="button"], input, select, textarea, *, *::before, *::after {
+    cursor: auto !important;
+  }
+}

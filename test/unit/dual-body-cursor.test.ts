@@ -98,4 +98,16 @@ describe('DualBodyCursor Component', () => {
       globalThis.window = originalWindow;
     }
   });
+
+  it('should define DOM identifiers cur-dot and ring for dual bodies', () => {
+    const componentCode = DualBodyCursor.toString();
+    expect(componentCode).toContain('cur-dot');
+    expect(componentCode).toContain('ring');
+  });
+
+  it('should guarantee consistent ring centering without unaligned translate(-50%, -50%) in reduced motion', () => {
+    const componentCode = DualBodyCursor.toString();
+    expect(componentCode).not.toContain('translate(-50%, -50%)');
+  });
 });
+

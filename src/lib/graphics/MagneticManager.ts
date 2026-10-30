@@ -30,6 +30,8 @@ export interface CachedMagneticItem {
   isActive: boolean;
 }
 
+export const DOM_MAGNETIC_CAPTURE_RADIUS = 60; // Rayon de capture très court (d < 60px du centre)
+
 export class MagneticManager {
   private static instance: MagneticManager | null = null;
 
@@ -39,6 +41,7 @@ export class MagneticManager {
   private unsubscribeFrame: (() => void) | null = null;
   private boundResize: (() => void) | null = null;
   private boundPointerMove: ((e: PointerEvent | MouseEvent) => void) | null = null;
+  private boundPointerLeave: (() => void) | null = null;
 
   private constructor() {
     this.init();
@@ -66,6 +69,19 @@ export class MagneticManager {
       this.ensureFrameSubscription();
     };
     window.addEventListener('pointermove', this.boundPointerMove, { passive: true });
+
+    this.boundPointerLeave = () => {
+      this.cursorX = -9999;
+      this.cursorY = -9999;
+      this.ensureFrameSubscription();
+    };
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('pointerleave', this.boundPointerLeave, { passive: true });
+      window.addEventListener('blur', this.boundPointerLeave);
+    }
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      document.addEventListener('mouseleave', this.boundPointerLeave);
+    }
   }
 
   public register(element: HTMLElement, intensity: number = 0.3): void {
@@ -128,7 +144,7 @@ export class MagneticManager {
     const height = rect.height;
     const centerX = docLeft + width / 2;
     const centerY = docTop + height / 2;
-    const radius = Math.max(width, height) * 1.4;
+    const radius = DOM_MAGNETIC_CAPTURE_RADIUS;
 
     return {
       element,
@@ -203,7 +219,10 @@ export class MagneticManager {
       const dy = this.cursorY - screenCenterY;
       const dist = Math.hypot(dx, dy);
 
-      if (dist < item.radius && this.cursorX > -1000) {
+      // L'effet magnétique sur les boutons DOM ne doit s'activer QUE si la souris
+      // se trouve à l'intérieur d'un rayon de capture très court (d < 60px du centre de l'élément).
+      // Au-delà de ce rayon : déplacement strictement égal à (0, 0).
+      if (dist < DOM_MAGNETIC_CAPTURE_RADIUS && this.cursorX > -1000) {
         item.targetX = dx * item.intensity;
         item.targetY = dy * item.intensity;
         item.isActive = true;
@@ -281,6 +300,14 @@ export class MagneticManager {
       if (this.boundPointerMove) {
         window.removeEventListener('pointermove', this.boundPointerMove);
         this.boundPointerMove = null;
+      }
+      if (this.boundPointerLeave) {
+        window.removeEventListener('pointerleave', this.boundPointerLeave);
+        if (typeof document !== 'undefined') {
+          document.removeEventListener('mouseleave', this.boundPointerLeave);
+        }
+        window.removeEventListener('blur', this.boundPointerLeave);
+        this.boundPointerLeave = null;
       }
     }
   }

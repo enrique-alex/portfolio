@@ -395,4 +395,112 @@ describe('ThreeIndustrialScene & 5 Pure Mathematical Topologies', () => {
 
     scene.destroy();
   });
+
+  it('should initialize with safe off-screen mousePos (-9999, -9999, active: false) and zero initial offsets', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 50 });
+    const pos = scene.getMousePosForTesting();
+
+    expect(pos.x).toBe(-9999.0);
+    expect(pos.y).toBe(-9999.0);
+    expect(pos.active).toBe(false);
+
+    // Initial render before any pointer movement
+    scene.renderFrameForTesting(0.016, 0, false);
+    const { offsetX, offsetY, offsetZ } = scene.getOffsetsForTesting();
+
+    // All offsets must be strictly 0.0
+    for (let i = 0; i < 50; i++) {
+      expect(offsetX[i]).toBe(0.0);
+      expect(offsetY[i]).toBe(0.0);
+      expect(offsetZ[i]).toBe(0.0);
+    }
+
+    scene.destroy();
+  });
+
+  it('should guarantee zero repulsion force when pointer is inactive or outside r_max ≈ 0.55', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 50 });
+
+    // 1. Pointer active but far outside r_max (e.g. at screen corner normX = 1.0, normY = 1.0)
+    // which in world coords is around ~2.4 units away from origin
+    scene.setPointerForTesting(1.0, 1.0, true);
+    scene.renderFrameForTesting(0.016, 100, false);
+    const { offsetX, offsetY, offsetZ } = scene.getOffsetsForTesting();
+
+    // Verify all offsets remain strictly 0.0 because d >= r_max (0.55)
+    for (let i = 0; i < 50; i++) {
+      expect(offsetX[i]).toBe(0.0);
+      expect(offsetY[i]).toBe(0.0);
+      expect(offsetZ[i]).toBe(0.0);
+    }
+
+    // 2. Pointer inactive: even at (0, 0), force must be strictly 0.0
+    scene.setPointerForTesting(0.0, 0.0, false);
+    scene.renderFrameForTesting(0.016, 116, false);
+    for (let i = 0; i < 50; i++) {
+      expect(offsetX[i]).toBe(0.0);
+      expect(offsetY[i]).toBe(0.0);
+      expect(offsetZ[i]).toBe(0.0);
+    }
+
+    scene.destroy();
+  });
+
+  it('should apply repulsion strictly within r_max = 0.55 and decay smoothly back to zero without jitter', () => {
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 100 });
+
+    // Place pointer at center (0, 0) active
+    scene.setPointerForTesting(0.0, 0.0, true);
+    scene.renderFrameForTesting(0.016, 50, false);
+    const { offsetX, offsetY, offsetZ } = scene.getOffsetsForTesting();
+
+    let localDisplacedCount = 0;
+    let outsideUndisturbedCount = 0;
+
+    for (let i = 0; i < 100; i++) {
+      const mag = Math.hypot(offsetX[i], offsetY[i], offsetZ[i]);
+      if (mag > 0.0) {
+        localDisplacedCount++;
+      } else {
+        outsideUndisturbedCount++;
+      }
+    }
+
+    // Must have displaced only local points within r_max while leaving points outside r_max at 0.0
+    expect(localDisplacedCount).toBeGreaterThan(0);
+    expect(outsideUndisturbedCount).toBeGreaterThan(0);
+
+    // Deactivate pointer (simulate mouseleave / blur)
+    scene.setPointerForTesting(-9999.0, -9999.0, false);
+
+    // After enough damping frames (* 0.88), all offsets must snap strictly to 0.0
+    for (let f = 0; f < 60; f++) {
+      scene.renderFrameForTesting(0.016, 50 + f * 16, false);
+    }
+
+    const decayed = scene.getOffsetsForTesting();
+    for (let i = 0; i < 100; i++) {
+      expect(decayed.offsetX[i]).toBe(0.0);
+      expect(decayed.offsetY[i]).toBe(0.0);
+      expect(decayed.offsetZ[i]).toBe(0.0);
+    }
+
+    scene.destroy();
+  });
 });
+

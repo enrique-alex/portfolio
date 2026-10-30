@@ -86,6 +86,7 @@ export class ThreeIndustrialScene {
   private currentDistances: Float32Array;
   private form2Weight: number = 0.0;
   private tempPointerVec: THREE.Vector3 = new THREE.Vector3();
+  private invMatrix: THREE.Matrix4 = new THREE.Matrix4();
 
   private currentTopologyIndex: number = 0;
   private targetTopologyIndex: number = 0;
@@ -96,9 +97,10 @@ export class ThreeIndustrialScene {
   private targetMouseX: number = 0;
   private targetMouseY: number = 0;
 
-  // Interaction tactile & curseur unifiée
-  private normPointerX: number = 0;
-  private normPointerY: number = 0;
+  // Interaction tactile & curseur unifiée sécurisée hors-champ
+  private mousePos = { x: -9999.0, y: -9999.0, active: false };
+  private normPointerX: number = -9999.0;
+  private normPointerY: number = -9999.0;
   private isPointerActive: boolean = false;
   private lastTouchX: number = 0;
   private lastTouchY: number = 0;
@@ -270,10 +272,15 @@ export class ThreeIndustrialScene {
     this.boundPointerMove = (e: PointerEvent | MouseEvent) => {
       const w = window.innerWidth || 1;
       const h = window.innerHeight || 1;
-      this.normPointerX = (e.clientX / w) * 2 - 1;
-      this.normPointerY = -(e.clientY / h) * 2 + 1;
-      this.targetMouseX = this.normPointerX;
-      this.targetMouseY = this.normPointerY;
+      const nx = (e.clientX / w) * 2 - 1;
+      const ny = -(e.clientY / h) * 2 + 1;
+      this.normPointerX = nx;
+      this.normPointerY = ny;
+      this.mousePos.x = nx;
+      this.mousePos.y = ny;
+      this.mousePos.active = true;
+      this.targetMouseX = nx;
+      this.targetMouseY = ny;
       this.isPointerActive = true;
 
       const moveSpeed = Math.hypot(e.movementX || 0, e.movementY || 0);
@@ -283,9 +290,22 @@ export class ThreeIndustrialScene {
     };
     this.boundPointerLeave = () => {
       this.isPointerActive = false;
+      this.mousePos.active = false;
+      this.normPointerX = -9999.0;
+      this.normPointerY = -9999.0;
+      this.mousePos.x = -9999.0;
+      this.mousePos.y = -9999.0;
+      this.targetMouseX = 0;
+      this.targetMouseY = 0;
     };
-    window.addEventListener('pointermove', this.boundPointerMove, { passive: true });
-    window.addEventListener('pointerleave', this.boundPointerLeave, { passive: true });
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('pointermove', this.boundPointerMove, { passive: true });
+      window.addEventListener('pointerleave', this.boundPointerLeave, { passive: true });
+      window.addEventListener('blur', this.boundPointerLeave);
+    }
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+      document.addEventListener('mouseleave', this.boundPointerLeave);
+    }
 
     // Interaction tactile mobile
     this.boundTouchStart = (e: TouchEvent) => {
@@ -293,10 +313,15 @@ export class ThreeIndustrialScene {
         const touch = e.touches[0];
         const w = window.innerWidth || 1;
         const h = window.innerHeight || 1;
-        this.normPointerX = (touch.clientX / w) * 2 - 1;
-        this.normPointerY = -(touch.clientY / h) * 2 + 1;
-        this.targetMouseX = this.normPointerX;
-        this.targetMouseY = this.normPointerY;
+        const nx = (touch.clientX / w) * 2 - 1;
+        const ny = -(touch.clientY / h) * 2 + 1;
+        this.normPointerX = nx;
+        this.normPointerY = ny;
+        this.mousePos.x = nx;
+        this.mousePos.y = ny;
+        this.mousePos.active = true;
+        this.targetMouseX = nx;
+        this.targetMouseY = ny;
         this.lastTouchX = touch.clientX;
         this.lastTouchY = touch.clientY;
         this.isPointerActive = true;
@@ -307,10 +332,15 @@ export class ThreeIndustrialScene {
         const touch = e.touches[0];
         const w = window.innerWidth || 1;
         const h = window.innerHeight || 1;
-        this.normPointerX = (touch.clientX / w) * 2 - 1;
-        this.normPointerY = -(touch.clientY / h) * 2 + 1;
-        this.targetMouseX = this.normPointerX;
-        this.targetMouseY = this.normPointerY;
+        const nx = (touch.clientX / w) * 2 - 1;
+        const ny = -(touch.clientY / h) * 2 + 1;
+        this.normPointerX = nx;
+        this.normPointerY = ny;
+        this.mousePos.x = nx;
+        this.mousePos.y = ny;
+        this.mousePos.active = true;
+        this.targetMouseX = nx;
+        this.targetMouseY = ny;
         this.isPointerActive = true;
 
         const deltaX = touch.clientX - this.lastTouchX;
@@ -325,6 +355,13 @@ export class ThreeIndustrialScene {
     };
     this.boundTouchEnd = () => {
       this.isPointerActive = false;
+      this.mousePos.active = false;
+      this.normPointerX = -9999.0;
+      this.normPointerY = -9999.0;
+      this.mousePos.x = -9999.0;
+      this.mousePos.y = -9999.0;
+      this.targetMouseX = 0;
+      this.targetMouseY = 0;
     };
     window.addEventListener('touchstart', this.boundTouchStart, { passive: true });
     window.addEventListener('touchmove', this.boundTouchMove, { passive: true });
@@ -352,7 +389,11 @@ export class ThreeIndustrialScene {
     // Coupure immédiate du moteur via document.hidden
     this.boundVisibilityChange = () => {
       if (typeof document !== 'undefined' && document.hidden) {
-        this.isPointerActive = false;
+        if (this.boundPointerLeave) {
+          this.boundPointerLeave();
+        } else {
+          this.isPointerActive = false;
+        }
       }
     };
     if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
@@ -995,117 +1036,7 @@ export class ThreeIndustrialScene {
       this.form2Weight = targetForm2Weight;
     }
 
-    // 2. Conversion spatiale unifiée dans le plan de coupe caméra (z = 0)
-    const fovRad = (this.camera.fov * 0.5 * Math.PI) / 180;
-    const halfH = Math.tan(fovRad) * this.camera.position.z;
-    const halfW = halfH * this.camera.aspect;
-    const targetX = this.normPointerX * halfW;
-    const targetY = this.normPointerY * halfH;
-
-    let localPointerX = targetX;
-    let localPointerY = targetY;
-    let localPointerZ = 0;
-    let effectiveRadius = 1.10;
-    const intensity = 1.0;
-
-    if (this.pointsMesh) {
-      this.pointsMesh.updateMatrixWorld();
-      this.tempPointerVec.set(targetX, targetY, 0);
-      this.pointsMesh.worldToLocal(this.tempPointerVec);
-      localPointerX = this.tempPointerVec.x;
-      localPointerY = this.tempPointerVec.y;
-      localPointerZ = this.tempPointerVec.z;
-      const meshScale = this.pointsMesh.scale.x || 1.0;
-      effectiveRadius = 1.10 / meshScale;
-    }
-
-    // 3. Répulsion volumétrique sous le pointeur / touch
-    if (this.isPointerActive && !isReduced) {
-      const effRadSq = effectiveRadius * effectiveRadius;
-      for (let i = 0; i < count; i++) {
-        const px = this.basePositions[i * 3];
-        const py = this.basePositions[i * 3 + 1];
-        const pz = this.basePositions[i * 3 + 2];
-        const dx = px - localPointerX;
-        const dy = py - localPointerY;
-        const dz = (pz - localPointerZ) * 0.5;
-        const dSq = dx * dx + dy * dy + dz * dz;
-
-        if (dSq < effRadSq) {
-          const d = Math.sqrt(dSq);
-          const force = Math.pow(1.0 - d / effectiveRadius, 2.0) * intensity;
-          const invD = 1.0 / Math.max(d, 0.0001);
-          this.offsetX[i] += (dx * invD) * force * 0.45;
-          this.offsetY[i] += (dy * invD) * force * 0.45;
-          this.offsetZ[i] += force * 0.25;
-
-          const curOffset = Math.hypot(this.offsetX[i], this.offsetY[i], this.offsetZ[i]);
-          const maxRepelDist = effectiveRadius * 0.85;
-          if (curOffset > maxRepelDist) {
-            const factor = maxRepelDist / curOffset;
-            this.offsetX[i] *= factor;
-            this.offsetY[i] *= factor;
-            this.offsetZ[i] *= factor;
-          }
-        }
-      }
-    }
-
-    // 4. Amortissement élastique continu (* 0.88) & micro-bruit harmonique sinusoïdal
-    const wavePhase = (time / 1000) * 3.0;
-    const scrollEnergy = Math.min(Math.abs(this.scrollVelocityY) * 0.015, 0.35);
-    const effectiveEnergy = Math.max(energy, scrollEnergy);
-    const hasWave = !isReduced && effectiveEnergy > 0.001;
-    const swimAmp = hasWave ? effectiveEnergy * 0.16 : 0.0;
-    let hasActiveOffsets = false;
-
-    for (let i = 0; i < count; i++) {
-      this.offsetX[i] *= 0.88;
-      this.offsetY[i] *= 0.88;
-      this.offsetZ[i] *= 0.88;
-
-      if (
-        Math.abs(this.offsetX[i]) > 0.0001 ||
-        Math.abs(this.offsetY[i]) > 0.0001 ||
-        Math.abs(this.offsetZ[i]) > 0.0001
-      ) {
-        hasActiveOffsets = true;
-      }
-
-      const idx = i * 3;
-      let swimX = 0;
-      let swimY = 0;
-      let swimZ = 0;
-
-      if (hasWave) {
-        // Micro-bruit harmonique sinusoïdal (nuée d'oiseaux nageant fluidement)
-        const birdPhase = wavePhase * 1.4 + (i % 80) * 0.09;
-        swimX = Math.sin(birdPhase + this.basePositions[idx + 1] * 1.8) * swimAmp;
-        swimY = Math.cos(birdPhase * 0.85 + this.basePositions[idx + 2] * 1.8) * swimAmp;
-        swimZ = Math.sin(birdPhase * 1.15 + this.basePositions[idx] * 1.8) * swimAmp;
-      }
-
-      this.currentPositions[idx] = this.basePositions[idx] + this.offsetX[i] + swimX;
-      this.currentPositions[idx + 1] = this.basePositions[idx + 1] + this.offsetY[i] + swimY;
-      this.currentPositions[idx + 2] = this.basePositions[idx + 2] + this.offsetZ[i] + swimZ;
-    }
-
-    this.hasDisplacement = hasWave || hasActiveOffsets;
-
-    if (this.positionAttribute) {
-      this.positionAttribute.needsUpdate = true;
-    }
-
-    this.scrollVelocityY *= 0.9;
-
-    // Mise à jour des uniforms
-    if (this.pointsMaterial) {
-      this.pointsMaterial.uniforms.uTime.value = time * 0.001;
-      this.pointsMaterial.uniforms.uMotion.value = isReduced ? 0.0 : 1.0;
-      this.pointsMaterial.uniforms.uForm2Weight.value = this.form2Weight;
-    }
-
-    // Rotation & Orientation
+    // Rotation & Orientation pré-trame pour synchronisation géométrique parfaite
     if (this.pointsMesh) {
       if (this.targetTopologyIndex === 1) {
         // Forme 2 active : alignement précis vers le Cameroun (4.5°N, 12.0°E)
@@ -1162,6 +1093,146 @@ export class ThreeIndustrialScene {
       }
     }
 
+    // 2. Conversion spatiale unifiée dans le plan de coupe caméra (z = 0)
+    const fovRad = (this.camera.fov * 0.5 * Math.PI) / 180;
+    const halfH = Math.tan(fovRad) * this.camera.position.z;
+    const halfW = halfH * this.camera.aspect;
+    const mouseWorldX = this.normPointerX * halfW;
+    const mouseWorldY = this.normPointerY * halfH;
+
+    const r_max = 0.55; // Unités monde 3D
+
+    // Matrice de transformation monde et inverse pour projeter précisément le pointeur et les particules
+    let m0 = 1, m4 = 0, m8 = 0, m12 = 0;
+    let m1 = 0, m5 = 1, m9 = 0, m13 = 0;
+    let inv0 = 1, inv4 = 0, inv8 = 0;
+    let inv1 = 0, inv5 = 1, inv9 = 0;
+    let inv2 = 0, inv6 = 0, inv10 = 1;
+
+    if (this.pointsMesh) {
+      this.pointsMesh.updateMatrixWorld();
+      const m = this.pointsMesh.matrixWorld.elements;
+      m0 = m[0]; m4 = m[4]; m8 = m[8]; m12 = m[12];
+      m1 = m[1]; m5 = m[5]; m9 = m[9]; m13 = m[13];
+
+      this.invMatrix.copy(this.pointsMesh.matrixWorld).invert();
+      const inv = this.invMatrix.elements;
+      inv0 = inv[0]; inv4 = inv[4]; inv8 = inv[8];
+      inv1 = inv[1]; inv5 = inv[5]; inv9 = inv[9];
+      inv2 = inv[2]; inv6 = inv[6]; inv10 = inv[10];
+    }
+
+    // 3. Répulsion volumétrique sous le pointeur / touch avec sécurisation absolue du falloff
+    if (this.isPointerActive && this.mousePos.active && !isReduced) {
+      for (let i = 0; i < count; i++) {
+        const px = this.basePositions[i * 3];
+        const py = this.basePositions[i * 3 + 1];
+        const pz = this.basePositions[i * 3 + 2];
+
+        // Position monde réelle de la particule projetée dans le plan caméra
+        const pWorldX = m0 * px + m4 * py + m8 * pz + m12;
+        const pWorldY = m1 * px + m5 * py + m9 * pz + m13;
+
+        const dx = pWorldX - mouseWorldX;
+        const dy = pWorldY - mouseWorldY;
+        const d = Math.hypot(dx, dy);
+
+        let repulsionForce = 0.0;
+        if (!this.mousePos.active) {
+          repulsionForce = 0.0;
+        } else if (d >= r_max || d < 0.0001) {
+          repulsionForce = 0.0;
+        } else {
+          // Décroissance garantie vers 0 aux bords
+          const factor = Math.max(0.0, 1.0 - d / r_max);
+          repulsionForce = Math.pow(factor, 2.0) * 0.35;
+        }
+
+        if (repulsionForce > 0.0) {
+          const invD = 1.0 / d;
+          const worldDispX = (dx * invD) * repulsionForce * 0.45;
+          const worldDispY = (dy * invD) * repulsionForce * 0.45;
+          const worldDispZ = repulsionForce * 0.25;
+
+          // Rétroprojection du déplacement monde dans le repère local du mesh
+          const localDispX = inv0 * worldDispX + inv4 * worldDispY + inv8 * worldDispZ;
+          const localDispY = inv1 * worldDispX + inv5 * worldDispY + inv9 * worldDispZ;
+          const localDispZ = inv2 * worldDispX + inv6 * worldDispY + inv10 * worldDispZ;
+
+          this.offsetX[i] += localDispX;
+          this.offsetY[i] += localDispY;
+          this.offsetZ[i] += localDispZ;
+
+          const curOffset = Math.hypot(this.offsetX[i], this.offsetY[i], this.offsetZ[i]);
+          const maxRepelDist = r_max * 0.85;
+          if (curOffset > maxRepelDist) {
+            const factor = maxRepelDist / curOffset;
+            this.offsetX[i] *= factor;
+            this.offsetY[i] *= factor;
+            this.offsetZ[i] *= factor;
+          }
+        }
+      }
+    }
+
+    // 4. Amortissement élastique continu (* 0.88) & micro-bruit harmonique sinusoïdal
+    const wavePhase = (time / 1000) * 3.0;
+    const scrollEnergy = Math.min(Math.abs(this.scrollVelocityY) * 0.015, 0.35);
+    const effectiveEnergy = Math.max(energy, scrollEnergy);
+    const hasWave = !isReduced && effectiveEnergy > 0.001;
+    const swimAmp = hasWave ? effectiveEnergy * 0.16 : 0.0;
+    let hasActiveOffsets = false;
+
+    for (let i = 0; i < count; i++) {
+      this.offsetX[i] *= 0.88;
+      this.offsetY[i] *= 0.88;
+      this.offsetZ[i] *= 0.88;
+
+      if (Math.abs(this.offsetX[i]) < 0.0001) this.offsetX[i] = 0.0;
+      if (Math.abs(this.offsetY[i]) < 0.0001) this.offsetY[i] = 0.0;
+      if (Math.abs(this.offsetZ[i]) < 0.0001) this.offsetZ[i] = 0.0;
+
+      if (
+        this.offsetX[i] !== 0.0 ||
+        this.offsetY[i] !== 0.0 ||
+        this.offsetZ[i] !== 0.0
+      ) {
+        hasActiveOffsets = true;
+      }
+
+      const idx = i * 3;
+      let swimX = 0;
+      let swimY = 0;
+      let swimZ = 0;
+
+      if (hasWave) {
+        // Micro-bruit harmonique sinusoïdal (nuée d'oiseaux nageant fluidement)
+        const birdPhase = wavePhase * 1.4 + (i % 80) * 0.09;
+        swimX = Math.sin(birdPhase + this.basePositions[idx + 1] * 1.8) * swimAmp;
+        swimY = Math.cos(birdPhase * 0.85 + this.basePositions[idx + 2] * 1.8) * swimAmp;
+        swimZ = Math.sin(birdPhase * 1.15 + this.basePositions[idx] * 1.8) * swimAmp;
+      }
+
+      this.currentPositions[idx] = this.basePositions[idx] + this.offsetX[i] + swimX;
+      this.currentPositions[idx + 1] = this.basePositions[idx + 1] + this.offsetY[i] + swimY;
+      this.currentPositions[idx + 2] = this.basePositions[idx + 2] + this.offsetZ[i] + swimZ;
+    }
+
+    this.hasDisplacement = hasWave || hasActiveOffsets;
+
+    if (this.positionAttribute) {
+      this.positionAttribute.needsUpdate = true;
+    }
+
+    this.scrollVelocityY *= 0.9;
+
+    // Mise à jour des uniforms
+    if (this.pointsMaterial) {
+      this.pointsMaterial.uniforms.uTime.value = time * 0.001;
+      this.pointsMaterial.uniforms.uMotion.value = isReduced ? 0.0 : 1.0;
+      this.pointsMaterial.uniforms.uForm2Weight.value = this.form2Weight;
+    }
+
     if (this.renderer) {
       this.renderer.render(this.scene, this.camera);
     }
@@ -1196,9 +1267,18 @@ export class ThreeIndustrialScene {
   }
 
   public setPointerForTesting(normX: number, normY: number, active: boolean): void {
-    this.normPointerX = normX;
-    this.normPointerY = normY;
+    this.normPointerX = active ? normX : -9999.0;
+    this.normPointerY = active ? normY : -9999.0;
+    this.mousePos.x = this.normPointerX;
+    this.mousePos.y = this.normPointerY;
+    this.mousePos.active = active;
+    this.targetMouseX = active ? normX : 0;
+    this.targetMouseY = active ? normY : 0;
     this.isPointerActive = active;
+  }
+
+  public getMousePosForTesting(): { x: number; y: number; active: boolean } {
+    return { ...this.mousePos };
   }
 
   public getOffsetsForTesting(): { offsetX: Float32Array; offsetY: Float32Array; offsetZ: Float32Array } {
@@ -1224,6 +1304,10 @@ export class ThreeIndustrialScene {
       }
       if (this.boundPointerLeave) {
         window.removeEventListener('pointerleave', this.boundPointerLeave);
+        if (typeof document !== 'undefined' && typeof document.removeEventListener === 'function') {
+          document.removeEventListener('mouseleave', this.boundPointerLeave);
+        }
+        window.removeEventListener('blur', this.boundPointerLeave);
         this.boundPointerLeave = null;
       }
       if (this.boundTouchStart) {
@@ -1236,6 +1320,7 @@ export class ThreeIndustrialScene {
       }
       if (this.boundTouchEnd) {
         window.removeEventListener('touchend', this.boundTouchEnd);
+        window.removeEventListener('touchcancel', this.boundTouchEnd);
         this.boundTouchEnd = null;
       }
       if (this.boundScroll) {
