@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { GraduationCap } from 'lucide-react';
 
@@ -35,30 +35,6 @@ export default function AcademicJourney() {
   const { t } = useLanguage();
   const journeyData = useJourneyData();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [svgHeight, setSvgHeight] = useState(0);
-
-  // Synchronisation stricte de la hauteur du circuit avec le conteneur du DOM
-  useEffect(() => {
-    if (containerRef.current) {
-      setSvgHeight(containerRef.current.offsetHeight);
-    }
-    
-    let timeoutId: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        if (containerRef.current) {
-          setSvgHeight(containerRef.current.offsetHeight);
-        }
-      }, 100);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timeoutId);
-    };
-  }, []);
 
   // Calcul physique du scroll relatif à la section
   const { scrollYProgress } = useScroll({
@@ -97,34 +73,39 @@ export default function AcademicJourney() {
       <div className="relative">
         {/* PCB Trace Line (Ligne de Circuit Imprimé SVG animée) */}
         <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 pointer-events-none z-0">
-            {svgHeight > 0 && (
-              <svg
-                  width="2"
-                  height={svgHeight}
-                  className="absolute top-0 left-0"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-              >
-                  {/* Piste de fond non alimentée */}
-                  <path
-                      d={`M1 0V${svgHeight}`}
-                      stroke="currentColor"
-                      strokeOpacity="0.1"
-                      strokeWidth="2"
-                      className="text-zinc-500 dark:text-white"
-                  />
-                  {/* Piste alimentée par l'énergie du scroll */}
-                  <motion.path
-                      d={`M1 0V${svgHeight}`}
-                      stroke="transparent" // Fallback
-                      strokeWidth="2"
-                      className="stroke-brand-blue drop-shadow-[0_0_8px_rgba(138,180,248,0.8)]"
-                      style={{
-                          pathLength: shouldReduceMotion ? 1 : pathLength,
-                      }}
-                  />
-              </svg>
-            )}
+          <svg
+            className="absolute top-0 left-0 h-full w-[2px] overflow-visible"
+            viewBox="0 0 2 100"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            {/* Piste de fond non alimentée */}
+            <line
+              x1="1"
+              y1="0"
+              x2="1"
+              y2="100"
+              stroke="currentColor"
+              strokeOpacity="0.1"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+              className="text-zinc-500 dark:text-white"
+            />
+            {/* Piste alimentée par l'énergie du scroll */}
+            <motion.line
+              x1="1"
+              y1="0"
+              x2="1"
+              y2="100"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+              className="stroke-brand-blue drop-shadow-[0_0_8px_rgba(138,180,248,0.8)]"
+              style={{
+                pathLength: shouldReduceMotion ? 1 : pathLength,
+              }}
+            />
+          </svg>
         </div>
 
         {/* Blocs de Typographie Spatiale Flottante */}

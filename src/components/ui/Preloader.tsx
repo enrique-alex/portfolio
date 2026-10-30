@@ -25,7 +25,7 @@ export default function Preloader() {
   const [isTouch, setIsTouch] = useState(false);
   const [isComplete, setIsComplete] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
-    return window.__preloaderDone === true;
+    return window.__preloaderDone === true || sessionStorage.getItem('seen-preloader') === 'true';
   });
 
   useEffect(() => {
@@ -37,11 +37,13 @@ export default function Preloader() {
     const isTouchCoarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
     setIsTouch(isTouchCoarse);
 
-    if (shouldReduceMotion || isBot) {
+    const hasSeen = typeof window !== 'undefined' && sessionStorage.getItem('seen-preloader') === 'true';
+    if (shouldReduceMotion || isBot || hasSeen) {
       setProgress(100);
       setIsComplete(true);
       if (typeof window !== 'undefined') {
         window.__preloaderDone = true;
+        sessionStorage.setItem('seen-preloader', 'true');
       }
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('preloader-complete'));
@@ -49,10 +51,10 @@ export default function Preloader() {
       return;
     }
 
-    // Ultra-snappy simulation on touch devices to preserve LCP and avoid CPU thrashing
-    const intervalDelay = isTouchCoarse ? 50 : 35;
-    const stepIncrement = isTouchCoarse ? 28 : 10;
-    const pauseDuration = isTouchCoarse ? 150 : 250;
+    // Ultra-snappy simulation to preserve LCP and avoid CPU thrashing
+    const intervalDelay = isTouchCoarse ? 25 : 20;
+    const stepIncrement = isTouchCoarse ? 35 : 25;
+    const pauseDuration = 80;
 
     const interval = setInterval(() => {
       setProgress(prev => {
@@ -60,6 +62,7 @@ export default function Preloader() {
           clearInterval(interval);
           if (typeof window !== 'undefined') {
             window.__preloaderDone = true;
+            sessionStorage.setItem('seen-preloader', 'true');
           }
           setTimeout(() => {
             setIsComplete(true);
@@ -67,8 +70,8 @@ export default function Preloader() {
           }, pauseDuration);
           return 100;
         }
-        // Step increment
-        const increment = Math.floor(Math.random() * stepIncrement) + (isTouchCoarse ? 15 : 5);
+        // Fast step increment
+        const increment = Math.floor(Math.random() * stepIncrement) + 20;
         return Math.min(prev + increment, 100);
       });
     }, intervalDelay);

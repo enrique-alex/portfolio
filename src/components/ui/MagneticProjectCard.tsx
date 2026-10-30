@@ -167,7 +167,7 @@ export default function MagneticProjectCard({
                 isFeatured 
                 ? "border-zinc-300 dark:border-white/10 bg-zinc-100/60 dark:bg-zinc-900/50 hover:bg-zinc-100/90 dark:hover:bg-zinc-900/80 p-8 lg:p-12" 
                 : "border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] p-8 md:p-10"
-            } ${isTouchDevice ? '' : 'backdrop-blur-xl'} transition-transform duration-300 will-change-transform`}
+            } ${isTouchDevice ? '' : 'backdrop-blur-xl'} transition-transform duration-300`}
         >
             {/* COVER IMAGE (conditional) */}
             {hasCover && (
@@ -246,7 +246,7 @@ export default function MagneticProjectCard({
             )}
 
             {/* Dynamic Spotlight */}
-            {mounted && (
+            {mounted && !isTouchDevice && (
                 <motion.div
                     className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:mix-blend-screen"
                     style={{ background: spotlightTemplate }}

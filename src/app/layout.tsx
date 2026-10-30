@@ -63,6 +63,9 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning est indispensable avec next-themes pour éviter le flash au chargement
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <link rel="preload" as="image" href="/photo.webp" type="image/webp" fetchPriority="high" />
+      </head>
       <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased overflow-x-hidden w-full max-w-full">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>

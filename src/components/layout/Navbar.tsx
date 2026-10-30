@@ -83,15 +83,19 @@ export default function Navbar() {
   // Animate pill position to active link
   useEffect(() => {
     if (!navRef.current) return;
-    const activeEl = navRef.current.querySelector(`[data-segment="${activeSegment}"]`) as HTMLElement;
-    if (activeEl) {
-      const navRect = navRef.current.getBoundingClientRect();
-      const elRect = activeEl.getBoundingClientRect();
-      setPillStyle({
-        left: elRect.left - navRect.left,
-        width: elRect.width,
-      });
-    }
+    const rafId = requestAnimationFrame(() => {
+      if (!navRef.current) return;
+      const activeEl = navRef.current.querySelector(`[data-segment="${activeSegment}"]`) as HTMLElement;
+      if (activeEl) {
+        const navRect = navRef.current.getBoundingClientRect();
+        const elRect = activeEl.getBoundingClientRect();
+        setPillStyle({
+          left: elRect.left - navRect.left,
+          width: elRect.width,
+        });
+      }
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [activeSegment, mounted]);
 
   return (

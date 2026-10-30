@@ -220,34 +220,18 @@ function ToolCard({ tool, isTouch, 'aria-hidden': ariaHidden }: { tool: MarqueeT
   return (
     <div 
       aria-hidden={ariaHidden}
-      className={`tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] ${
+      className={`tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] hover:border-black/20 dark:hover:border-white/20 ${
         isTouch ? 'bg-white/80 dark:bg-zinc-900/80' : 'bg-white/60 backdrop-blur-sm dark:bg-white/[0.03]'
-      } px-4 py-2.5 sm:px-5 sm:py-3.5 transition-transform duration-300 hover:scale-105 dark:border-white/[0.08]`}
+      } px-4 py-2.5 sm:px-5 sm:py-3.5 transition-all duration-300 hover:scale-105 dark:border-white/[0.08]`}
       style={{
         '--brand': tool.brandColor,
       } as CSSPropertiesWithVars}
     >
-      {/* Glow border on hover */}
-      <div 
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background: `linear-gradient(135deg, ${tool.brandColor}15, transparent 50%, ${tool.brandColor}10)`,
-          boxShadow: `inset 0 0 0 1px ${tool.brandColor}30, 0 4px 20px ${tool.brandColor}15, 0 0 40px ${tool.brandColor}08`,
-        }}
-      />
-      {/* Icon wrapper with brand color pulse */}
       <div className="relative z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-black/[0.04] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.04]">
         <IconComp 
           size={18} 
           aria-hidden="true"
-          className="flex-shrink-0 text-zinc-500 transition-transform duration-300 dark:text-zinc-400" 
-        />
-        {/* Subtle glow behind icon on hover */}
-        <div 
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-xl opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-40"
-          style={{ background: tool.brandColor }}
+          className="flex-shrink-0 text-zinc-500 transition-colors duration-300 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white" 
         />
       </div>
       <span className="relative z-10 text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-900 dark:text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300">
@@ -391,9 +375,7 @@ export default function SkillsSection() {
                       boxShadow: `inset 0 0 0 1px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.2), 0 4px 12px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.08)`
                     } : undefined}
                   >
-                    {!isActive && (
-                      <span aria-hidden="true" className="absolute inset-0 bg-black/[0.02] dark:bg-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
-                    )}
+
                     <div 
                       aria-hidden="true"
                       className="relative z-10 mb-2 h-2 w-2 rounded-full transition-opacity duration-200"

@@ -109,7 +109,7 @@ export default function HeroSection() {
             <div className="mt-6 mb-2">
               <Magnetic intensity={0.2}>
                 <div className="group relative inline-flex cursor-pointer items-center gap-3 rounded-full border border-black/10 bg-black/5 px-5 py-2 text-sm font-medium text-zinc-900 backdrop-blur-md dark:border-white/5 dark:bg-[#050505]/60 dark:text-zinc-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden">
-                  <span className="absolute inset-0 bg-black/5 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60"></span>
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)]"></span>
@@ -131,7 +131,7 @@ export default function HeroSection() {
                   onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} 
                   className="group relative flex items-center gap-4 overflow-hidden rounded-full bg-zinc-900 px-8 py-4 font-semibold text-white active:scale-95 transition-transform duration-200 dark:bg-white dark:text-zinc-900"
                 >
-                  <span className="absolute inset-0 bg-white/10 dark:bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  
                   <span className="relative z-10 tracking-wide uppercase text-sm">{t('hero.cta.explore')}</span>
                   <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 dark:bg-black/10 transition-transform duration-300 group-hover:translate-x-1">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -145,7 +145,7 @@ export default function HeroSection() {
                   download="CV_Enrique_Ndjakou.pdf"
                   className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-black/10 bg-black/5 px-8 py-4 font-semibold text-zinc-900 active:scale-95 transition-transform duration-200 dark:border-white/10 dark:bg-white/5 dark:text-white"
                 >
-                  <span className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  
                   <Download className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:-translate-y-1" aria-hidden="true" />
                   <span className="relative z-10 font-mono text-xs uppercase tracking-widest">{t('hero.cta.cv')}</span>
                 </a>
@@ -170,7 +170,7 @@ export default function HeroSection() {
                   
                   {/* Photo de Profil */}
                   <Image 
-                    src="/photo.jpeg" 
+                    src="/photo.webp" 
                     alt="Enrique Alex NDJAKOU KEMAYOU" 
                     fill 
                     className="object-cover z-20 grayscale hover:grayscale-0 transition-transform duration-700 hover:scale-105"
