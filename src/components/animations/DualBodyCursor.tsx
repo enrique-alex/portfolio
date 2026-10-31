@@ -100,9 +100,11 @@ export default function DualBodyCursor() {
           return;
         }
 
-        // Règle CliffIsCurious : ringPos += (mousePos - ringPos) * 0.18
-        currentRingX.current += dx * 0.18;
-        currentRingY.current += dy * 0.18;
+        // Damping inertiel exponentiel 1 - exp(-k * dt) dans la boucle FrameManager
+        const clampedDt = Math.min(Math.max(dt || 0.0117, 0.001), 0.1);
+        const lerpFactor = 1.0 - Math.exp(-LERP_SPEED * clampedDt);
+        currentRingX.current += dx * lerpFactor;
+        currentRingY.current += dy * lerpFactor;
 
         ringRef.current.style.transform = `translate3d(${currentRingX.current}px, ${currentRingY.current}px, 0)`;
       });

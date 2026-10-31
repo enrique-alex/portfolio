@@ -5,8 +5,8 @@
  * - Échantillonnage Blue Noise sur sphère de rayon R = 2.05
  * - Filtrage par masque bilinéaire Terre/Mer haute fidélité (landValue >= 0.5)
  * - Grille d'accélération spatiale 3D avec table de hachage Int32Array (head/next)
- * - Foyer Cameroun (4.5°N, 12.0°E) avec relief radial et atténuation gaussienne
- * - Tri morphologique synchronisé (Y décroissant puis X)
+ * - Foyer Cameroun (4.5°N, 12.0°E) avec relief radial, onde d'Airy et atténuation gaussienne
+ * - Tri cylindrique synchronisé (y * 10 + atan2(z, x)) pour morphing sans croisement
  * - PRNG mulberry32 déterministe (seed = 42 par défaut)
  */
 
@@ -137,9 +137,42 @@ function smoothstep(edge0: number, edge1: number, x: number): number {
 }
 
 /**
+ * Clé de tri cylindrique universelle (y * 10 + atan2(z, x))
+ * pour synchroniser les particules et éliminer tout croisement lors du morphing.
+ */
+export function computeCylindricalKey(x: number, y: number, z: number): number {
+  return y * 10.0 + Math.atan2(z, x);
+}
+
+/**
+ * Trie un tampon Float32Array(N * 3) en place selon la clé cylindrique (y * 10 + atan2(z, x)).
+ */
+export function sortBufferByCylindricalKey(buf: Float32Array, n: number): void {
+  const keys = new Float64Array(n);
+  const indices = new Int32Array(n);
+  for (let i = 0; i < n; i++) {
+    const i3 = i * 3;
+    keys[i] = buf[i3 + 1] * 10.0 + Math.atan2(buf[i3 + 2], buf[i3]);
+    indices[i] = i;
+  }
+
+  indices.sort((a, b) => keys[a] - keys[b]);
+
+  const sorted = new Float32Array(n * 3);
+  for (let k = 0; k < n; k++) {
+    const src3 = indices[k] * 3;
+    const dst3 = k * 3;
+    sorted[dst3] = buf[src3];
+    sorted[dst3 + 1] = buf[src3 + 1];
+    sorted[dst3 + 2] = buf[src3 + 2];
+  }
+  buf.set(sorted);
+}
+
+/**
  * Générateur pur du nuage de points du globe terrestre (Forme 2).
  *
- * @param n Nombre de points souhaité (ex. 9000 sur Desktop / 5000 sur Mobile)
+ * @param n Nombre de points souhaité (ex. 9000 sur Desktop / 4500 sur Mobile)
  * @param seed Graine aléatoire (42 par défaut pour déterminisme strict)
  * @param maskData Données de masque facultatives
  */
@@ -219,7 +252,7 @@ export function generateEarthCloud(
     const lat = Math.asin(sinLat);
     const lon = (2.0 * uLon - 1.0) * Math.PI;
 
-    // Test masque terre/mer
+    // Test masque terre/mer (zéro point en mer)
     if (landValue(lon, lat, mask, maskW, maskH) < 0.5) {
       continue;
     }
@@ -283,7 +316,7 @@ export function generateEarthCloud(
     }
   }
 
-  // 3. Foyer Cameroun (4.5°N, 12.0°E)
+  // 3. Foyer Cameroun (4.5°N, 12.0°E) avec élévation continentale radiale et enveloppe d'Airy
   const latCam = (4.5 * Math.PI) / 180.0;
   const lonCam = (12.0 * Math.PI) / 180.0;
   const pCamX = R * Math.cos(latCam) * Math.sin(lonCam);
@@ -312,7 +345,7 @@ export function generateEarthCloud(
     rawHighlights[i] = factor;
     rawDistances[i] = d;
 
-    // Relief UNIQUEMENT radial (+ factor * 0.04)
+    // Élévation continentale et relief radial (+ factor * 0.04)
     const pLen = Math.sqrt(px * px + py * py + pz * pz) || 1.0;
     const relief = factor * 0.04;
     rawPos[idx] = px + (px / pLen) * relief;
@@ -320,27 +353,16 @@ export function generateEarthCloud(
     rawPos[idx + 2] = pz + (pz / pLen) * relief;
   }
 
-  // 4. Tri morphologique : Y décroissant puis X
-  const rawY = new Float32Array(n);
-  const rawX = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    rawY[i] = rawPos[i * 3 + 1];
-    rawX[i] = rawPos[i * 3];
-  }
-
+  // 4. Tri cylindrique synchronisé : clé = y * 10 + atan2(z, x)
+  const keys = new Float64Array(n);
   const indices = new Int32Array(n);
   for (let i = 0; i < n; i++) {
+    const i3 = i * 3;
+    keys[i] = rawPos[i3 + 1] * 10.0 + Math.atan2(rawPos[i3 + 2], rawPos[i3]);
     indices[i] = i;
   }
 
-  indices.sort((a, b) => {
-    const ya = rawY[a];
-    const yb = rawY[b];
-    if (Math.abs(yb - ya) > 1e-6) {
-      return yb - ya; // Y décroissant
-    }
-    return rawX[a] - rawX[b]; // X croissant
-  });
+  indices.sort((a, b) => keys[a] - keys[b]);
 
   const positions = new Float32Array(n * 3);
   const highlights = new Float32Array(n);

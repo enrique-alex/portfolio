@@ -2,26 +2,23 @@
  * ThreeIndustrialScene - Moteur WebGL Particulaire de Sculptures Géométriques Pures
  *
  * Conforme aux standards d'exécution esthétique de cliffiscurious.com :
- * 1. Règle Absolue de Densité & Échantillonnage :
- *    - Point Count fixe et garanti : N = 9000 points sur Desktop / N = 5000 points sur Mobile.
- *    - Remplissage exhaustif des Float32Array sans aucune coquille vide.
- *    - Épaisseur volumétrique contrôlée : r_effectif = r_base * (1.0 + (random_symetrique() * 0.12)).
- *    - Normalisation spatiale : centré en (0, 0, 0) dans une sphère englobante R ≈ 1.95 (visible sous caméra 45° à z = 4.8).
- * 2. Catalogue des 5 Topologies d'Art Mathématique :
- *    - Topologie 1 : GOLDEN_TOROIDAL_OVOID (L'Ovoïde Toroïdal d'Or - Signature visuelle)
- *    - Topologie 2 : MOBIUS_VOLUMETRIC_STRIP (Le Ruban de Möbius Volumétrique Épais)
- *    - Topologie 3 : INTERTWINED_TORUS_KNOT (Le Nœud Torique Entrelacé p=3, q=5)
- *    - Topologie 4 : MINIMAL_GYROID_SHEET (La Nappe Harmonisante / Gyroïde Minimal)
- *    - Topologie 5 : FERMAT_VORTEX_NEBULA (La Nébuleuse Vortex & Double Spirale de Fermat)
- * 3. Morphing Organique (Nuée de Points Déphasée) :
- *    - Inertie individuelle de point : speed_i = 0.038 + (i % 100) * 0.0002.
- *    - Micro-bruit harmonique sinusoïdal sous énergie cinétique de scroll.
- *    - Amortissement complet vers la forme cible à 100% au repos.
- * 4. Calibrage Optique du Shader (ShaderMaterial) :
- *    - Taille des points : gl_PointSize = (4.0 / -mvPosition.z) * min(uDpr, 1.5) avec mise à l'échelle voluptueuse.
- *    - Découpe circulaire lisse avec smoothstep atténué sur les bords.
- *    - Teinte nominale beige crème doré (#E5E3C0), modulation de profondeur Z (alpha 0.35 à 0.90, reflet or pâle),
- *      et accents cyan technique (#00F0FF) sous vélocité cinétique.
+ * 1. Architecture des tampons & Déterminisme :
+ *    - Point Count fixe et garanti : N = 9000 points sur Desktop / N = 4500 points sur Mobile.
+ *    - Échantillonnage déterministe via mulberry32(42).
+ *    - Catalogue générant pour chaque forme un Float32Array(N * 3).
+ *    - Tri synchronisé selon la clé cylindrique (y * 10 + atan2(z, x)) pour éliminer tout croisement au morphing.
+ * 2. Les 5 Topologies Mathématiques Volumétriques :
+ *    - Forme 1 (Accueil) : GOLDEN_TOROIDAL_OVOID (Ovoïde asymétrique de Fibonacci à cavité centrale oblique et corps dense)
+ *    - Forme 2 (Origines) : MOBIUS_VOLUMETRIC_STRIP / Globe terrestre Natural Earth RLE, foyer Cameroun (4.5°N, 12.0°E), onde d'Airy, orientation (-12° Y, -4.5° X)
+ *    - Forme 3 (Énergie) : INTERTWINED_TORUS_KNOT (Solénoïde torique tressé p=3, q=7 avec tube volumétrique continu en repère de Frenet)
+ *    - Forme 4 (Systèmes) : MINIMAL_GYROID_SHEET (Gyroïde biomécanique minimal triplement périodique en double nappe épaisse)
+ *    - Forme 5 (Futur) : FERMAT_VORTEX_NEBULA (Nébuleuse vortex de Fermat en phyllotaxie d'or sur nappe hyperbolique 3D)
+ * 3. Shaders GLSL Haute Définition :
+ *    - Respiration stationnaire au repos, onde rayonnante Cameroun, backface fading via dot(normal, viewDir),
+ *      découpe antialiasée 1.0 - smoothstep(0.22, 0.5, d) et shading de profondeur.
+ *    - Material Three.js : transparent: true, depthWrite: false, blending: THREE.NormalBlending.
+ * 4. Fluidité du Moteur :
+ *    - Damping inertiel en 1 - exp(-k * dt) dans la boucle FrameManager, 0 allocation mémoire dans la boucle RAF.
  */
 
 import * as THREE from 'three';
@@ -43,14 +40,22 @@ export interface ThreeIndustrialSceneOptions {
   decayRate?: number;
 }
 
-function pseudoRandom(i: number, seed: number = 1): number {
-  const n = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453;
-  return (n - Math.floor(n)) * 2.0 - 1.0;
+/**
+ * PRNG déterministe mulberry32 (seed = 42 par défaut)
+ */
+export function mulberry32(seed: number = 42): () => number {
+  let a = seed >>> 0;
+  return function (): number {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-function pseudoGaussian(i: number, seed: number = 1): number {
-  const u1 = Math.max(1e-6, (pseudoRandom(i, seed) + 1.0) * 0.5);
-  const u2 = (pseudoRandom(i, seed + 107) + 1.0) * 0.5;
+function boxMullerGaussian(rand: () => number): number {
+  const u1 = Math.max(1e-6, rand());
+  const u2 = rand();
   return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
 }
 
@@ -132,8 +137,8 @@ export class ThreeIndustrialScene {
       (window.innerWidth < 768 ||
         (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches));
 
-    // Règle 1 : Point Count fixe et garanti (N = 9000 sur Desktop / N = 5000 sur Mobile)
-    this.pointCount = options?.pointCount ?? (this.isMobile ? 5000 : 9000);
+    // Règle 1 : Point Count fixe et garanti (N = 9000 sur Desktop / N = 4500 sur Mobile)
+    this.pointCount = options?.pointCount ?? (this.isMobile ? 4500 : 9000);
 
     // Initialisation des tampons géométriques statiques
     this.currentPositions = new Float32Array(this.pointCount * 3);
@@ -209,6 +214,13 @@ export class ThreeIndustrialScene {
         this.earthHighlights.set(earth.highlights);
         this.earthDistances.set(earth.distances);
         this.earthCloudLoaded = true;
+
+        // Si l'utilisateur est déjà positionné sur la Forme 2 pendant le chargement asynchrone,
+        // réinitialiser la progression du morphing vers le nuage Natural Earth nouvellement décodé.
+        if (this.targetTopologyIndex === 1) {
+          this.sourcePositions.set(this.currentPositions);
+          this.morphProgress = 0.0;
+        }
       } catch (err) {
         console.warn('[ThreeIndustrialScene] Erreur de chargement du nuage Terre :', err);
       }
@@ -224,7 +236,7 @@ export class ThreeIndustrialScene {
   private computePointSize(): number {
     const R = 2.05;
     const aTerre = 0.26344 * 4.0 * Math.PI * R * R;
-    const activeCount = this.isMobile ? Math.min(this.pointCount, 5000) : this.pointCount;
+    const activeCount = this.isMobile ? Math.min(this.pointCount, 4500) : this.pointCount;
     const avgSpacing = Math.sqrt(aTerre / (Math.max(1, activeCount) * 0.866));
     return 0.60 * avgSpacing;
   }
@@ -453,16 +465,42 @@ export class ThreeIndustrialScene {
   }
 
   /**
-   * Catalogue des 5 Topologies d'Art Mathématique Pures
+   * Tri cylindrique synchronisé selon la clé (y * 10 + atan2(z, x))
+   * pour éliminer tout croisement désordonné des particules lors du morphing.
+   */
+  private sortBufferCylindrical(buf: Float32Array, N: number): void {
+    const keys = new Float64Array(N);
+    const indices = new Int32Array(N);
+    for (let i = 0; i < N; i++) {
+      const i3 = i * 3;
+      keys[i] = buf[i3 + 1] * 10.0 + Math.atan2(buf[i3 + 2], buf[i3]);
+      indices[i] = i;
+    }
+
+    indices.sort((a, b) => keys[a] - keys[b]);
+
+    const sorted = new Float32Array(N * 3);
+    for (let k = 0; k < N; k++) {
+      const src3 = indices[k] * 3;
+      const dst3 = k * 3;
+      sorted[dst3] = buf[src3];
+      sorted[dst3 + 1] = buf[src3 + 1];
+      sorted[dst3 + 2] = buf[src3 + 2];
+    }
+    buf.set(sorted);
+  }
+
+  /**
+   * Catalogue des 5 Topologies Mathématiques Volumétriques
    */
   private generateTopologies(): void {
     const N = this.pointCount;
     this.topologyBuffers = [
-      new Float32Array(N * 3), // 0: GOLDEN_TOROIDAL_OVOID
-      new Float32Array(N * 3), // 1: MOBIUS_VOLUMETRIC_STRIP
-      new Float32Array(N * 3), // 2: INTERTWINED_TORUS_KNOT
-      new Float32Array(N * 3), // 3: MINIMAL_GYROID_SHEET
-      new Float32Array(N * 3), // 4: FERMAT_VORTEX_NEBULA
+      new Float32Array(N * 3), // 0: GOLDEN_TOROIDAL_OVOID (Accueil)
+      new Float32Array(N * 3), // 1: MOBIUS_VOLUMETRIC_STRIP / Globe Natural Earth (Origines)
+      new Float32Array(N * 3), // 2: INTERTWINED_TORUS_KNOT p=3, q=7 (Énergie)
+      new Float32Array(N * 3), // 3: MINIMAL_GYROID_SHEET double nappe (Systèmes)
+      new Float32Array(N * 3), // 4: FERMAT_VORTEX_NEBULA hyperbolique (Futur)
     ];
 
     this.generateGoldenToroidalOvoid(this.topologyBuffers[0], N);
@@ -473,15 +511,12 @@ export class ThreeIndustrialScene {
   }
 
   /**
-   * Topologie 1 : L'Ovoïde Toroïdal d'Or (Signature visuelle CliffIsCurious)
-   * - Distribution de Fibonacci sur sphère
-   * - Profil en œuf : déformation non-linéaire sur Y (y = y * (1.35 + 0.25 * y))
-   * - Évidement central toroïdal oblique le long d'un axe passant par le centre,
-   *   repoussant les points vers une lèvre extérieure dense et courbée (anneau organique asymétrique)
-   * - Épaisseur volumétrique radiale contrôlée : r_effectif = r_base * (1.0 + random_symetrique() * 0.12)
+   * Forme 1 (Accueil) : Ovoïde asymétrique de Fibonacci avec cavité centrale oblique
+   * et épaississement radial volumétrique (aucun fil de fer, corps plein et dense).
    */
   private generateGoldenToroidalOvoid(buf: Float32Array, N: number): void {
-    const phi = Math.PI * (3 - Math.sqrt(5)); // Angle d'or (~2.39996 rad)
+    const rand = mulberry32(42);
+    const phi = Math.PI * (3.0 - Math.sqrt(5.0)); // Angle d'or (~2.39996 rad)
 
     // Axe oblique traversant le centre (inclinaison harmonieuse ~28° sur X, ~16° sur Y)
     const tiltX = 0.48;
@@ -502,7 +537,7 @@ export class ThreeIndustrialScene {
       const rBase = Math.sqrt(Math.max(0.001, 1.0 - yNorm * yNorm));
       const theta = i * phi;
 
-      // Profil en œuf : déformation non linéaire sur Y et évasement à la base
+      // Profil en œuf asymétrique : déformation non linéaire sur Y et évasement à la base
       const yEgg = yNorm * (1.35 + 0.25 * yNorm);
       const eggTaper = 1.0 - 0.16 * yNorm;
 
@@ -528,36 +563,31 @@ export class ThreeIndustrialScene {
       y = hNew * ay + py * scale;
       z = hNew * az + pz * scale;
 
-      // Injection d'épaisseur volumétrique contrôlée : r_effectif = r_base * (1.0 + random_symetrique() * 0.12)
-      const rVol = 1.0 + pseudoRandom(i, 11) * 0.12;
+      // Épaississement radial volumétrique déterministe via mulberry32(42)
+      const rVol = 1.0 + (rand() * 2.0 - 1.0) * 0.12;
       buf[i * 3] = x * rVol;
       buf[i * 3 + 1] = y * rVol;
       buf[i * 3 + 2] = z * rVol;
     }
 
     this.normalizeBuffer(buf, N, 1.95);
+    this.sortBufferCylindrical(buf, N);
   }
 
   /**
-   * Topologie 2 : Le Ruban de Möbius Volumétrique Épais
-   * - Ruban infini à torsion continue sur [0, 2π]
-   * - x = (R + v * cos(u/2)) * cos(u)
-   * - y = (R + v * cos(u/2)) * sin(u)
-   * - z = v * sin(u/2) + épaisseur
-   * - Distribution équitensionnelle sans étirement
+   * Forme 2 (Initialisation synchrone avant remplacement par le Globe Natural Earth RLE)
    */
   private generateMobiusVolumetricStrip(buf: Float32Array, N: number): void {
+    const rand = mulberry32(42);
     const R = 1.45;
     const w = 0.55;
     const d = 0.18;
 
     for (let i = 0; i < N; i++) {
-      const u = (i / N) * Math.PI * 2 + (pseudoRandom(i, 21) * Math.PI * 0.5) / N;
-      const v = pseudoRandom(i, 22) * w;
-      const thick = pseudoRandom(i, 23) * d;
-
-      // Épaisseur volumétrique contrôlée
-      const rVol = 1.0 + pseudoRandom(i, 24) * 0.12;
+      const u = (i / N) * Math.PI * 2.0 + ((rand() * 2.0 - 1.0) * Math.PI * 0.5) / N;
+      const v = (rand() * 2.0 - 1.0) * w;
+      const thick = (rand() * 2.0 - 1.0) * d;
+      const rVol = 1.0 + (rand() * 2.0 - 1.0) * 0.12;
       const t = thick * rVol;
 
       const cu = Math.cos(u);
@@ -565,7 +595,6 @@ export class ThreeIndustrialScene {
       const cu2 = Math.cos(u * 0.5);
       const su2 = Math.sin(u * 0.5);
 
-      // Déplacement normal volumétrique complet garantissant continuité et épaisseur
       const rad = R + v * cu2 - t * su2;
       buf[i * 3] = rad * cu;
       buf[i * 3 + 1] = rad * su;
@@ -573,62 +602,87 @@ export class ThreeIndustrialScene {
     }
 
     this.normalizeBuffer(buf, N, 1.95);
+    this.sortBufferCylindrical(buf, N);
   }
 
   /**
-   * Topologie 3 : Le Nœud Torique Entrelacé (Torus Knot p=3, q=5 volumétrique)
-   * - Courbe maîtresse auto-enlacée : r = cos(q*φ) + 2.0; x = r*cos(p*φ); y = r*sin(p*φ); z = -sin(q*φ)
-   * - Manchon tubulaire dense de rayon variable autour de la trajectoire
+   * Forme 3 (Énergie) : Solénoïde torique tressé (Torus Knot p=3, q=7)
+   * avec tube volumétrique d'épaisseur continue (repère de Frenet).
    */
   private generateIntertwinedTorusKnot(buf: Float32Array, N: number): void {
+    const rand = mulberry32(42);
     const p = 3;
-    const q = 5;
+    const q = 7;
+    const tubeRadiusBase = 0.34; // Épaisseur tubulaire continue
 
     for (let i = 0; i < N; i++) {
-      const phi = (i / N) * Math.PI * 2 + (pseudoRandom(i, 31) * Math.PI * 0.4) / N;
-      const rKnot = Math.cos(q * phi) + 2.0;
-      const cx = rKnot * Math.cos(p * phi);
-      const cy = rKnot * Math.sin(p * phi);
-      const cz = -Math.sin(q * phi);
+      const phi = (i / N) * Math.PI * 2.0 + ((rand() * 2.0 - 1.0) * Math.PI * 0.4) / N;
+      const cosQ = Math.cos(q * phi);
+      const sinQ = Math.sin(q * phi);
+      const cosP = Math.cos(p * phi);
+      const sinP = Math.sin(p * phi);
 
-      // Dérivée tangente
-      const dr = -q * Math.sin(q * phi);
-      const tx = dr * Math.cos(p * phi) - p * rKnot * Math.sin(p * phi);
-      const ty = dr * Math.sin(p * phi) + p * rKnot * Math.cos(p * phi);
-      const tz = -q * Math.cos(q * phi);
+      const rKnot = cosQ + 2.0;
+      const cx = rKnot * cosP;
+      const cy = rKnot * sinP;
+      const cz = -sinQ;
+
+      // Dérivée première C'(phi) -> Tangente unitaire T du repère de Frenet
+      const dr = -q * sinQ;
+      const tx = dr * cosP - p * rKnot * sinP;
+      const ty = dr * sinP + p * rKnot * cosP;
+      const tz = -q * cosQ;
       const tLen = Math.hypot(tx, ty, tz) || 1.0;
-      const utx = tx / tLen, uty = ty / tLen, utz = tz / tLen;
+      const utx = tx / tLen;
+      const uty = ty / tLen;
+      const utz = tz / tLen;
 
-      // Base orthonormée de Frenet
-      let nx = -uty, ny = utx, nz = 0;
-      const nLen = Math.hypot(nx, ny, nz);
-      if (nLen < 0.001) { nx = 1; ny = 0; nz = 0; } else { nx /= nLen; ny /= nLen; }
-      const bx = uty * nz - utz * ny;
-      const by = utz * nx - utx * nz;
-      const bz = utx * ny - uty * nx;
+      // Dérivée seconde C''(phi) pour construire le vrai repère de Frenet (T, N, B)
+      const d2r = -q * q * cosQ;
+      const ax = (d2r - p * p * rKnot) * cosP - 2.0 * p * dr * sinP;
+      const ay = (d2r - p * p * rKnot) * sinP + 2.0 * p * dr * cosP;
+      const az = q * q * sinQ;
 
-      // Manchon tubulaire dense de rayon variable
-      const psi = i * 2.39996323 + pseudoRandom(i, 32) * 0.35;
-      const rVar = 0.36 + 0.12 * Math.cos(2 * q * phi);
-      const tubeRadius = Math.sqrt(Math.abs(pseudoRandom(i, 33))) * rVar;
-      const rVol = 1.0 + pseudoRandom(i, 34) * 0.12;
-      const rEff = tubeRadius * rVol;
+      // Binormale B = normalize(T x C'')
+      let bx = uty * az - utz * ay;
+      let by = utz * ax - utx * az;
+      let bz = utx * ay - uty * ax;
+      const bLen = Math.hypot(bx, by, bz);
+      if (bLen > 1e-4) {
+        bx /= bLen;
+        by /= bLen;
+        bz /= bLen;
+      } else {
+        bx = 0;
+        by = 0;
+        bz = 1;
+      }
 
-      buf[i * 3] = cx + rEff * (Math.cos(psi) * nx + Math.sin(psi) * bx);
-      buf[i * 3 + 1] = cy + rEff * (Math.cos(psi) * ny + Math.sin(psi) * by);
-      buf[i * 3 + 2] = cz + rEff * (Math.cos(psi) * nz + Math.sin(psi) * bz);
+      // Normale principale de Frenet N = B x T
+      const nx = by * utz - bz * uty;
+      const ny = bz * utx - bx * utz;
+      const nz = bx * uty - by * utx;
+
+      // Échantillonnage volumétrique continu dans la section circulaire du tube
+      const psi = i * 2.39996323 + (rand() * 2.0 - 1.0) * 0.25;
+      const rho = Math.sqrt(rand()) * tubeRadiusBase * (1.0 + (rand() * 2.0 - 1.0) * 0.12);
+
+      buf[i * 3] = cx + rho * (Math.cos(psi) * nx + Math.sin(psi) * bx);
+      buf[i * 3 + 1] = cy + rho * (Math.cos(psi) * ny + Math.sin(psi) * by);
+      buf[i * 3 + 2] = cz + rho * (Math.cos(psi) * nz + Math.sin(psi) * bz);
     }
 
     this.normalizeBuffer(buf, N, 1.95);
+    this.sortBufferCylindrical(buf, N);
   }
 
   /**
-   * Topologie 4 : La Nappe Harmonisante / Gyroïde Minimal
-   * - Surface ondulatoire minimale à triple périodicité : sin(x)cos(y) + sin(y)cos(z) + sin(z)cos(x) = 0
-   * - Projection par méthode de Newton-Raphson avec densité isotrope
+   * Forme 4 (Systèmes) : Gyroïde biomécanique minimal triplement périodique
+   * (sin(kx)cos(ky) + sin(ky)cos(kz) + sin(kz)cos(kx) = 0) découpé en double nappe épaisse.
    */
   private generateHarmonicGyroid(buf: Float32Array, N: number): void {
-    const scale = 2.4;
+    const rand = mulberry32(42);
+    const k = 2.4;
 
     for (let i = 0; i < N; i++) {
       const u = N > 1 ? (i + 0.5) / N : 0.5;
@@ -637,13 +691,16 @@ export class ThreeIndustrialScene {
       const thSeed = i * 2.39996323;
       const shellRad = 0.35 + 0.65 * Math.pow((i % 120) / 119, 0.5);
 
-      let gx = Math.cos(thSeed) * rSeed * shellRad * scale;
-      let gy = Math.sin(thSeed) * rSeed * shellRad * scale;
-      let gz = zSeed * shellRad * scale;
+      let gx = Math.cos(thSeed) * rSeed * shellRad * k;
+      let gy = Math.sin(thSeed) * rSeed * shellRad * k;
+      let gz = zSeed * shellRad * k;
 
-      // 4 itérations de Newton-Raphson vers le zéro harmonique
+      // 4 itérations de Newton-Raphson vers la surface minimale sin(kx)cos(ky) + sin(ky)cos(kz) + sin(kz)cos(kx) = 0
       for (let step = 0; step < 4; step++) {
-        const val = Math.sin(gx) * Math.cos(gy) + Math.sin(gy) * Math.cos(gz) + Math.sin(gz) * Math.cos(gx);
+        const val =
+          Math.sin(gx) * Math.cos(gy) +
+          Math.sin(gy) * Math.cos(gz) +
+          Math.sin(gz) * Math.cos(gx);
         const dx = Math.cos(gx) * Math.cos(gy) - Math.sin(gz) * Math.sin(gx);
         const dy = Math.cos(gy) * Math.cos(gz) - Math.sin(gx) * Math.sin(gy);
         const dz = Math.cos(gz) * Math.cos(gx) - Math.sin(gy) * Math.sin(gz);
@@ -654,26 +711,31 @@ export class ThreeIndustrialScene {
         gz -= delta * dz;
       }
 
-      let x = gx / scale;
-      let y = gy / scale;
-      let z = gz / scale;
+      let x = gx / k;
+      let y = gy / k;
+      let z = gz / k;
 
-      // Normale de surface pour injection volumétrique contrôlée
+      // Normale unitaire pour découpe en double nappe épaisse (+sheet / -sheet)
       const normX = Math.cos(gx) * Math.cos(gy) - Math.sin(gz) * Math.sin(gx);
       const normY = Math.cos(gy) * Math.cos(gz) - Math.sin(gx) * Math.sin(gy);
       const normZ = Math.cos(gz) * Math.cos(gx) - Math.sin(gy) * Math.sin(gz);
       const nLen = Math.hypot(normX, normY, normZ) || 1.0;
 
-      const thick = pseudoRandom(i, 41) * 0.16 * (1.0 + pseudoRandom(i, 42) * 0.12);
-      x += (normX / nLen) * thick;
-      y += (normY / nLen) * thick;
-      z += (normZ / nLen) * thick;
+      const sheetSign = i % 2 === 0 ? 1.0 : -1.0;
+      const sheetThickness = (rand() * 2.0 - 1.0) * 0.055;
+      const doubleSheetOffset = sheetSign * 0.13 + sheetThickness;
+
+      x += (normX / nLen) * doubleSheetOffset;
+      y += (normY / nLen) * doubleSheetOffset;
+      z += (normZ / nLen) * doubleSheetOffset;
 
       // Enveloppe sphérique douce
       const d = Math.hypot(x, y, z);
       if (d > 1.95) {
         const f = 1.95 / d;
-        x *= f; y *= f; z *= f;
+        x *= f;
+        y *= f;
+        z *= f;
       }
 
       buf[i * 3] = x;
@@ -682,46 +744,48 @@ export class ThreeIndustrialScene {
     }
 
     this.normalizeBuffer(buf, N, 1.95);
+    this.sortBufferCylindrical(buf, N);
   }
 
   /**
-   * Topologie 5 : La Nébuleuse Vortex & Double Spirale de Fermat
-   * - Deux spirales logarithmiques intriquées
-   * - Cœur dense et lumineux au centre
-   * - Dispersion volumétrique gaussienne vers l'extérieur
+   * Forme 5 (Futur) : Nébuleuse vortex de Fermat (phyllotaxie d'or sur nappe hyperbolique 3D)
+   * à cœur dense et expansion spirale.
    */
   private generateFermatVortexNebula(buf: Float32Array, N: number): void {
+    const rand = mulberry32(42);
+    const goldenAngle = Math.PI * (3.0 - Math.sqrt(5.0)); // Phyllotaxie d'or
+
     for (let i = 0; i < N; i++) {
-      const arm = i % 2;
-      const armOffset = arm * Math.PI;
+      // Concentration vers le centre pour un cœur dense et lumineux
+      const u = Math.pow((i + 0.5) / N, 1.25);
+      const rBase = 0.12 + 1.88 * Math.pow(u, 0.75);
 
-      // Biais vers le centre pour un cœur compact et lumineux
-      const u = Math.pow(i / N, 1.25);
-      const theta = u * (Math.PI * 6.5) + armOffset;
-      const rBase = 0.15 + 1.85 * Math.pow(u, 0.75);
+      // Phyllotaxie d'or combinée à une torsion vortex spirale
+      const theta = i * goldenAngle + 2.4 * Math.pow(u, 0.7);
 
-      // Entonnoir vortex central
-      const zCore = -0.65 * Math.exp(-(rBase * rBase) / 0.45);
-      const zWave = 0.28 * Math.sin(theta * 2.0) * (1.0 - u * 0.35);
-      const zBase = zCore + zWave;
+      // Nappe hyperbolique 3D : puits hyperbolique central + ondulation spirale
+      const zHyperbolic = -0.82 / (1.0 + 2.8 * rBase * rBase);
+      const zSpiralWave = 0.26 * Math.sin(theta * 2.0) * (1.0 - u * 0.35);
+      const zBase = zHyperbolic + zSpiralWave;
 
-      // Dispersion volumétrique gaussienne vers l'extérieur
-      const sigma = 0.04 + 0.18 * u;
-      const gX = pseudoGaussian(i, 51) * sigma;
-      const gY = pseudoGaussian(i, 52) * sigma;
-      const gZ = pseudoGaussian(i, 53) * sigma * 1.4;
+      // Dispersion volumétrique gaussienne croissante du cœur vers la périphérie
+      const sigma = 0.035 + 0.16 * u;
+      const gX = boxMullerGaussian(rand) * sigma;
+      const gY = boxMullerGaussian(rand) * sigma;
+      const gZ = boxMullerGaussian(rand) * sigma * 1.35;
 
-      const rVol = 1.0 + pseudoRandom(i, 54) * 0.12;
+      const rVol = 1.0 + (rand() * 2.0 - 1.0) * 0.10;
       buf[i * 3] = (rBase * Math.cos(theta) + gX) * rVol;
       buf[i * 3 + 1] = (rBase * Math.sin(theta) + gY) * rVol;
       buf[i * 3 + 2] = (zBase + gZ) * rVol;
     }
 
     this.normalizeBuffer(buf, N, 1.95);
+    this.sortBufferCylindrical(buf, N);
   }
 
   /**
-   * Construction de la géométrie et du ShaderMaterial optimisé
+   * Construction de la géométrie et du ShaderMaterial GLSL Haute Définition
    */
   private buildGeometry(): void {
     this.geometry = new THREE.BufferGeometry();
@@ -764,19 +828,30 @@ export class ThreeIndustrialScene {
         attribute float aDist;
         varying float vHighlight;
         varying float vFade;
+        varying float vDepth;
 
         void main() {
           float h = aHighlight * uForm2Weight;
           vHighlight = h;
           float pLen = length(position);
           vec3 n = pLen > 0.0001 ? position / pLen : vec3(0.0, 1.0, 0.0);
-          float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5; // onde sortante depuis le Cameroun
-          vec3 p = position + n * (h * wave * 0.035 * uMotion);
+
+          // Respiration stationnaire au repos + onde d'Airy rayonnante depuis le Cameroun
+          float breath = sin(uTime * 1.6 + position.y * 2.2 + position.x * 1.5) * 0.018 * (1.0 - uForm2Weight) * uMotion;
+          float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5;
+          vec3 p = position + n * (breath + h * wave * 0.035 * uMotion);
+
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
-          // Estompage de la face arrière avec le vrai vecteur de vue (horizon correct en perspective)
-          vec3 vn = normalize(normalMatrix * n);
-          float facing = dot(vn, normalize(-mv.xyz));
-          vFade = mix(1.0, smoothstep(0.02, 0.45, facing), uForm2Weight);
+
+          // Backface fading via dot(normal, viewDir)
+          vec3 normal = normalize(normalMatrix * n);
+          vec3 viewDir = normalize(-mv.xyz);
+          float facing = dot(normal, viewDir);
+          vFade = mix(0.45 + 0.55 * smoothstep(-0.6, 0.5, facing), smoothstep(0.02, 0.45, facing), uForm2Weight);
+
+          // Shading de profondeur
+          vDepth = clamp((mv.z + 6.8) / 4.0, 0.0, 1.0);
+
           float pz = max(-mv.z, 0.001);
           float size = uPointSize * uScale * uPixelRatio / pz;
           size *= 1.0 + h * 0.5 * wave * uMotion;
@@ -788,15 +863,17 @@ export class ThreeIndustrialScene {
         uniform vec3 uBaseColor;
         varying float vHighlight;
         varying float vFade;
+        varying float vDepth;
 
         void main() {
           float d = length(gl_PointCoord - vec2(0.5));
           if (d > 0.5) discard;
           float disc = 1.0 - smoothstep(0.22, 0.5, d);
-          vec3 colBase = uBaseColor; // lin / beige #E5E3C0
+          vec3 colDepth = uBaseColor * (0.76 + 0.32 * vDepth);
           vec3 colCameroon = vec3(1.0, 0.72, 0.14); // or ambré #FFB724
-          vec3 col = mix(colBase, colCameroon, vHighlight);
-          float a = disc * (0.75 + vHighlight * 0.25) * vFade;
+          vec3 col = mix(colDepth, colCameroon, vHighlight);
+          float depthAlpha = 0.65 + 0.35 * vDepth;
+          float a = disc * (0.75 + vHighlight * 0.25) * vFade * depthAlpha;
           if (a < 0.02) discard;
           gl_FragColor = vec4(col, a);
         }
@@ -815,7 +892,7 @@ export class ThreeIndustrialScene {
     this.pointsMesh.scale.set(initialMeshScale, initialMeshScale, initialMeshScale);
 
     if (this.geometry) {
-      const activeCount = this.isMobile ? Math.min(this.pointCount, 5000) : this.pointCount;
+      const activeCount = this.isMobile ? Math.min(this.pointCount, 4500) : this.pointCount;
       this.geometry.setDrawRange(0, activeCount);
     }
 
@@ -931,9 +1008,9 @@ export class ThreeIndustrialScene {
       this.pointsMesh.scale.set(scale, scale, scale);
     }
 
-    // Plafonnement du nombre de particules (5000 max sur mobile)
+    // Plafonnement du nombre de particules (4500 max sur mobile)
     if (this.geometry) {
-      const activeCount = this.isMobile ? Math.min(this.pointCount, 5000) : this.pointCount;
+      const activeCount = this.isMobile ? Math.min(this.pointCount, 4500) : this.pointCount;
       this.geometry.setDrawRange(0, activeCount);
     }
 
@@ -954,7 +1031,7 @@ export class ThreeIndustrialScene {
   }
 
   /**
-   * Boucle de trame synchronisée sur le singleton FrameManager
+   * Boucle de trame synchronisée sur le singleton FrameManager (0 allocation mémoire)
    */
   private renderFrame(dt: number, time: number, isReducedMotion?: boolean): void {
     if (this.isDestroyed) return;
@@ -969,21 +1046,22 @@ export class ThreeIndustrialScene {
       (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     );
 
-    const mouseLerpFactor = 1 - Math.exp(-12 * dt);
+    const clampedDt = Math.min(Math.max(dt, 0.001), 0.05);
+    const mouseLerpFactor = 1.0 - Math.exp(-12.0 * clampedDt);
     this.mouseX += (this.targetMouseX - this.mouseX) * mouseLerpFactor;
     this.mouseY += (this.targetMouseY - this.mouseY) * mouseLerpFactor;
 
     const energy = isReduced ? 0.0 : kineticEnergy.getEnergy();
-    const count = this.isMobile ? Math.min(this.pointCount, 5000) : this.pointCount;
+    const count = this.isMobile ? Math.min(this.pointCount, 4500) : this.pointCount;
 
-    // 1. Morphing Organique avec micro-déphasage individuel :
-    // Chaque point i possède un facteur d'inertie individuel : speed_i = 0.038 + (i % 100) * 0.0002
+    // 1. Morphing Organique avec damping inertiel en 1 - exp(-k * dt) :
     const targetBuf = this.topologyBuffers[this.targetTopologyIndex];
     let hasMorphDelta = false;
     const isForm2Target = this.targetTopologyIndex === 1 && this.earthCloudLoaded;
+    const morphBaseDamp = 1.0 - Math.exp(-(isReduced ? 10.2 : 2.42) * clampedDt);
 
     for (let i = 0; i < count; i++) {
-      const speed_i = isReduced ? 0.15 : 0.038 + (i % 100) * 0.0002;
+      const speed_i = morphBaseDamp + (isReduced ? 0.0 : (i % 100) * 0.0002);
       const idx = i * 3;
 
       for (let c = 0; c < 3; c++) {
@@ -1028,8 +1106,7 @@ export class ThreeIndustrialScene {
       this.morphProgress = 1.0;
     }
 
-    // Gestion fluide du poids de la Forme 2
-    const clampedDt = Math.min(dt, 0.05);
+    // Gestion fluide du poids de la Forme 2 via 1 - exp(-k * dt)
     const targetForm2Weight = this.targetTopologyIndex === 1 ? 1.0 : 0.0;
     this.form2Weight += (targetForm2Weight - this.form2Weight) * (1.0 - Math.exp(-6.0 * clampedDt));
     if (Math.abs(targetForm2Weight - this.form2Weight) < 0.001) {
@@ -1039,7 +1116,7 @@ export class ThreeIndustrialScene {
     // Rotation & Orientation pré-trame pour synchronisation géométrique parfaite
     if (this.pointsMesh) {
       if (this.targetTopologyIndex === 1) {
-        // Forme 2 active : alignement précis vers le Cameroun (4.5°N, 12.0°E)
+        // Forme 2 active : orientation frontale automatique vers le Cameroun (-12° Y, -4.5° X)
         const f = 1.0 - Math.exp(-4.5 * clampedDt);
 
         const swayAmp = isReduced ? 0.0 : (2.5 * Math.PI) / 180.0;
@@ -1049,7 +1126,7 @@ export class ThreeIndustrialScene {
         const targetRotY =
           (-12.0 * Math.PI) / 180.0 + swayY + (!isReduced ? this.mouseX * 0.03 : 0.0);
         const targetRotX =
-          (4.5 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
+          (-4.5 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
 
         // Plus court chemin angulaire
         const deltaY = Math.atan2(
@@ -1069,12 +1146,13 @@ export class ThreeIndustrialScene {
         this.pointsMesh.position.x += (0.0 - this.pointsMesh.position.x) * f;
         this.pointsMesh.position.y += (0.0 - this.pointsMesh.position.y) * f;
       } else if (!isReduced) {
-        // Section inactive : rotation planétaire douce existante
-        const rotationSpeedY = 0.06 * dt + this.mouseX * 0.01;
+        // Section inactive : rotation planétaire douce avec damping 1 - exp(-k * dt)
+        const rotDamp = 1.0 - Math.exp(-8.0 * clampedDt);
+        const rotationSpeedY = 0.06 * clampedDt + this.mouseX * 0.01;
         this.pointsMesh.rotation.y += rotationSpeedY;
-        this.pointsMesh.rotation.x = this.mouseY * 0.12;
-        this.pointsMesh.position.x = this.mouseX * 0.15;
-        this.pointsMesh.position.y = this.mouseY * 0.15;
+        this.pointsMesh.rotation.x += (this.mouseY * 0.12 - this.pointsMesh.rotation.x) * rotDamp;
+        this.pointsMesh.position.x += (this.mouseX * 0.15 - this.pointsMesh.position.x) * rotDamp;
+        this.pointsMesh.position.y += (this.mouseY * 0.15 - this.pointsMesh.position.y) * rotDamp;
       } else {
         // Section inactive en prefers-reduced-motion : retour amorti vers le neutre
         const f = 1.0 - Math.exp(-4.5 * clampedDt);
@@ -1175,7 +1253,9 @@ export class ThreeIndustrialScene {
       }
     }
 
-    // 4. Amortissement élastique continu (* 0.88) & micro-bruit harmonique sinusoïdal
+    // 4. Damping inertiel en 1 - exp(-k * dt) & micro-bruit harmonique sinusoïdal
+    const offsetDamp = 1.0 - Math.exp(-7.9896 * clampedDt);
+    const offsetKeep = 1.0 - offsetDamp;
     const wavePhase = (time / 1000) * 3.0;
     const scrollEnergy = Math.min(Math.abs(this.scrollVelocityY) * 0.015, 0.35);
     const effectiveEnergy = Math.max(energy, scrollEnergy);
@@ -1184,9 +1264,9 @@ export class ThreeIndustrialScene {
     let hasActiveOffsets = false;
 
     for (let i = 0; i < count; i++) {
-      this.offsetX[i] *= 0.88;
-      this.offsetY[i] *= 0.88;
-      this.offsetZ[i] *= 0.88;
+      this.offsetX[i] *= offsetKeep;
+      this.offsetY[i] *= offsetKeep;
+      this.offsetZ[i] *= offsetKeep;
 
       if (Math.abs(this.offsetX[i]) < 0.0001) this.offsetX[i] = 0.0;
       if (Math.abs(this.offsetY[i]) < 0.0001) this.offsetY[i] = 0.0;
@@ -1224,7 +1304,8 @@ export class ThreeIndustrialScene {
       this.positionAttribute.needsUpdate = true;
     }
 
-    this.scrollVelocityY *= 0.9;
+    const scrollDamp = 1.0 - Math.exp(-6.58 * clampedDt);
+    this.scrollVelocityY *= 1.0 - scrollDamp;
 
     // Mise à jour des uniforms
     if (this.pointsMaterial) {

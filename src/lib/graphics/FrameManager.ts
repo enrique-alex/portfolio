@@ -162,15 +162,14 @@ export class FrameManager {
     const dt = Math.min(rawDt, FrameManager.MAX_DT);
     this.lastTime = now;
 
-    // Itération sécurisée sur une copie pour autoriser les désabonnements en cours d'exécution
-    const currentSubscribers = Array.from(this.subscribers);
-    for (let i = 0; i < currentSubscribers.length; i++) {
+    // Itération zéro-allocation (Set.prototype.forEach supporte nativement la suppression en cours d'itération)
+    this.subscribers.forEach((cb) => {
       try {
-        currentSubscribers[i](dt, now, this.prefersReducedMotion);
+        cb(dt, now, this.prefersReducedMotion);
       } catch (error) {
         console.error('[FrameManager] Error inside subscriber callback:', error);
       }
-    }
+    });
 
     if (this.subscribers.size > 0 && !this.isPaused && !this.isVisibilityHidden) {
       if (typeof requestAnimationFrame !== 'undefined') {

@@ -259,7 +259,7 @@ describe('ThreeIndustrialScene & 5 Pure Mathematical Topologies', () => {
     scene.destroy();
   });
 
-  it('should initialize with mobile point count (5000) when width < 768 and desktop point count (9000)', () => {
+  it('should initialize with mobile point count (4500) when width < 768 and desktop point count (9000)', () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -279,7 +279,7 @@ describe('ThreeIndustrialScene & 5 Pure Mathematical Topologies', () => {
 
     try {
       const mobileScene = new ThreeIndustrialScene(fakeCanvas);
-      expect(mobileScene.currentPositionsBuffer.length).toBe(5000 * 3);
+      expect(mobileScene.currentPositionsBuffer.length).toBe(4500 * 3);
       mobileScene.destroy();
     } finally {
       globalThis.window = originalWindow;
@@ -303,6 +303,42 @@ describe('ThreeIndustrialScene & 5 Pure Mathematical Topologies', () => {
     } finally {
       globalThis.window = originalWindow;
     }
+  });
+
+  it('should synchronize the sorting of all 5 topologies using the cylindrical key (y * 10 + atan2(z, x))', () => {
+    const pointCount = 300;
+    const fakeCanvas = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as HTMLCanvasElement;
+
+    const scene1 = new ThreeIndustrialScene(fakeCanvas, { pointCount });
+    const scene2 = new ThreeIndustrialScene(fakeCanvas, { pointCount });
+
+    for (let t = 0; t < 5; t++) {
+      const buf1 = scene1.getTopologyBuffer(t);
+      const buf2 = scene2.getTopologyBuffer(t);
+
+      // Deterministic generation with mulberry32(42)
+      expect(buf1).toEqual(buf2);
+
+      for (let i = 0; i < pointCount - 1; i++) {
+        const x0 = buf1[i * 3];
+        const y0 = buf1[i * 3 + 1];
+        const z0 = buf1[i * 3 + 2];
+        const key0 = y0 * 10.0 + Math.atan2(z0, x0);
+
+        const x1 = buf1[(i + 1) * 3];
+        const y1 = buf1[(i + 1) * 3 + 1];
+        const z1 = buf1[(i + 1) * 3 + 2];
+        const key1 = y1 * 10.0 + Math.atan2(z1, x1);
+
+        expect(key0).toBeLessThanOrEqual(key1 + 1e-5);
+      }
+    }
+
+    scene1.destroy();
+    scene2.destroy();
   });
 
   it('should support dynamic theme contrast adaptation without crash', () => {

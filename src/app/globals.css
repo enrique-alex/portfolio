@@ -82,13 +82,11 @@
   }
 }
 
-/* Masquage propre du curseur par defaut sur Desktop (pointer: fine) avec DualBodyCursor */
+/* Masquage strict du curseur système uniquement sur Desktop (pointer: fine) */
 @media (pointer: fine) {
-  html, body, a, button, [role="button"], input, select, textarea {
-    cursor: none !important;
-  }
+  html, body, a, button { cursor: none !important; }
 
-  *, *::before, *::after {
+  [role="button"], input, select, textarea, *, *::before, *::after {
     cursor: none !important;
   }
 }

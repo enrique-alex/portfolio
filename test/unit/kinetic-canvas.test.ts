@@ -694,7 +694,7 @@ describe('KineticCanvas & Shaders GLSL (Phases 3 & 4)', () => {
       }
     });
 
-    it('should guarantee point counts N=9000 on desktop and N=5000 on mobile with the 5 mathematical topologies', () => {
+    it('should guarantee point counts N=9000 on desktop and N=4500 on mobile with the 5 mathematical topologies', () => {
       const fakeCanvas = {
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
@@ -737,8 +737,8 @@ describe('KineticCanvas & Shaders GLSL (Phases 3 & 4)', () => {
       };
 
       const mobileScene = new ThreeIndustrialScene(fakeCanvas);
-      expect(mobileScene.currentPositionsBuffer.length).toBe(5000 * 3);
-      expect(mobileScene.getTopologyBuffer(0).length).toBe(5000 * 3);
+      expect(mobileScene.currentPositionsBuffer.length).toBe(4500 * 3);
+      expect(mobileScene.getTopologyBuffer(0).length).toBe(4500 * 3);
       mobileScene.destroy();
 
       globalThis.window = origWindow;
