@@ -43,13 +43,13 @@ export default function CursorFluid() {
     const [shouldRender, setShouldRender] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const fluidInstance = useRef<WebGLFluidInstance>(null); // Référence pour l'instance WebGL fluide
+    const fluidInstance = useRef<WebGLFluidInstance>(null);
 
     useEffect(() => {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion) return;
 
-        // Activation immédiate sur PC et mobile dès le montage côté client
+        // Activation immediate sur PC et mobile des le montage cote client
         setShouldRender(true);
     }, []);
 
@@ -74,7 +74,7 @@ export default function CursorFluid() {
         };
         window.addEventListener('error', silentErrorGuard as EventListener);
         
-        // Import dynamique pour s'assurer que ça ne tourne que côté client
+        // Import dynamique pour s'assurer que ca ne tourne que cote client
         const loadFluid = async () => {
             if (cleaned) return;
             try {
@@ -83,42 +83,39 @@ export default function CursorFluid() {
                 if (WebGLFluid) {
                     const isTouch = window.matchMedia('(pointer: coarse)').matches;
                     fluidInstance.current = WebGLFluid(canvasRef.current!, {
-                    TRIGGER: 'hover',
-                    IMMEDIATE: true,
-                    NUM_SPLATS: isTouch ? 2 : 3,
-                    CURL: 20,
-                    SUNRAYS: true,
-                    SUNRAYS_RESOLUTION: 196,
-                    SUNRAYS_WEIGHT: 0.5,
-                    DENSITY_DISSIPATION: 3,
-                    VELOCITY_DISSIPATION: 1.5,
-                    PRESSURE: 0.2,
-                    PRESSURE_ITERATIONS: 25,
-                    SPLAT_RADIUS: 0.35,
-                    SHADING: true,
-                    COLORFUL: true,
-                    COLOR_UPDATE_SPEED: 8,
-                    BACK_COLOR: { r: 0, g: 0, b: 0 },
-                    TRANSPARENT: true,
-                    BLOOM: true,
-                    BLOOM_ITERATIONS: 8,
-                    BLOOM_RESOLUTION: 256,
-                    BLOOM_INTENSITY: 0.8,
-                    BLOOM_THRESHOLD: 0.6,
-                    BLOOM_SOFT_KNEE: 0.7
-                });
+                        TRIGGER: 'hover',
+                        IMMEDIATE: false,
+                        NUM_SPLATS: isTouch ? 1 : 2,
+                        CURL: 20,
+                        SUNRAYS: false, // Desactive les rayons centraux eblouissants qui forment un disque pixelise
+                        SUNRAYS_RESOLUTION: 196,
+                        SUNRAYS_WEIGHT: 0.1,
+                        DENSITY_DISSIPATION: 3.5,
+                        VELOCITY_DISSIPATION: 2.0,
+                        PRESSURE: 0.2,
+                        PRESSURE_ITERATIONS: isTouch ? 10 : 20,
+                        SPLAT_RADIUS: 0.25,
+                        SHADING: true,
+                        COLORFUL: true,
+                        COLOR_UPDATE_SPEED: 8,
+                        BACK_COLOR: { r: 0, g: 0, b: 0 },
+                        TRANSPARENT: true,
+                        BLOOM: false, // Desactive le bloom eblouissant qui blanchit le theme sombre
+                        BLOOM_ITERATIONS: 4,
+                        BLOOM_RESOLUTION: 256,
+                        BLOOM_INTENSITY: 0.2,
+                        BLOOM_THRESHOLD: 0.7,
+                        BLOOM_SOFT_KNEE: 0.7
+                    });
                 }
             } catch (error) {
                 console.error("Erreur de chargement du shader WebGL :", error);
             }
         };
 
-        loadFluid().then(() => {
-            // Déclenche l'explosion initiale de particules WebGL
-            window.dispatchEvent(new CustomEvent('webgl-explode'));
-        });
+        loadFluid();
 
-        // Résonance WebGL via Custom Event
+        // Resonance WebGL via Custom Event
         const handleResonance = (e: Event) => {
             const customEvent = e as CustomEvent;
             const color = customEvent.detail?.color;
@@ -129,22 +126,14 @@ export default function CursorFluid() {
             }
         };
 
-        // Explosion WebGL à la fin du preloader
-        const handlePreloaderComplete = () => {
-            // Déclenche l'explosion de manière propre sans utiliser le clavier
-            window.dispatchEvent(new CustomEvent('webgl-explode'));
-        };
-
         window.addEventListener('webgl-resonance', handleResonance);
-        window.addEventListener('preloader-complete', handlePreloaderComplete);
 
         return () => {
              cleaned = true;
              window.removeEventListener('webgl-resonance', handleResonance);
-             window.removeEventListener('preloader-complete', handlePreloaderComplete);
              window.removeEventListener('error', silentErrorGuard as EventListener);
         };
-    }, [shouldRender]); // Removed pathname to prevent re-initialization on route change
+    }, [shouldRender]);
 
     if (!shouldRender) return null;
 
@@ -152,9 +141,8 @@ export default function CursorFluid() {
         <div ref={containerRef} className="pointer-events-none fixed inset-0 z-0 h-full w-full overflow-hidden">
              {/* 
                 Le Canvas Magique : 
-                - Nuit (light) : Le noir devient transparent, les couleurs vives s'additionnent.
-                - Jour (dark) : On inverse le comportement ou on utilise un filtre CSS (hue-rotate/invert) 
-                  car webgl-fluid est conçu pour des fonds noirs.
+                - Nuit (dark) : Fond sombre, voile fluide subtil et contraste
+                - Jour (light) : Filtre CSS adapte
              */}
             <canvas
                 ref={canvasRef}
@@ -163,7 +151,7 @@ export default function CursorFluid() {
                      height: '100vh',
                      filter: resolvedTheme === 'light' ? 'invert(1) hue-rotate(180deg) brightness(0.6)' : 'none',
                      mixBlendMode: resolvedTheme === 'light' ? 'multiply' : 'screen',
-                     opacity: resolvedTheme === 'light' ? 0.4 : 0.6,
+                     opacity: resolvedTheme === 'light' ? 0.35 : 0.45,
                      transition: 'filter 1s ease-in-out, opacity 1s ease-in-out'
                 }}
                 className="absolute inset-0 z-0 pointer-events-none"
