@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import EarthGlobe3D from '@/components/ui/EarthGlobe3D';
 import { generateEarthCloud } from '@/lib/graphics/earthCloud';
+import { DUAL_AXIS_LAT, DUAL_AXIS_LON } from '@/lib/geoData';
 
 describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
   let originalWindow: typeof globalThis.window;
@@ -16,12 +17,12 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
     globalThis.window = originalWindow;
   });
 
-  it('should render correctly in SSR without crashing', () => {
+  it('should render correctly in SSR without crashing with Dual-Hub engineering telemetry', () => {
     const html = renderToString(React.createElement(EarthGlobe3D));
-    expect(html).toContain('GEOGRAPHIC RADAR');
-    expect(html).toContain('CAMEROUN');
-    expect(html).toContain('LILLE / DUNKERQUE');
-    expect(html).toContain('Recentrer');
+    expect(html).toContain('GEODETIC TELEMETRY');
+    expect(html).toContain('YAOUNDÉ');
+    expect(html).toContain('LILLE-DUNKERQUE');
+    expect(html).toContain('ALIGN DUAL-AXIS');
     expect(html).toContain('canvas');
   });
 
@@ -49,23 +50,21 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
     }
   });
 
-  it('should ensure Cameroon focal point has maximum highlight near 4.5°N, 12.0°E', () => {
+  it('should ensure Cameroon border (1.0), France border (2.0), and 3D Geodesic Arc (3.0) are present', () => {
     const cloud = generateEarthCloud(4500, 42);
-    let maxHighlight = 0;
-    let minDistance = Infinity;
+    let camCount = 0;
+    let fraCount = 0;
+    let arcCount = 0;
 
     for (let i = 0; i < cloud.highlights.length; i++) {
-      if (cloud.highlights[i] > maxHighlight) {
-        maxHighlight = cloud.highlights[i];
-      }
-      if (cloud.distances[i] < minDistance) {
-        minDistance = cloud.distances[i];
-      }
+      if (cloud.highlights[i] === 1.0) camCount++;
+      else if (cloud.highlights[i] === 2.0) fraCount++;
+      else if (cloud.highlights[i] === 3.0) arcCount++;
     }
 
-    // Focal highlight is boosted and distance to Cameroon focal center is small
-    expect(maxHighlight).toBeGreaterThan(0.5);
-    expect(minDistance).toBeLessThan(0.3);
+    expect(camCount).toBeGreaterThan(50);
+    expect(fraCount).toBeGreaterThan(50);
+    expect(arcCount).toBe(80);
   });
 
   it('should clamp vertical pitch to ±75 degrees (±1.309 rad)', () => {
@@ -79,12 +78,12 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
   });
 
   it('should compute shortest angular distance on circle without multi-turn hyperspin', () => {
-    const CAMEROON_YAW = (-12.0 * Math.PI) / 180.0;
+    const DUAL_AXIS_YAW = (-DUAL_AXIS_LON * Math.PI) / 180.0;
     
     // Simulate yaw after multiple rotations (e.g. 5 full turns + offset)
-    const longAccumulatedYaw = CAMEROON_YAW + 5 * 2 * Math.PI + 0.5;
+    const longAccumulatedYaw = DUAL_AXIS_YAW + 5 * 2 * Math.PI + 0.5;
 
-    let diffYaw = (CAMEROON_YAW - longAccumulatedYaw) % (2.0 * Math.PI);
+    let diffYaw = (DUAL_AXIS_YAW - longAccumulatedYaw) % (2.0 * Math.PI);
     if (diffYaw > Math.PI) diffYaw -= 2.0 * Math.PI;
     if (diffYaw < -Math.PI) diffYaw += 2.0 * Math.PI;
 
@@ -115,8 +114,8 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
     expect(pointerState.velPitch).toBe(0);
   });
 
-  it('should render initial telemetry coordinates "4.5°N, 12.0°E" in SSR', () => {
+  it('should render initial telemetry coordinates "27.3°N, 8.2°E" in SSR', () => {
     const html = renderToString(React.createElement(EarthGlobe3D));
-    expect(html).toContain('4.5°N, 12.0°E');
+    expect(html).toContain('27.3°N, 8.2°E');
   });
 });

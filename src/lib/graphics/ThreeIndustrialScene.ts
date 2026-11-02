@@ -827,34 +827,54 @@ export class ThreeIndustrialScene {
         attribute float aHighlight;
         attribute float aDist;
         varying float vHighlight;
+        varying float vDist;
         varying float vFade;
         varying float vDepth;
+        varying float vPhoton;
 
         void main() {
           float h = aHighlight * uForm2Weight;
           vHighlight = h;
+          vDist = aDist;
           float pLen = length(position);
           vec3 n = pLen > 0.0001 ? position / pLen : vec3(0.0, 1.0, 0.0);
+          vec3 p = position;
+          float photon = 0.0;
 
-          // Respiration stationnaire au repos + onde d'Airy rayonnante depuis le Cameroun
-          float breath = sin(uTime * 1.6 + position.y * 2.2 + position.x * 1.5) * 0.018 * (1.0 - uForm2Weight) * uMotion;
-          float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5;
-          vec3 p = position + n * (breath + h * wave * 0.035 * uMotion);
+          if (aHighlight > 2.5 && uForm2Weight > 0.05) {
+            float photonPhase = fract(uTime * 0.35);
+            float pDiff = abs(aDist - photonPhase);
+            if (pDiff > 0.5) pDiff = 1.0 - pDiff;
+            photon = exp(-pow(pDiff / 0.055, 2.0));
+            vPhoton = photon;
+          } else {
+            float breath = sin(uTime * 1.6 + position.y * 2.2 + position.x * 1.5) * 0.018 * (1.0 - uForm2Weight) * uMotion;
+            float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5;
+            float amp = (aHighlight > 0.5) ? 0.025 : 0.008;
+            p = position + n * (breath + wave * amp * uForm2Weight * uMotion);
+            vPhoton = 0.0;
+          }
 
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
 
-          // Backface fading via dot(normal, viewDir)
           vec3 normal = normalize(normalMatrix * n);
           vec3 viewDir = normalize(-mv.xyz);
           float facing = dot(normal, viewDir);
-          vFade = mix(0.45 + 0.55 * smoothstep(-0.6, 0.5, facing), smoothstep(0.02, 0.45, facing), uForm2Weight);
+          if (aHighlight > 2.5) {
+            vFade = mix(0.45 + 0.55 * smoothstep(-0.6, 0.5, facing), smoothstep(-0.15, 0.35, facing), uForm2Weight);
+          } else {
+            vFade = mix(0.45 + 0.55 * smoothstep(-0.6, 0.5, facing), smoothstep(0.01, 0.45, facing), uForm2Weight);
+          }
 
-          // Shading de profondeur
           vDepth = clamp((mv.z + 6.8) / 4.0, 0.0, 1.0);
 
           float pz = max(-mv.z, 0.001);
           float size = uPointSize * uScale * uPixelRatio / pz;
-          size *= 1.0 + h * 0.5 * wave * uMotion;
+          if (aHighlight > 2.5) {
+            size *= 1.15 + 1.85 * photon * uMotion * uForm2Weight;
+          } else if (aHighlight > 0.5) {
+            size *= 1.0 + 0.35 * uForm2Weight;
+          }
           gl_PointSize = clamp(size, 1.5, 14.0);
           gl_Position = projectionMatrix * mv;
         }
@@ -862,18 +882,37 @@ export class ThreeIndustrialScene {
       fragmentShader: `
         uniform vec3 uBaseColor;
         varying float vHighlight;
+        varying float vDist;
         varying float vFade;
         varying float vDepth;
+        varying float vPhoton;
 
         void main() {
           float d = length(gl_PointCoord - vec2(0.5));
           if (d > 0.5) discard;
-          float disc = 1.0 - smoothstep(0.22, 0.5, d);
+          float disc = 1.0 - smoothstep(0.20, 0.50, d);
           vec3 colDepth = uBaseColor * (0.76 + 0.32 * vDepth);
+
           vec3 colCameroon = vec3(1.0, 0.72, 0.14); // or ambré #FFB724
-          vec3 col = mix(colDepth, colCameroon, vHighlight);
+          vec3 colFrance = vec3(0.22, 0.74, 0.97);   // cyan / cobalt #38BDF8
+
+          vec3 col = colDepth;
+          float alphaMult = 1.0;
+
+          if (vHighlight > 2.5) {
+            vec3 arcGrad = mix(colCameroon, colFrance, vDist);
+            col = mix(arcGrad, vec3(1.0, 1.0, 1.0), vPhoton * 0.75);
+            alphaMult = 0.95 + 0.05 * vPhoton;
+          } else if (vHighlight > 1.5) {
+            col = colFrance;
+            alphaMult = 1.0;
+          } else if (vHighlight > 0.5) {
+            col = colCameroon;
+            alphaMult = 1.0;
+          }
+
           float depthAlpha = 0.65 + 0.35 * vDepth;
-          float a = disc * (0.75 + vHighlight * 0.25) * vFade * depthAlpha;
+          float a = disc * alphaMult * vFade * depthAlpha;
           if (a < 0.02) discard;
           gl_FragColor = vec4(col, a);
         }
@@ -1124,9 +1163,9 @@ export class ThreeIndustrialScene {
         const swayX = Math.cos((time / 1000.0) * 0.5) * (swayAmp * 0.4);
 
         const targetRotY =
-          (-12.7395 * Math.PI) / 180.0 + swayY + (!isReduced ? this.mouseX * 0.03 : 0.0);
+          (-8.22 * Math.PI) / 180.0 + swayY + (!isReduced ? this.mouseX * 0.03 : 0.0);
         const targetRotX =
-          (5.6914 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
+          (27.30 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
 
         // Plus court chemin angulaire
         const deltaY = Math.atan2(

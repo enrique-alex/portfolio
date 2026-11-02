@@ -2,17 +2,21 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { Compass, RotateCcw, Crosshair, MapPin, Globe } from 'lucide-react';
+import { RotateCcw, Crosshair, Activity } from 'lucide-react';
 import { generateEarthCloud } from '@/lib/graphics/earthCloud';
-import { CAMEROON_CENTER } from '@/lib/geoData';
+import {
+  DUAL_AXIS_LAT,
+  DUAL_AXIS_LON,
+  GEODESIC_DISTANCE_KM,
+} from '@/lib/geoData';
 
 export interface EarthGlobe3DProps {
   className?: string;
   onCoordinatesChange?: (coords: { yawDeg: number; pitchDeg: number }) => void;
 }
 
-const CAMEROON_YAW = (-CAMEROON_CENTER[0] * Math.PI) / 180.0;
-const CAMEROON_PITCH = (CAMEROON_CENTER[1] * Math.PI) / 180.0;
+const DUAL_AXIS_YAW = (-DUAL_AXIS_LON * Math.PI) / 180.0;
+const DUAL_AXIS_PITCH = (DUAL_AXIS_LAT * Math.PI) / 180.0;
 const MAX_PITCH = (75.0 * Math.PI) / 180.0;
 
 function computePointSize(pointCount: number): number {
@@ -32,8 +36,8 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
   // Références d'animation et d'état (évite re-rendus dans la boucle RAF)
   const animStateRef = useRef({
-    yaw: CAMEROON_YAW,
-    pitch: CAMEROON_PITCH,
+    yaw: DUAL_AXIS_YAW,
+    pitch: DUAL_AXIS_PITCH,
     velYaw: 0,
     velPitch: 0,
     isDragging: false,
@@ -53,7 +57,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
   const pointsMeshRef = useRef<THREE.Points | null>(null);
   const geometryRef = useRef<THREE.BufferGeometry | null>(null);
 
-  // Recentrer sur le Cameroun (4.5°N, 12.0°E)
+  // Aligner sur l'axe Cameroun - France
   const handleRecenter = useCallback(() => {
     animStateRef.current.isRecentering = true;
     animStateRef.current.velYaw = 0;
@@ -103,7 +107,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       return;
     }
 
-    // 2. Génération du nuage terrestre haute fidélité
+    // 2. Génération du nuage terrestre Dual-Hub haute fidélité
     const earth = generateEarthCloud(pointCount, 42);
 
     const geometry = new THREE.BufferGeometry();
@@ -134,41 +138,97 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
         attribute float aHighlight;
         attribute float aDist;
         varying float vHighlight;
+        varying float vDist;
         varying float vFade;
+        varying float vPhoton;
 
         void main() {
           vHighlight = aHighlight;
-          vec3 n = normalize(position);
+          vDist = aDist;
 
-          // Onde sortante depuis Yaoundé (3.848°N, 11.502°E)
-          float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5;
-          vec3 p = position + n * (aHighlight * wave * 0.03 * uMotion);
+          vec3 n = normalize(position);
+          vec3 p = position;
+          float photon = 0.0;
+
+          if (aHighlight > 2.5) {
+            // Arc géodésique : impulsion photonique circulant le long du grand cercle (aDist = t in [0, 1])
+            float photonPhase = fract(uTime * 0.35);
+            float pDiff = abs(aDist - photonPhase);
+            if (pDiff > 0.5) pDiff = 1.0 - pDiff;
+            photon = exp(-pow(pDiff / 0.055, 2.0));
+            vPhoton = photon;
+          } else {
+            // Ondes sonar rayonnant depuis Yaoundé et Lille
+            float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5;
+            float amp = (aHighlight > 0.5) ? 0.025 : 0.008;
+            p = position + n * (wave * amp * uMotion);
+            vPhoton = 0.0;
+          }
 
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
 
           // Vrai vecteur de vue : horizon correct en perspective
           vec3 vn = normalize(normalMatrix * n);
           float facing = dot(vn, normalize(-mv.xyz));
-          vFade = smoothstep(0.02, 0.45, facing);
 
-          float size = uPointSize * uScale * uPixelRatio / -mv.z;
-          size *= 1.0 + aHighlight * (0.25 + 0.35 * wave * uMotion);
+          if (aHighlight > 2.5) {
+            vFade = smoothstep(-0.15, 0.35, facing);
+          } else {
+            vFade = smoothstep(0.01, 0.45, facing);
+          }
+
+          float pz = max(-mv.z, 0.001);
+          float size = uPointSize * uScale * uPixelRatio / pz;
+
+          if (aHighlight > 2.5) {
+            size *= 1.15 + 1.85 * photon * uMotion;
+          } else if (aHighlight > 0.5) {
+            size *= 1.35; // Frontières vectorielles fines et précises
+          }
+
           gl_PointSize = clamp(size, 1.5, 14.0);
           gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
+        uniform vec3 uBaseColor;
         varying float vHighlight;
+        varying float vDist;
         varying float vFade;
+        varying float vPhoton;
 
         void main() {
           float d = length(gl_PointCoord - vec2(0.5));
           if (d > 0.5) discard;
-          float disc = 1.0 - smoothstep(0.22, 0.5, d);
-          vec3 colBase = vec3(0.90, 0.89, 0.75);     // lin / beige  #E5E3C0
-          vec3 colCameroon = vec3(1.0, 0.72, 0.14);  // or ambré     #FFB724
-          vec3 col = mix(colBase, colCameroon, vHighlight);
-          float a = disc * (0.75 + vHighlight * 0.25) * vFade;
+          float disc = 1.0 - smoothstep(0.20, 0.50, d);
+
+          vec3 colCameroon = vec3(1.0, 0.72, 0.14); // or ambré #FFB724
+          vec3 colFrance = vec3(0.22, 0.74, 0.97);   // cyan / cobalt #38BDF8
+          vec3 colBase = uBaseColor;
+
+          vec3 col;
+          float alphaMult = 1.0;
+
+          if (vHighlight > 2.5) {
+            // Arc géodésique : dégradé ambre -> cyan + éclat photonique
+            vec3 arcGrad = mix(colCameroon, colFrance, vDist);
+            col = mix(arcGrad, vec3(1.0, 1.0, 1.0), vPhoton * 0.75);
+            alphaMult = 0.95 + 0.05 * vPhoton;
+          } else if (vHighlight > 1.5) {
+            // Frontière vectorielle France
+            col = colFrance;
+            alphaMult = 1.0;
+          } else if (vHighlight > 0.5) {
+            // Frontière vectorielle Cameroun
+            col = colCameroon;
+            alphaMult = 1.0;
+          } else {
+            // Terres continentales globales
+            col = colBase;
+            alphaMult = 0.75;
+          }
+
+          float a = disc * alphaMult * vFade;
           if (a < 0.02) discard;
           gl_FragColor = vec4(col, a);
         }
@@ -181,15 +241,15 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
     const pointsMesh = new THREE.Points(geometry, material);
     pointsMesh.rotation.order = 'XYZ';
-    pointsMesh.rotation.y = CAMEROON_YAW;
-    pointsMesh.rotation.x = CAMEROON_PITCH;
+    pointsMesh.rotation.y = DUAL_AXIS_YAW;
+    pointsMesh.rotation.x = DUAL_AXIS_PITCH;
     scene.add(pointsMesh);
     pointsMeshRef.current = pointsMesh;
 
     // 3. Boucle d'animation avec contrôle d'exécution strict
     const state = animStateRef.current;
-    state.yaw = CAMEROON_YAW;
-    state.pitch = CAMEROON_PITCH;
+    state.yaw = DUAL_AXIS_YAW;
+    state.pitch = DUAL_AXIS_PITCH;
     state.velYaw = 0;
     state.velPitch = 0;
     state.lastFrameTime = performance.now();
@@ -202,22 +262,19 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
       if (!state.isDragging) {
         if (state.isRecentering) {
-          // Recentrage élastique amorti via la plus courte distance angulaire sur le cercle
-          let diffYaw = (CAMEROON_YAW - state.yaw) % (2.0 * Math.PI);
+          // Recentrage élastique amorti sur l'axe Cameroun-France
+          let diffYaw = (DUAL_AXIS_YAW - state.yaw) % (2.0 * Math.PI);
           if (diffYaw > Math.PI) diffYaw -= 2.0 * Math.PI;
           if (diffYaw < -Math.PI) diffYaw += 2.0 * Math.PI;
 
-          const diffPitch = CAMEROON_PITCH - state.pitch;
+          const diffPitch = DUAL_AXIS_PITCH - state.pitch;
           const lerpFactor = 1.0 - Math.exp(-6.0 * dt);
           state.yaw += diffYaw * lerpFactor;
           state.pitch += diffPitch * lerpFactor;
 
-          if (
-            Math.abs(diffYaw) < 0.001 &&
-            Math.abs(diffPitch) < 0.001
-          ) {
-            state.yaw = CAMEROON_YAW;
-            state.pitch = CAMEROON_PITCH;
+          if (Math.abs(diffYaw) < 0.001 && Math.abs(diffPitch) < 0.001) {
+            state.yaw = DUAL_AXIS_YAW;
+            state.pitch = DUAL_AXIS_PITCH;
             state.isRecentering = false;
           }
         } else if (Math.abs(state.velYaw) > 0.0001 || Math.abs(state.velPitch) > 0.0001) {
@@ -229,13 +286,13 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           state.velYaw *= decay;
           state.velPitch *= decay;
         } else {
-          // Rotation planétaire lente et douce au repos (0.07 rad/s)
-          state.yaw += 0.07 * dt;
-          // Amortissement très doux du pitch vers l'équateur (0 rad)
-          state.pitch += (0.0 - state.pitch) * (1.0 - Math.exp(-0.8 * dt));
+          // Rotation planétaire douce au repos (0.05 rad/s)
+          state.yaw += 0.05 * dt;
+          // Maintien du pitch vers l'axe médian d'observation
+          state.pitch += (DUAL_AXIS_PITCH - state.pitch) * (1.0 - Math.exp(-0.8 * dt));
         }
 
-        // Maintien de l'angle yaw dans [-PI, PI] pour éviter toute dérive infinie
+        // Maintien de l'angle yaw dans [-PI, PI]
         if (state.yaw > Math.PI) state.yaw -= 2.0 * Math.PI;
         if (state.yaw < -Math.PI) state.yaw += 2.0 * Math.PI;
       }
@@ -249,23 +306,14 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
       renderer.render(scene, camera);
 
-      // Calcul des coordonnées géographiques en direct sans re-rendu React 60 FPS
-      const liveLon = (((-state.yaw * 180.0) / Math.PI) % 360 + 540) % 360 - 180;
-      const liveLat = (-state.pitch * 180.0) / Math.PI;
-
+      // Notification des coordonnées orbitales
       if (coordsSpanRef.current) {
-        const roundedLon = Math.round(liveLon * 10) / 10;
-        const roundedLat = Math.round(liveLat * 10) / 10;
-        const latStr = roundedLat >= 0 ? `${roundedLat}°N` : `${Math.abs(roundedLat)}°S`;
-        const lonStr = roundedLon >= 0 ? `${roundedLon}°E` : `${Math.abs(roundedLon)}°W`;
-        const formatted = `${latStr}, ${lonStr}`;
-        if (coordsSpanRef.current.textContent !== formatted) {
-          coordsSpanRef.current.textContent = formatted;
+        const yawDeg = (-state.yaw * 180) / Math.PI;
+        const pitchDeg = (state.pitch * 180) / Math.PI;
+        coordsSpanRef.current.textContent = `${Math.abs(pitchDeg).toFixed(1)}°${pitchDeg >= 0 ? 'N' : 'S'}, ${Math.abs(yawDeg).toFixed(1)}°${yawDeg >= 0 ? 'E' : 'W'}`;
+        if (onCoordinatesChange) {
+          onCoordinatesChange({ yawDeg, pitchDeg });
         }
-      }
-
-      if (onCoordinatesChange) {
-        onCoordinatesChange({ yawDeg: liveLon, pitchDeg: liveLat });
       }
 
       if (state.isVisible) {
@@ -274,9 +322,10 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     };
 
     const startAnimation = () => {
-      if (state.rafId) return;
-      state.lastFrameTime = performance.now();
-      state.rafId = requestAnimationFrame(renderLoop);
+      if (!state.rafId && !isDestroyed) {
+        state.lastFrameTime = performance.now();
+        state.rafId = requestAnimationFrame(renderLoop);
+      }
     };
 
     const stopAnimation = () => {
@@ -286,14 +335,14 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       }
     };
 
-    // 4. IntersectionObserver : suspendre totalement la boucle hors écran (0% CPU/GPU)
+    // 4. IntersectionObserver pour couper le rendu hors viewport
     let observer: IntersectionObserver | null = null;
     if (typeof IntersectionObserver !== 'undefined') {
       observer = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
             state.isVisible = entry.isIntersecting;
-            if (entry.isIntersecting && !document.hidden) {
+            if (entry.isIntersecting) {
               startAnimation();
             } else {
               stopAnimation();
@@ -320,7 +369,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       document.addEventListener('visibilitychange', handleVisibility);
     }
 
-    // 6. ResizeObserver sur le conteneur carré du canvas pour garantir un ratio 1:1 parfait
+    // 6. ResizeObserver sur le conteneur carré du canvas
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver((entries) => {
@@ -384,13 +433,13 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     };
   }, [onCoordinatesChange]);
 
-  // 8. Gestionnaires d'interaction Drag-to-Rotate
+  // 8. Interaction Drag-to-Rotate (ZÉRO répulsion particulaire)
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
     const state = animStateRef.current;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
-      // Ignorer si pointer capture n'est pas supporté
+      // Ignorer
     }
     state.isDragging = true;
     state.isRecentering = false;
@@ -412,13 +461,11 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     const dx = e.clientX - state.lastPointerX;
     const dy = e.clientY - state.lastPointerY;
 
-    // Sensibilité angulaire
     const sensitivity = 0.005;
     state.yaw += dx * sensitivity;
     state.pitch += dy * sensitivity;
     state.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, state.pitch));
 
-    // Calcul de la vitesse angulaire pour l'inertie
     const rawVelYaw = (dx * sensitivity) / dtPointer;
     const rawVelPitch = (dy * sensitivity) / dtPointer;
     state.velYaw = state.velYaw * 0.6 + rawVelYaw * 0.4;
@@ -441,12 +488,10 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     }
 
     const now = performance.now();
-    // Si l'utilisateur est resté immobile avant de relâcher (>80ms), annuler l'impulsion résiduelle
     if (now - state.lastPointerTime > 80) {
       state.velYaw = 0;
       state.velPitch = 0;
     } else {
-      // Clamping de la vitesse initiale pour une inertie douce
       state.velYaw = Math.max(-8, Math.min(8, state.velYaw));
       state.velPitch = Math.max(-8, Math.min(8, state.velPitch));
     }
@@ -459,26 +504,26 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       className={`group relative flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-black/5 p-4 shadow-2xl backdrop-blur-sm dark:border-white/10 dark:bg-white/5 ${className}`}
       style={{ touchAction: 'pan-y' }}
     >
-      {/* HUD Header */}
+      {/* HUD Header d'Ingénierie Télémétrique */}
       <div className="mb-3 flex items-center justify-between border-b border-black/5 pb-3 dark:border-white/5">
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 text-brand-blue">
-            <Globe className="h-3.5 w-3.5" />
+            <Activity className="h-3.5 w-3.5" />
             <span className="font-mono text-[9px] font-bold tracking-widest uppercase">
-              GEOGRAPHIC RADAR // LVL 5
+              GEODETIC TELEMETRY // WGS-84 DUAL-HUB
             </span>
           </div>
           <span className="font-mono text-[8px] tracking-wider text-zinc-500 dark:text-zinc-400">
-            NATURAL EARTH BLUE NOISE · CAMEROON FOCAL POINT
+            GREAT-CIRCLE ORBITAL TRAJECTORY · {GEODESIC_DISTANCE_KM.toLocaleString()} KM · RESOLUTION 0.05°
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span className="font-mono text-[8px] font-bold text-amber-500 uppercase tracking-wider">
-            ACTIVE
+          <span className="font-mono text-[8px] font-bold text-emerald-500 uppercase tracking-wider">
+            SYS_ONLINE
           </span>
         </div>
       </div>
@@ -496,7 +541,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           onPointerCancel={handlePointerUp}
           className="h-full w-full cursor-grab active:cursor-grabbing select-none"
           style={{ touchAction: 'pan-y' }}
-          aria-label="Globe 3D interactif terrestre avec foyer doré au Cameroun"
+          aria-label="Globe 3D interactif géodésique reliant le Cameroun et la France"
         />
 
         {/* Repère de visée discret */}
@@ -504,27 +549,31 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           <Crosshair className="h-10 w-10 text-brand-blue/60 stroke-[1]" />
         </div>
 
-        {/* Badge Télémétrie Cameroun & France */}
-        <div className="pointer-events-none absolute bottom-2 left-2 flex flex-col gap-1 rounded bg-black/60 px-2 py-1 font-mono text-[8px] text-zinc-300 backdrop-blur-md border border-white/10">
-          <div className="flex items-center gap-1 text-amber-400 font-semibold">
-            <MapPin className="h-2.5 w-2.5 text-amber-400" />
-            <span>CAMEROUN : 4.5°N, 12.0°E</span>
+        {/* Badge Télémétrie Dual-Hub (Cameroun & France) */}
+        <div className="pointer-events-none absolute bottom-2 left-2 flex flex-col gap-1 rounded bg-black/70 px-2.5 py-1.5 font-mono text-[8px] text-zinc-300 backdrop-blur-md border border-white/10 shadow-lg">
+          <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+            <span>NODE 01 : YAOUNDÉ [CM] · 03°50&apos;N 11°30&apos;E</span>
           </div>
-          <div className="flex items-center gap-1 text-zinc-400">
-            <Compass className="h-2.5 w-2.5 text-brand-blue" />
-            <span>LILLE / DUNKERQUE : 50.6°N, 3.1°E</span>
+          <div className="flex items-center gap-1.5 text-sky-400 font-semibold">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+            <span>NODE 02 : LILLE-DUNKERQUE [FR] · 50°38&apos;N 03°03&apos;E</span>
+          </div>
+          <div className="mt-0.5 border-t border-white/10 pt-1 text-[7.5px] text-zinc-400 flex items-center justify-between gap-3">
+            <span>ORTHODROMIE : {GEODESIC_DISTANCE_KM.toLocaleString()} KM</span>
+            <span className="text-zinc-500">Δσ = 47.3°</span>
           </div>
         </div>
 
-        {/* Bouton Tactile de Recentrage */}
+        {/* Bouton Tactile d'Alignement Dual-Hub */}
         <button
           type="button"
           onClick={handleRecenter}
-          title="Recentrer sur le Cameroun"
+          title="Aligner sur l'axe Cameroun - France"
           className="absolute top-2 right-2 flex items-center gap-1 rounded-md border border-black/10 bg-white/80 px-2 py-1 text-[9px] font-mono font-medium text-zinc-700 shadow-sm backdrop-blur hover:bg-white hover:text-black dark:border-white/10 dark:bg-black/60 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
         >
-          <RotateCcw className="h-2.5 w-2.5 text-amber-400" />
-          <span>Recentrer</span>
+          <RotateCcw className="h-2.5 w-2.5 text-brand-blue" />
+          <span>ALIGN DUAL-AXIS</span>
         </button>
       </div>
 
@@ -538,7 +587,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           ref={coordsSpanRef}
           className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/5 text-[9px] font-bold"
         >
-          4.5°N, 12.0°E
+          27.3°N, 8.2°E
         </span>
       </div>
     </div>

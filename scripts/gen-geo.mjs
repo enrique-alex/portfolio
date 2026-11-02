@@ -4,7 +4,7 @@ import { feature } from 'topojson-client';
 const W = 2048, H = 1024;
 const INCLUDE_ANTARCTICA = true;
 
-// ---- Terres émergées : rasterisation scanline (pair-impair, gère les lacs) ----
+// ---- 1. Terres émergées : rasterisation scanline (pair-impair, gère les lacs) ----
 const topo = JSON.parse(readFileSync('node_modules/world-atlas/land-50m.json', 'utf8'));
 const fc = feature(topo, topo.objects.land);
 const geoms = fc.type === 'FeatureCollection' ? fc.features.map(f => f.geometry) : [fc.geometry];
@@ -29,6 +29,7 @@ for (const poly of polys) {
     }
   }
 }
+
 // RLE + fraction de terre pondérée par l'aire (cos lat)
 let num = 0, den = 0; const rows = [];
 for (let y = 0; y < H; y++) {
@@ -42,26 +43,48 @@ for (let y = 0; y < H; y++) {
   rows.push(r); num += w * count; den += w * W;
 }
 const areaFrac = num / den;
-console.log('fraction de terre (aire):', areaFrac.toFixed(3)); // attendu ~0.28-0.30 avec Antarctique
+console.log('fraction de terre (aire):', areaFrac.toFixed(3));
 
-// ---- Cameroun : vraie frontière (Natural Earth admin-0) ----
+// ---- 2. Cameroun : vraie frontière (Natural Earth admin-0) ----
 const ctopo = JSON.parse(readFileSync('node_modules/world-atlas/countries-50m.json', 'utf8'));
-const cf = feature(ctopo, ctopo.objects.countries).features
-  .find(f => f.properties?.name === 'Cameroon' || String(f.id) === '120');
+const countries = feature(ctopo, ctopo.objects.countries).features;
+const cf = countries.find(f => f.properties?.name === 'Cameroon' || String(f.id) === '120');
 if (!cf) throw new Error('Cameroun introuvable dans countries-50m');
 const cpolys = cf.geometry.type === 'Polygon' ? [cf.geometry.coordinates] : cf.geometry.coordinates;
-const ring = cpolys.map(p => p[0]).sort((a, b) => b.length - a.length)[0]
+const camRing = cpolys.map(p => p[0]).sort((a, b) => b.length - a.length)[0]
   .map(([lo, la]) => [Math.round(lo * 1e4) / 1e4, Math.round(la * 1e4) / 1e4]);
-// centroïde planaire (le pays est petit) : aire signée
-let A = 0, cx = 0, cy = 0;
-for (let i = 0; i < ring.length - 1; i++) {
-  const [x1, y1] = ring[i], [x2, y2] = ring[i + 1], c = x1 * y2 - x2 * y1;
-  A += c; cx += (x1 + x2) * c; cy += (y1 + y2) * c;
+
+let Acam = 0, cxCam = 0, cyCam = 0;
+for (let i = 0; i < camRing.length - 1; i++) {
+  const [x1, y1] = camRing[i], [x2, y2] = camRing[i + 1], c = x1 * y2 - x2 * y1;
+  Acam += c; cxCam += (x1 + x2) * c; cyCam += (y1 + y2) * c;
 }
-A /= 2; cx /= 6 * A; cy /= 6 * A;
-const lons = ring.map(p => p[0]), lats = ring.map(p => p[1]);
-console.log('Cameroun : centroïde', cx.toFixed(2), cy.toFixed(2),
-  '| lon', Math.min(...lons), Math.max(...lons), '| lat', Math.min(...lats), Math.max(...lats));
+Acam /= 2; cxCam /= 6 * Acam; cyCam /= 6 * Acam;
+const lonsCam = camRing.map(p => p[0]), latsCam = camRing.map(p => p[1]);
+console.log('Cameroun : centroïde', cxCam.toFixed(2), cyCam.toFixed(2),
+  '| lon', Math.min(...lonsCam), Math.max(...lonsCam), '| lat', Math.min(...latsCam), Math.max(...latsCam));
+
+// ---- 3. France métropolitaine : frontière de l'Hexagone (Natural Earth admin-0) ----
+const ff = countries.find(f => f.properties?.name === 'France' || String(f.id) === '250');
+if (!ff) throw new Error('France introuvable dans countries-50m');
+const fpolys = ff.geometry.type === 'Polygon' ? [ff.geometry.coordinates] : ff.geometry.coordinates;
+// Le polygone principal est l'Hexagone (le plus grand nombre de sommets)
+const fraRing = fpolys.map(p => p[0]).sort((a, b) => b.length - a.length)[0]
+  .map(([lo, la]) => [Math.round(lo * 1e4) / 1e4, Math.round(la * 1e4) / 1e4]);
+
+let Afra = 0, cxFra = 0, cyFra = 0;
+for (let i = 0; i < fraRing.length - 1; i++) {
+  const [x1, y1] = fraRing[i], [x2, y2] = fraRing[i + 1], c = x1 * y2 - x2 * y1;
+  Afra += c; cxFra += (x1 + x2) * c; cyFra += (y1 + y2) * c;
+}
+Afra /= 2; cxFra /= 6 * Afra; cyFra /= 6 * Afra;
+const lonsFra = fraRing.map(p => p[0]), latsFra = fraRing.map(p => p[1]);
+console.log('France métropolitaine : centroïde', cxFra.toFixed(2), cyFra.toFixed(2),
+  '| lon', Math.min(...lonsFra), Math.max(...lonsFra), '| lat', Math.min(...latsFra), Math.max(...latsFra));
+
+// Point médian orthodromique de l'axe Cameroun-France
+const DUAL_AXIS_LAT = 27.30;
+const DUAL_AXIS_LON = 8.22;
 
 mkdirSync('src/lib', { recursive: true });
 writeFileSync('src/lib/geoData.ts',
@@ -69,8 +92,21 @@ writeFileSync('src/lib/geoData.ts',
 export const LAND_H = ${H};
 export const LAND_AREA_FRAC = ${areaFrac.toFixed(5)};
 export const LAND_RLE: number[][] = ${JSON.stringify(rows)};
-export const CAMEROON_RING: [number, number][] = ${JSON.stringify(ring)}; // [lon, lat] en degrés, anneau fermé
-export const CAMEROON_CENTER: [number, number] = [${cx.toFixed(4)}, ${cy.toFixed(4)}]; // [lon, lat]
-export const YAOUNDE_LAT = 3.848; // Yaoundé capitale (lat)
-export const YAOUNDE_LON = 11.502; // Yaoundé capitale (lon)
+
+// Cameroun (Natural Earth admin-0)
+export const CAMEROON_RING: [number, number][] = ${JSON.stringify(camRing)}; // [lon, lat] en degrés, anneau fermé
+export const CAMEROON_CENTER: [number, number] = [${cxCam.toFixed(4)}, ${cyCam.toFixed(4)}]; // [lon, lat]
+export const YAOUNDE_LAT = 3.8480; // Yaoundé (lat)
+export const YAOUNDE_LON = 11.5021; // Yaoundé (lon)
+
+// France métropolitaine (Hexagone, Natural Earth admin-0)
+export const FRANCE_RING: [number, number][] = ${JSON.stringify(fraRing)}; // [lon, lat] en degrés, anneau fermé
+export const FRANCE_CENTER: [number, number] = [${cxFra.toFixed(4)}, ${cyFra.toFixed(4)}]; // [lon, lat]
+export const LILLE_LAT = 50.6292; // Lille / Dunkerque cluster (lat)
+export const LILLE_LON = 3.0573; // Lille / Dunkerque cluster (lon)
+
+// Axe Télémétrique Dual-Hub (Point médian pour cadrage caméra frontal)
+export const DUAL_AXIS_LAT = ${DUAL_AXIS_LAT};
+export const DUAL_AXIS_LON = ${DUAL_AXIS_LON};
+export const GEODESIC_DISTANCE_KM = 5262;
 `);
