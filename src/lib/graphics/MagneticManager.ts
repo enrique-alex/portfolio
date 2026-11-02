@@ -106,14 +106,26 @@ export class MagneticManager {
       item.currentY = 0;
       item.isActive = false;
       try {
-        item.element.style.transform = '';
+        if (item.element.style.transform !== '') {
+          item.element.style.transform = '';
+        }
       } catch {
         // Safe reset
       }
     });
+
+    // Suspendre la boucle RAF pendant le scroll pour 0% CPU et 0 mutation de style
+    if (this.unsubscribeFrame) {
+      this.unsubscribeFrame();
+      this.unsubscribeFrame = null;
+    }
+
     this.scrollResetTimer = setTimeout(() => {
       this.isScrolling = false;
       this.scrollResetTimer = null;
+      if (this.cursorX > -1000) {
+        this.ensureFrameSubscription();
+      }
     }, 130);
   }
 
@@ -215,10 +227,15 @@ export class MagneticManager {
       return;
     }
 
+    const isTouch = typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(pointer: coarse)').matches;
+
     const isReduced = Boolean(
-      isReducedMotion ??
-      frameManager.isReducedMotion ??
-      (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      isTouch ||
+      (isReducedMotion ??
+        frameManager.isReducedMotion ??
+        (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches))
     );
 
     if (isReduced || this.isScrolling) {
@@ -229,12 +246,14 @@ export class MagneticManager {
         item.targetY = 0;
         item.isActive = false;
         try {
-          item.element.style.transform = '';
+          if (item.element.style.transform !== '') {
+            item.element.style.transform = '';
+          }
         } catch {
           // Safe reset
         }
       });
-      if (this.unsubscribeFrame && isReduced) {
+      if (this.unsubscribeFrame) {
         this.unsubscribeFrame();
         this.unsubscribeFrame = null;
       }

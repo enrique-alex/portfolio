@@ -285,9 +285,53 @@ describe('MagneticManager - Contrôleur Magnétique Globalisé (Étape 3)', () =
     magneticManager.handleScroll();
     expect(magneticManager.getIsScrolling()).toBe(true);
     expect(fakeElement.style.transform).toBe('');
+    expect(magneticManager.isSubscribed).toBe(false);
 
-    // During scrolling, update should keep transform empty
+    // During scrolling, update should keep transform empty and unsubscribed
     magneticManager.updateForTesting(0.016, false);
+    expect(fakeElement.style.transform).toBe('');
+    expect(magneticManager.isSubscribed).toBe(false);
+
+    magneticManager.unregister(fakeElement);
+  });
+
+  it('should disable magnetic displacement on touch screens (pointer: coarse)', () => {
+    const fakeElement = {
+      getBoundingClientRect: vi.fn(() => ({
+        left: 100,
+        top: 100,
+        width: 100,
+        height: 100,
+        right: 200,
+        bottom: 200,
+      })),
+      style: {
+        transform: 'translate3d(5px, 5px, 0)',
+      },
+    } as unknown as HTMLElement;
+
+    // Mock window and matchMedia for pointer: coarse
+    globalThis.window = {
+      matchMedia: vi.fn().mockImplementation((query: string) => ({
+        matches: query === '(pointer: coarse)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+      scrollX: 0,
+      scrollY: 0,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as Window & typeof globalThis;
+
+    magneticManager.register(fakeElement, 0.5);
+    magneticManager.setCursor(150, 150);
+    magneticManager.updateForTesting(0.016, false);
+
     expect(fakeElement.style.transform).toBe('');
 
     magneticManager.unregister(fakeElement);

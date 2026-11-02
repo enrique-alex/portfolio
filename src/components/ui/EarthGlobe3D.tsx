@@ -23,13 +23,10 @@ function computePointSize(pointCount: number): number {
 
 export default function EarthGlobe3D({ className = '', onCoordinatesChange }: EarthGlobe3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const coordsSpanRef = useRef<HTMLSpanElement>(null);
 
-  // Coordonnées et état interactif
-  const [coords, setCoords] = useState<{ lonDeg: number; latDeg: number }>({
-    lonDeg: 12.0,
-    latDeg: 4.5,
-  });
   const [isInteracting, setIsInteracting] = useState(false);
 
   // Références d'animation et d'état (évite re-rendus dans la boucle RAF)
@@ -65,7 +62,8 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
-    if (!canvas || !container) return;
+    const canvasContainer = canvasContainerRef.current;
+    if (!canvas || !container || !canvasContainer) return;
 
     let isDestroyed = false;
 
@@ -80,8 +78,8 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const width = container.clientWidth || 340;
-    const height = container.clientHeight || 340;
+    const width = canvasContainer.clientWidth || 300;
+    const height = canvasContainer.clientHeight || width || 300;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 50);
     camera.position.set(0, 0, 4.8);
@@ -213,14 +211,19 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
       if (!state.isDragging) {
         if (state.isRecentering) {
-          // Recentrage élastique amorti vers le Cameroun
+          // Recentrage élastique amorti via la plus courte distance angulaire sur le cercle
+          let diffYaw = (CAMEROON_YAW - state.yaw) % (2.0 * Math.PI);
+          if (diffYaw > Math.PI) diffYaw -= 2.0 * Math.PI;
+          if (diffYaw < -Math.PI) diffYaw += 2.0 * Math.PI;
+
+          const diffPitch = CAMEROON_PITCH - state.pitch;
           const lerpFactor = 1.0 - Math.exp(-6.0 * dt);
-          state.yaw += (CAMEROON_YAW - state.yaw) * lerpFactor;
-          state.pitch += (CAMEROON_PITCH - state.pitch) * lerpFactor;
+          state.yaw += diffYaw * lerpFactor;
+          state.pitch += diffPitch * lerpFactor;
 
           if (
-            Math.abs(state.yaw - CAMEROON_YAW) < 0.001 &&
-            Math.abs(state.pitch - CAMEROON_PITCH) < 0.001
+            Math.abs(diffYaw) < 0.001 &&
+            Math.abs(diffPitch) < 0.001
           ) {
             state.yaw = CAMEROON_YAW;
             state.pitch = CAMEROON_PITCH;
@@ -240,6 +243,10 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           // Amortissement très doux du pitch vers l'équateur (0 rad)
           state.pitch += (0.0 - state.pitch) * (1.0 - Math.exp(-0.8 * dt));
         }
+
+        // Maintien de l'angle yaw dans [-PI, PI] pour éviter toute dérive infinie
+        if (state.yaw > Math.PI) state.yaw -= 2.0 * Math.PI;
+        if (state.yaw < -Math.PI) state.yaw += 2.0 * Math.PI;
       }
 
       pointsMesh.rotation.y = state.yaw;
@@ -251,14 +258,20 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
       renderer.render(scene, camera);
 
-      // Calcul des coordonnées géographiques en direct
+      // Calcul des coordonnées géographiques en direct sans re-rendu React 60 FPS
       const liveLon = (((-state.yaw * 180.0) / Math.PI) % 360 + 540) % 360 - 180;
       const liveLat = (-state.pitch * 180.0) / Math.PI;
 
-      setCoords({
-        lonDeg: Math.round(liveLon * 10) / 10,
-        latDeg: Math.round(liveLat * 10) / 10,
-      });
+      if (coordsSpanRef.current) {
+        const roundedLon = Math.round(liveLon * 10) / 10;
+        const roundedLat = Math.round(liveLat * 10) / 10;
+        const latStr = roundedLat >= 0 ? `${roundedLat}°N` : `${Math.abs(roundedLat)}°S`;
+        const lonStr = roundedLon >= 0 ? `${roundedLon}°E` : `${Math.abs(roundedLon)}°W`;
+        const formatted = `${latStr}, ${lonStr}`;
+        if (coordsSpanRef.current.textContent !== formatted) {
+          coordsSpanRef.current.textContent = formatted;
+        }
+      }
 
       if (onCoordinatesChange) {
         onCoordinatesChange({ yawDeg: liveLon, pitchDeg: liveLat });
@@ -316,14 +329,14 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       document.addEventListener('visibilitychange', handleVisibility);
     }
 
-    // 6. ResizeObserver pour ajuster la géométrie et la caméra
+    // 6. ResizeObserver sur le conteneur carré du canvas pour garantir un ratio 1:1 parfait
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
           const cr = entry.contentRect;
-          const w = cr.width || 340;
-          const h = cr.height || 340;
+          const w = cr.width || 300;
+          const h = cr.height || w || 300;
           if (w > 0 && h > 0) {
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
@@ -336,7 +349,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           }
         }
       });
-      resizeObserver.observe(container);
+      resizeObserver.observe(canvasContainer);
     }
 
     // 7. Thème (sombre / clair)
@@ -364,6 +377,11 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       if (themeObserver) themeObserver.disconnect();
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibility);
+      }
+      try {
+        renderer.forceContextLoss();
+      } catch {
+        // Safe disposal
       }
       geometry.dispose();
       material.dispose();
@@ -431,9 +449,16 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       // Ignorer
     }
 
-    // Clamping de la vitesse initiale pour une inertie douce
-    state.velYaw = Math.max(-8, Math.min(8, state.velYaw));
-    state.velPitch = Math.max(-8, Math.min(8, state.velPitch));
+    const now = performance.now();
+    // Si l'utilisateur est resté immobile avant de relâcher (>80ms), annuler l'impulsion résiduelle
+    if (now - state.lastPointerTime > 80) {
+      state.velYaw = 0;
+      state.velPitch = 0;
+    } else {
+      // Clamping de la vitesse initiale pour une inertie douce
+      state.velYaw = Math.max(-8, Math.min(8, state.velYaw));
+      state.velPitch = Math.max(-8, Math.min(8, state.velPitch));
+    }
     setIsInteracting(false);
   }, []);
 
@@ -467,8 +492,11 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
         </div>
       </div>
 
-      {/* 3D Canvas Container */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-black/10 bg-zinc-950/20 dark:border-white/10 dark:bg-zinc-900/40">
+      {/* 3D Canvas Container (ratio carré 1:1 strict) */}
+      <div
+        ref={canvasContainerRef}
+        className="relative aspect-square w-full overflow-hidden rounded-xl border border-black/10 bg-zinc-950/20 dark:border-white/10 dark:bg-zinc-900/40"
+      >
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
@@ -515,9 +543,11 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           <span className="text-brand-blue">✦</span>
           {isInteracting ? 'Contrôle orbital actif...' : 'Maintenir & glisser pour pivoter'}
         </span>
-        <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/5 text-[9px] font-bold">
-          {coords.latDeg >= 0 ? `${coords.latDeg}°N` : `${Math.abs(coords.latDeg)}°S`},{' '}
-          {coords.lonDeg >= 0 ? `${coords.lonDeg}°E` : `${Math.abs(coords.lonDeg)}°W`}
+        <span
+          ref={coordsSpanRef}
+          className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/5 text-[9px] font-bold"
+        >
+          4.5°N, 12.0°E
         </span>
       </div>
     </div>

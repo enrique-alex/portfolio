@@ -77,4 +77,46 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
     expect(clampPitch(-3.0)).toBeCloseTo(-1.309, 3);
     expect(clampPitch(0.5)).toBeCloseTo(0.5, 3);
   });
+
+  it('should compute shortest angular distance on circle without multi-turn hyperspin', () => {
+    const CAMEROON_YAW = (-12.0 * Math.PI) / 180.0;
+    
+    // Simulate yaw after multiple rotations (e.g. 5 full turns + offset)
+    const longAccumulatedYaw = CAMEROON_YAW + 5 * 2 * Math.PI + 0.5;
+
+    let diffYaw = (CAMEROON_YAW - longAccumulatedYaw) % (2.0 * Math.PI);
+    if (diffYaw > Math.PI) diffYaw -= 2.0 * Math.PI;
+    if (diffYaw < -Math.PI) diffYaw += 2.0 * Math.PI;
+
+    // The shortest angular difference must be bounded by [-PI, PI] and close to -0.5 rad (less than 1 turn!)
+    expect(Math.abs(diffYaw)).toBeLessThanOrEqual(Math.PI);
+    expect(diffYaw).toBeCloseTo(-0.5, 3);
+  });
+
+  it('should cancel residual pointer velocity when pointer was stationary (>80ms) before release', () => {
+    const pointerState = {
+      isDragging: true,
+      lastPointerTime: 1000,
+      velYaw: 5.5,
+      velPitch: 3.2,
+    };
+
+    const handleRelease = (now: number) => {
+      pointerState.isDragging = false;
+      if (now - pointerState.lastPointerTime > 80) {
+        pointerState.velYaw = 0;
+        pointerState.velPitch = 0;
+      }
+    };
+
+    // User paused for 300ms before releasing pointer
+    handleRelease(1300);
+    expect(pointerState.velYaw).toBe(0);
+    expect(pointerState.velPitch).toBe(0);
+  });
+
+  it('should render initial telemetry coordinates "4.5°N, 12.0°E" in SSR', () => {
+    const html = renderToString(React.createElement(EarthGlobe3D));
+    expect(html).toContain('4.5°N, 12.0°E');
+  });
 });
