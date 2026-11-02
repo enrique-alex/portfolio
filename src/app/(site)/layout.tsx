@@ -1,4 +1,4 @@
-import KineticCanvas from "@/components/animations/KineticCanvas";
+import CursorFluid from "@/components/animations/CursorFluid";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Preloader from "@/components/ui/Preloader";
@@ -14,7 +14,7 @@ export default function SiteLayout({
       <Preloader />
 
       {/* L'animation WebGL Fluide réactive en arrière-plan */}
-      <KineticCanvas />
+      <CursorFluid />
       
       {/* La barre de navigation par-dessus l'animation */}
       <Navbar />

@@ -30,7 +30,8 @@ export interface CachedMagneticItem {
   isActive: boolean;
 }
 
-export const DOM_MAGNETIC_CAPTURE_RADIUS = 60; // Rayon de capture très court (d < 60px du centre)
+export const DOM_MAGNETIC_CAPTURE_RADIUS = 40; // Rayon de capture resserré (d < 40px du centre)
+export const MAX_MAGNETIC_DISPLACEMENT = 6.0; // Plafond maximal de déplacement à ±6px
 
 export class MagneticManager {
   private static instance: MagneticManager | null = null;
@@ -38,8 +39,11 @@ export class MagneticManager {
   private items: Map<HTMLElement, CachedMagneticItem> = new Map();
   private cursorX: number = -9999;
   private cursorY: number = -9999;
+  private isScrolling: boolean = false;
+  private scrollResetTimer: ReturnType<typeof setTimeout> | null = null;
   private unsubscribeFrame: (() => void) | null = null;
   private boundResize: (() => void) | null = null;
+  private boundScroll: (() => void) | null = null;
   private boundPointerMove: ((e: PointerEvent | MouseEvent) => void) | null = null;
   private boundPointerLeave: (() => void) | null = null;
 
@@ -62,6 +66,11 @@ export class MagneticManager {
     };
     window.addEventListener('resize', this.boundResize, { passive: true });
 
+    this.boundScroll = () => {
+      this.handleScroll();
+    };
+    window.addEventListener('scroll', this.boundScroll, { passive: true });
+
     // Écouteur passif global sur le pointeur pour connaître les coordonnées absolues
     this.boundPointerMove = (e: PointerEvent | MouseEvent) => {
       this.cursorX = e.clientX;
@@ -82,6 +91,30 @@ export class MagneticManager {
     if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
       document.addEventListener('mouseleave', this.boundPointerLeave);
     }
+  }
+
+  public handleScroll(): void {
+    this.isScrolling = true;
+    if (this.scrollResetTimer !== null) {
+      clearTimeout(this.scrollResetTimer);
+    }
+    // Mute immédiat : toutes les cibles sont instantanément forcées à (0, 0)
+    this.items.forEach((item) => {
+      item.targetX = 0;
+      item.targetY = 0;
+      item.currentX = 0;
+      item.currentY = 0;
+      item.isActive = false;
+      try {
+        item.element.style.transform = '';
+      } catch {
+        // Safe reset
+      }
+    });
+    this.scrollResetTimer = setTimeout(() => {
+      this.isScrolling = false;
+      this.scrollResetTimer = null;
+    }, 130);
   }
 
   public register(element: HTMLElement, intensity: number = 0.3): void {
@@ -188,15 +221,20 @@ export class MagneticManager {
       (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     );
 
-    if (isReduced) {
+    if (isReduced || this.isScrolling) {
       this.items.forEach((item) => {
         item.currentX = 0;
         item.currentY = 0;
         item.targetX = 0;
         item.targetY = 0;
-        item.element.style.transform = '';
+        item.isActive = false;
+        try {
+          item.element.style.transform = '';
+        } catch {
+          // Safe reset
+        }
       });
-      if (this.unsubscribeFrame) {
+      if (this.unsubscribeFrame && isReduced) {
         this.unsubscribeFrame();
         this.unsubscribeFrame = null;
       }
@@ -220,11 +258,22 @@ export class MagneticManager {
       const dist = Math.hypot(dx, dy);
 
       // L'effet magnétique sur les boutons DOM ne doit s'activer QUE si la souris
-      // se trouve à l'intérieur d'un rayon de capture très court (d < 60px du centre de l'élément).
+      // se trouve à l'intérieur d'un rayon de capture très court (d < 40px du centre de l'élément).
       // Au-delà de ce rayon : déplacement strictement égal à (0, 0).
-      if (dist < DOM_MAGNETIC_CAPTURE_RADIUS && this.cursorX > -1000) {
-        item.targetX = dx * item.intensity;
-        item.targetY = dy * item.intensity;
+      if (!this.isScrolling && dist < DOM_MAGNETIC_CAPTURE_RADIUS && this.cursorX > -1000) {
+        // Courbe d'atténuation quadratique douce évitant tout décrochage brutal
+        const normDist = dist / DOM_MAGNETIC_CAPTURE_RADIUS;
+        const smoothFactor = 1.0 - normDist * normDist;
+        let rawTargetX = dx * item.intensity * smoothFactor;
+        let rawTargetY = dy * item.intensity * smoothFactor;
+        const targetDist = Math.hypot(rawTargetX, rawTargetY);
+        if (targetDist > MAX_MAGNETIC_DISPLACEMENT) {
+          const clampRatio = MAX_MAGNETIC_DISPLACEMENT / targetDist;
+          rawTargetX *= clampRatio;
+          rawTargetY *= clampRatio;
+        }
+        item.targetX = rawTargetX;
+        item.targetY = rawTargetY;
         item.isActive = true;
       } else {
         item.targetX = 0;
@@ -269,11 +318,24 @@ export class MagneticManager {
     return this.items.size;
   }
 
+  public getIsScrolling(): boolean {
+    return this.isScrolling;
+  }
+
+  public setIsScrollingForTesting(value: boolean): void {
+    this.isScrolling = value;
+  }
+
   public updateForTesting(dt: number, isReducedMotion?: boolean): void {
     this.update(dt, isReducedMotion);
   }
 
   public resetForTesting(): void {
+    if (this.scrollResetTimer !== null) {
+      clearTimeout(this.scrollResetTimer);
+      this.scrollResetTimer = null;
+    }
+    this.isScrolling = false;
     if (this.unsubscribeFrame) {
       this.unsubscribeFrame();
       this.unsubscribeFrame = null;
@@ -296,6 +358,10 @@ export class MagneticManager {
       if (this.boundResize) {
         window.removeEventListener('resize', this.boundResize);
         this.boundResize = null;
+      }
+      if (this.boundScroll) {
+        window.removeEventListener('scroll', this.boundScroll);
+        this.boundScroll = null;
       }
       if (this.boundPointerMove) {
         window.removeEventListener('pointermove', this.boundPointerMove);

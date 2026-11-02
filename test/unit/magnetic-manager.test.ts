@@ -180,7 +180,7 @@ describe('MagneticManager - Contrôleur Magnétique Globalisé (Étape 3)', () =
     magneticManager.unregister(fakeElement);
   });
 
-  it('should only activate magnetic attraction when cursor is strictly within capture radius (d < 60px)', () => {
+  it('should only activate magnetic attraction when cursor is strictly within capture radius (d < 40px)', () => {
     // Element centered at (150, 150)
     const fakeElement = {
       getBoundingClientRect: vi.fn(() => ({
@@ -198,8 +198,8 @@ describe('MagneticManager - Contrôleur Magnétique Globalisé (Étape 3)', () =
 
     magneticManager.register(fakeElement, 0.3);
 
-    // 1. Cursor at (190, 150): dx = 40, dy = 0 -> d = 40px (< 60px) -> MUST activate
-    magneticManager.setCursor(190, 150);
+    // 1. Cursor at (175, 150): dx = 25, dy = 0 -> d = 25px (< 40px) -> MUST activate
+    magneticManager.setCursor(175, 150);
     magneticManager.updateForTesting(0.016, false);
     expect(fakeElement.style.transform).toContain('translate3d');
 
@@ -209,13 +209,84 @@ describe('MagneticManager - Contrôleur Magnétique Globalisé (Étape 3)', () =
 
     magneticManager.register(fakeElement, 0.3);
 
-    // 2. Cursor at (215, 150): dx = 65, dy = 0 -> d = 65px (>= 60px) -> MUST NOT activate
-    magneticManager.setCursor(215, 150);
+    // 2. Cursor at (195, 150): dx = 45, dy = 0 -> d = 45px (>= 40px) -> MUST NOT activate
+    magneticManager.setCursor(195, 150);
     magneticManager.updateForTesting(0.016, false);
     expect(fakeElement.style.transform).toBe('');
 
-    // 3. Cursor at (250, 250): dx = 100, dy = 100 -> d ≈ 141px (>= 60px) -> MUST NOT activate
+    // 3. Cursor at (250, 250): dx = 100, dy = 100 -> d ≈ 141px (>= 40px) -> MUST NOT activate
     magneticManager.setCursor(250, 250);
+    magneticManager.updateForTesting(0.016, false);
+    expect(fakeElement.style.transform).toBe('');
+
+    magneticManager.unregister(fakeElement);
+  });
+
+  it('should cap magnetic displacement to a maximum of 6px', () => {
+    const fakeElement = {
+      getBoundingClientRect: vi.fn(() => ({
+        left: 100,
+        top: 100,
+        width: 100,
+        height: 100,
+        right: 200,
+        bottom: 200,
+      })),
+      style: {
+        transform: '',
+      },
+    } as unknown as HTMLElement;
+
+    // High intensity to attempt large displacement
+    magneticManager.register(fakeElement, 1.0);
+    magneticManager.setCursor(170, 150); // dx = 20px
+
+    // Run multiple frames to approach target
+    for (let i = 0; i < 50; i++) {
+      magneticManager.updateForTesting(0.016, false);
+    }
+
+    // Extract translate3d values
+    const match = fakeElement.style.transform.match(/translate3d\(([-0-9.]+)px,\s*([-0-9.]+)px,\s*0\)/);
+    expect(match).not.toBeNull();
+    if (match) {
+      const x = parseFloat(match[1]);
+      const y = parseFloat(match[2]);
+      const displacement = Math.hypot(x, y);
+      expect(displacement).toBeLessThanOrEqual(6.01);
+    }
+
+    magneticManager.unregister(fakeElement);
+  });
+
+  it('should mute all magnetic effects immediately during scrolling', () => {
+    const fakeElement = {
+      getBoundingClientRect: vi.fn(() => ({
+        left: 100,
+        top: 100,
+        width: 100,
+        height: 100,
+        right: 200,
+        bottom: 200,
+      })),
+      style: {
+        transform: '',
+      },
+    } as unknown as HTMLElement;
+
+    magneticManager.register(fakeElement, 0.5);
+    magneticManager.setCursor(170, 150); // within 40px radius
+
+    // Run frame: should activate
+    magneticManager.updateForTesting(0.016, false);
+    expect(fakeElement.style.transform).toContain('translate3d');
+
+    // Trigger scroll
+    magneticManager.handleScroll();
+    expect(magneticManager.getIsScrolling()).toBe(true);
+    expect(fakeElement.style.transform).toBe('');
+
+    // During scrolling, update should keep transform empty
     magneticManager.updateForTesting(0.016, false);
     expect(fakeElement.style.transform).toBe('');
 

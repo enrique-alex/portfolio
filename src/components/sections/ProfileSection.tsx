@@ -1,9 +1,9 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import Image from 'next/image';
 import { Fingerprint, Terminal, Crosshair, MapPin, Code2, Zap } from 'lucide-react';
 import { useLanguage } from '../theme/LanguageProvider';
+import EarthGlobe3D from '../ui/EarthGlobe3D';
 
 export default function ProfileSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -45,52 +45,15 @@ export default function ProfileSection() {
 
         <div className="flex flex-col gap-12 lg:flex-row lg:gap-20 items-center lg:items-start">
           
-          {/* LEFT COLUMN: Operator ID Card */}
+          {/* LEFT COLUMN: Geographic Telemetry 3D Globe */}
           <motion.div 
-            className="w-full max-w-sm shrink-0"
+            className="w-full max-w-sm lg:max-w-md shrink-0"
             initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -30, rotateY: shouldReduceMotion ? 0 : 15 }}
             whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
             viewport={{ once: true }}
             transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', damping: 20, stiffness: 100 }}
           >
-            <div className="group relative w-full overflow-hidden rounded-2xl border border-black/10 bg-black/5 p-4 shadow-2xl backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
-              
-              {/* ID Card Header */}
-              <div className="mb-4 flex items-center justify-between border-b border-black/5 pb-4 dark:border-white/5">
-                <div className="flex flex-col">
-                  <span className="font-mono text-[10px] font-bold tracking-widest text-brand-blue uppercase">{t('profile.card.clearance')}</span>
-                  <span className="font-mono text-[8px] tracking-wider text-zinc-500 dark:text-zinc-400">{t('profile.card.id')}</span>
-                </div>
-                <div className="flex gap-1">
-                  <span className="block h-2 w-2 rounded-full bg-brand-red opacity-80 animate-pulse"></span>
-                  <span className="block h-2 w-2 rounded-full bg-emerald-500 opacity-80"></span>
-                </div>
-              </div>
-
-              {/* Holographic Photo Frame */}
-              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-black/10 bg-zinc-200 dark:border-white/10 dark:bg-zinc-800">
-                <div className="absolute inset-0 mix-blend-overlay opacity-50 z-10 bg-[linear-gradient(transparent_0%,rgba(0,0,0,0.1)_50%,transparent_100%)] bg-[length:100%_4px] group-hover:animate-[scan_2s_linear_infinite]" />
-                <Image 
-                  src="/photo.webp"
-                  alt="Enrique Alex Ndjakou"
-                  fill
-                  className="object-cover object-center grayscale-[30%] contrast-125 transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 400px"
-                />
-                
-                {/* Scanner Line Effect */}
-                <div className="absolute inset-x-0 top-0 h-1 bg-brand-blue/80 shadow-[0_0_15px_rgba(10,102,194,0.8)] z-20 opacity-0 group-hover:opacity-100 group-hover:animate-[scanline_2.5s_ease-in-out_infinite]" />
-              </div>
-
-              {/* Data Footer */}
-              <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase text-zinc-600 dark:text-zinc-400">
-                <span>{t('profile.card.status')}</span>
-                <span className="flex items-center gap-1">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  {t('profile.card.bio')}
-                </span>
-              </div>
-            </div>
+            <EarthGlobe3D className="w-full max-w-[340px] lg:max-w-none mx-auto" />
           </motion.div>
 
           {/* RIGHT COLUMN: Bio-Data Readout */}
