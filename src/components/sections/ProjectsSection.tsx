@@ -10,7 +10,7 @@ export default function ProjectsSection() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-      <section id="projects" className="relative w-full overflow-hidden pb-32 pt-32 scroll-mt-32">
+      <section id="projects" className="section-contain relative w-full overflow-hidden pb-32 pt-32 scroll-mt-32">
         
         {/* 1. GLASS GRID INFINIE & REVEAL TOPOGRAPHIQUE */}
         <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_100%_at_50%_0%,#000_10%,transparent_110%)] md:bg-[size:100px_100px]"></div>

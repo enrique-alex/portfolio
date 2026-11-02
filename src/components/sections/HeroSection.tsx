@@ -102,7 +102,7 @@ export default function HeroSection() {
           
           {/* Conteneur Capsule / Portrait */}
           <Magnetic intensity={0.1}>
-            <div className="relative aspect-[3/4] w-full min-h-[350px] max-w-[300px] overflow-hidden rounded-[2.5rem] border border-black/5 bg-white/10 p-2 shadow-2xl backdrop-blur-3xl dark:border-white/10 dark:bg-black/20 ring-1 ring-black/5 dark:ring-white/10">
+            <div className="relative aspect-[3/4] w-full min-h-[350px] max-w-[300px] overflow-hidden rounded-[2.5rem] border border-black/5 bg-white/10 p-2 shadow-2xl backdrop-blur-md dark:border-white/10 dark:bg-black/20 ring-1 ring-black/5 dark:ring-white/10">
               <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group">
                 
                 {/* Overlay Cyberpunk */}
@@ -114,9 +114,10 @@ export default function HeroSection() {
                   alt="Enrique Alex NDJAKOU KEMAYOU" 
                   fill 
                   className="object-cover z-20 grayscale hover:grayscale-0 transition-transform duration-700 hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 300px"
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 300px"
                   priority
                   fetchPriority="high"
+                  decoding="sync"
                 />
 
               </div>

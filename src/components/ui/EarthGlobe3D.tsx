@@ -71,65 +71,85 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     if (!canvas || !container || !canvasContainer) return;
 
     let isDestroyed = false;
+    let isInitialized = false;
 
-    // Détection mobile pour calibrer le point count (2500 mobile / 4500 desktop)
-    const isMobile =
-      typeof window !== 'undefined' &&
-      (window.innerWidth < 768 ||
-        (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches));
-    const pointCount = isMobile ? 2500 : 4500;
-
-    // 1. Initialisation Three.js
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
-
-    const width = canvasContainer.clientWidth || 300;
-    const height = canvasContainer.clientHeight || width || 300;
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 50);
-    camera.position.set(0, 0, 4.8);
-    camera.lookAt(0, 0, 0);
-    cameraRef.current = camera;
-
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        alpha: true,
-        antialias: true,
-        powerPreference: 'high-performance',
-      });
-      renderer.setPixelRatio(Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2));
-      renderer.setSize(width, height, false);
-      rendererRef.current = renderer;
-    } catch (err) {
-      console.warn('[EarthGlobe3D] Contexte WebGL inaccessible :', err);
-      return;
-    }
-
-    // 2. Génération du nuage terrestre Dual-Hub haute fidélité
-    const earth = generateEarthCloud(pointCount, 42);
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(earth.positions, 3));
-    geometry.setAttribute('aHighlight', new THREE.BufferAttribute(earth.highlights, 1));
-    geometry.setAttribute('aDist', new THREE.BufferAttribute(earth.distances, 1));
-    geometryRef.current = geometry;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let geometry: THREE.BufferGeometry | null = null;
+    let material: THREE.ShaderMaterial | null = null;
+    let camera: THREE.PerspectiveCamera | null = null;
+    let scene: THREE.Scene | null = null;
+    let pointsMesh: THREE.Points | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let themeObserver: MutationObserver | null = null;
 
     const fovRad = (45 * Math.PI) / 180;
-    const initialScale = height / (2.0 * Math.tan(fovRad * 0.5));
-    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    const state = animStateRef.current;
+    state.yaw = DUAL_AXIS_YAW;
+    state.pitch = DUAL_AXIS_PITCH;
+    state.velYaw = 0;
+    state.velPitch = 0;
+    state.lastFrameTime = performance.now();
 
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0.0 },
-        uPixelRatio: { value: renderer.getPixelRatio() },
-        uScale: { value: initialScale },
-        uPointSize: { value: computePointSize(pointCount) },
-        uMotion: { value: 1.0 },
-        uBaseColor: { value: new THREE.Color(isDark ? 0xe5e3c0 : 0x524b38) },
-      },
-      vertexShader: `
+    // 1 & 2. Initialisation Three.js et Nuage Terrestre différée (hors du chemin critique LCP)
+    const initEngine = () => {
+      if (isInitialized || isDestroyed) return;
+      isInitialized = true;
+
+      // Détection mobile pour calibrer le point count (2500 mobile / 4500 desktop)
+      const isMobile =
+        typeof window !== 'undefined' &&
+        (window.innerWidth < 768 ||
+          (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches));
+      const pointCount = isMobile ? 2500 : 4500;
+
+      scene = new THREE.Scene();
+      sceneRef.current = scene;
+
+      const width = canvasContainer.clientWidth || 300;
+      const height = canvasContainer.clientHeight || width || 300;
+
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 50);
+      camera.position.set(0, 0, 4.8);
+      camera.lookAt(0, 0, 0);
+      cameraRef.current = camera;
+
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: 'high-performance',
+        });
+        renderer.setPixelRatio(Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2));
+        renderer.setSize(width, height, false);
+        rendererRef.current = renderer;
+      } catch (err) {
+        console.warn('[EarthGlobe3D] Contexte WebGL inaccessible :', err);
+        return;
+      }
+
+      // Génération du nuage terrestre Dual-Hub haute fidélité
+      const earth = generateEarthCloud(pointCount, 42);
+
+      geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(earth.positions, 3));
+      geometry.setAttribute('aHighlight', new THREE.BufferAttribute(earth.highlights, 1));
+      geometry.setAttribute('aDist', new THREE.BufferAttribute(earth.distances, 1));
+      geometryRef.current = geometry;
+
+      const initialScale = height / (2.0 * Math.tan(fovRad * 0.5));
+      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
+      material = new THREE.ShaderMaterial({
+        uniforms: {
+          uTime: { value: 0.0 },
+          uPixelRatio: { value: renderer.getPixelRatio() },
+          uScale: { value: initialScale },
+          uPointSize: { value: computePointSize(pointCount) },
+          uMotion: { value: 1.0 },
+          uBaseColor: { value: new THREE.Color(isDark ? 0xe5e3c0 : 0x524b38) },
+        },
+        vertexShader: `
         uniform float uTime;
         uniform float uPixelRatio;
         uniform float uScale;
@@ -190,7 +210,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           gl_Position = projectionMatrix * mv;
         }
       `,
-      fragmentShader: `
+        fragmentShader: `
         uniform vec3 uBaseColor;
         varying float vHighlight;
         varying float vDist;
@@ -233,29 +253,62 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           gl_FragColor = vec4(col, a);
         }
       `,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.NormalBlending,
-    });
-    materialRef.current = material;
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.NormalBlending,
+      });
+      materialRef.current = material;
 
-    const pointsMesh = new THREE.Points(geometry, material);
-    pointsMesh.rotation.order = 'XYZ';
-    pointsMesh.rotation.y = DUAL_AXIS_YAW;
-    pointsMesh.rotation.x = DUAL_AXIS_PITCH;
-    scene.add(pointsMesh);
-    pointsMeshRef.current = pointsMesh;
+      pointsMesh = new THREE.Points(geometry, material);
+      pointsMesh.rotation.order = 'XYZ';
+      pointsMesh.rotation.y = DUAL_AXIS_YAW;
+      pointsMesh.rotation.x = DUAL_AXIS_PITCH;
+      scene.add(pointsMesh);
+      pointsMeshRef.current = pointsMesh;
+
+      // ResizeObserver sur le conteneur carré du canvas
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const cr = entry.contentRect;
+            const w = cr.width || 300;
+            const h = cr.height || w || 300;
+            if (w > 0 && h > 0 && camera && renderer) {
+              camera.aspect = w / h;
+              camera.updateProjectionMatrix();
+              renderer.setSize(w, h, false);
+              const scale = h / (2.0 * Math.tan(fovRad * 0.5));
+              if (materialRef.current) {
+                materialRef.current.uniforms.uScale.value = scale;
+                materialRef.current.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+              }
+            }
+          }
+        });
+        resizeObserver.observe(canvasContainer);
+      }
+
+      // Thème (sombre / clair)
+      const updateTheme = () => {
+        if (typeof document === 'undefined' || !materialRef.current) return;
+        const isD = document.documentElement.classList.contains('dark');
+        materialRef.current.uniforms.uBaseColor.value.setHex(isD ? 0xe5e3c0 : 0x524b38);
+      };
+
+      if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+        themeObserver = new MutationObserver(updateTheme);
+        themeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+      }
+    };
 
     // 3. Boucle d'animation avec contrôle d'exécution strict
-    const state = animStateRef.current;
-    state.yaw = DUAL_AXIS_YAW;
-    state.pitch = DUAL_AXIS_PITCH;
-    state.velYaw = 0;
-    state.velPitch = 0;
-    state.lastFrameTime = performance.now();
-
     const renderLoop = (now: number) => {
       if (isDestroyed) return;
+      if (!isInitialized) initEngine();
+      if (!renderer || !scene || !camera || !pointsMesh) return;
 
       const dt = Math.min((now - state.lastFrameTime) * 0.001, 0.1);
       state.lastFrameTime = now;
@@ -323,6 +376,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
 
     const startAnimation = () => {
       if (!state.rafId && !isDestroyed) {
+        if (!isInitialized) initEngine();
         state.lastFrameTime = performance.now();
         state.rafId = requestAnimationFrame(renderLoop);
       }
@@ -335,7 +389,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       }
     };
 
-    // 4. IntersectionObserver pour couper le rendu hors viewport
+    // 4. IntersectionObserver avec marge anticipée (300px) pour éviter tout freeze
     let observer: IntersectionObserver | null = null;
     if (typeof IntersectionObserver !== 'undefined') {
       observer = new IntersectionObserver(
@@ -349,7 +403,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
             }
           }
         },
-        { threshold: 0.05 }
+        { rootMargin: '300px 0px', threshold: 0.01 }
       );
       observer.observe(container);
     } else {
@@ -369,45 +423,6 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       document.addEventListener('visibilitychange', handleVisibility);
     }
 
-    // 6. ResizeObserver sur le conteneur carré du canvas
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const cr = entry.contentRect;
-          const w = cr.width || 300;
-          const h = cr.height || w || 300;
-          if (w > 0 && h > 0) {
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-            renderer.setSize(w, h, false);
-            const scale = h / (2.0 * Math.tan(fovRad * 0.5));
-            if (materialRef.current) {
-              materialRef.current.uniforms.uScale.value = scale;
-              materialRef.current.uniforms.uPixelRatio.value = renderer.getPixelRatio();
-            }
-          }
-        }
-      });
-      resizeObserver.observe(canvasContainer);
-    }
-
-    // 7. Thème (sombre / clair)
-    const updateTheme = () => {
-      if (typeof document === 'undefined' || !materialRef.current) return;
-      const isD = document.documentElement.classList.contains('dark');
-      materialRef.current.uniforms.uBaseColor.value.setHex(isD ? 0xe5e3c0 : 0x524b38);
-    };
-
-    let themeObserver: MutationObserver | null = null;
-    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
-      themeObserver = new MutationObserver(updateTheme);
-      themeObserver.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class'],
-      });
-    }
-
     // Nettoyage complet
     return () => {
       isDestroyed = true;
@@ -418,20 +433,21 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibility);
       }
-      try {
-        renderer.forceContextLoss();
-      } catch {
-        // Safe disposal
+      if (renderer) {
+        try {
+          renderer.forceContextLoss();
+        } catch {
+          // Safe disposal
+        }
+        renderer.dispose();
       }
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-      if (pointsMeshRef.current) {
-        scene.remove(pointsMeshRef.current);
+      if (geometry) geometry.dispose();
+      if (material) material.dispose();
+      if (pointsMesh && scene) {
+        scene.remove(pointsMesh);
         pointsMeshRef.current = null;
       }
-    };
-  }, [onCoordinatesChange]);
+    };  }, [onCoordinatesChange]);
 
   // 8. Interaction Drag-to-Rotate (ZÉRO répulsion particulaire)
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {

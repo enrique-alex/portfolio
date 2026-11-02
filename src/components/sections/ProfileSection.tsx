@@ -10,7 +10,7 @@ export default function ProfileSection() {
   const { t } = useLanguage();
 
   return (
-    <section id="profile" className="relative w-full py-24 lg:py-32 scroll-mt-32">
+    <section id="profile" className="section-contain relative w-full py-24 lg:py-32 scroll-mt-32">
       {/* Background Matrix/Dotted */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
         style={{

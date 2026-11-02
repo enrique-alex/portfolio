@@ -113,7 +113,21 @@ export default function CursorFluid() {
             }
         };
 
-        loadFluid();
+        // Planification asynchrone hors du chemin critique LCP
+        // Priorité absolue accordée au premier paint FCP et à l'image Hero
+        let idleId: number | null = null;
+        let timerId: ReturnType<typeof setTimeout> | null = null;
+
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            idleId = (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number })
+                .requestIdleCallback(() => {
+                    if (!cleaned) loadFluid();
+                }, { timeout: 1200 });
+        } else {
+            timerId = setTimeout(() => {
+                if (!cleaned) loadFluid();
+            }, 300);
+        }
 
         // Resonance WebGL via Custom Event
         const handleResonance = (e: Event) => {
@@ -130,6 +144,12 @@ export default function CursorFluid() {
 
         return () => {
              cleaned = true;
+             if (idleId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+                 (window as Window & { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+             }
+             if (timerId !== null) {
+                 clearTimeout(timerId);
+             }
              window.removeEventListener('webgl-resonance', handleResonance);
              window.removeEventListener('error', silentErrorGuard as EventListener);
         };
