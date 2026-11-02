@@ -130,7 +130,7 @@ export default function Navbar() {
             href="#home" 
             className="group relative z-50 flex items-center gap-2.5 text-xl font-bold tracking-tighter text-zinc-900 transition-all hover:opacity-90 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-lg py-1 px-1.5 -ml-1.5"
             onClick={() => setActiveSegment(NAV_LINKS[0]?.name || 'Accueil')}
-            aria-label="Enrique Ndjakou - Accueil"
+            aria-label="Enrique.Ndjakou"
           >
             <Logo className="h-7 w-7 text-zinc-900 transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-blue dark:text-white dark:group-hover:text-brand-blue" />
             <span className="relative">
@@ -221,7 +221,7 @@ export default function Navbar() {
                   : '1px solid rgba(0,0,0,0.06)',
                 backdropFilter: 'blur(12px)',
               }}
-              aria-label={locale === 'fr' ? "Switch to English" : "Passer en Français"}
+              aria-label={locale === 'fr' ? "Switch to English (EN)" : "Passer en Français (FR)"}
             >
               <Languages className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
               <span>{locale === 'fr' ? 'EN' : 'FR'}</span>

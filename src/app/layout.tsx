@@ -64,7 +64,19 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning est indispensable avec next-themes pour éviter le flash au chargement
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
-      <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased overflow-x-hidden w-full max-w-full">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if(typeof window!=='undefined'&&typeof window.__name==='undefined'){window.__name=function(t,v){return Object.defineProperty(t,'name',{value:v,configurable:true});}}",
+          }}
+        />
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="default-src 'self'; connect-src 'self' https://api.web3forms.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://pub-f2abb97fd5a44520b79d8e56bf020956.r2.dev; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
+        />
+      </head>
+      <body className="bg-white text-zinc-900 transition-colors duration-700 ease-in-out dark:bg-[#050505] dark:text-[#EDEDED] antialiased overflow-x-hidden w-full max-w-full" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>
             <ProjectsProvider>

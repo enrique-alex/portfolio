@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   reactCompiler: true,
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {

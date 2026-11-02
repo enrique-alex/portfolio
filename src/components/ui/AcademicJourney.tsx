@@ -34,7 +34,7 @@ export default function AcademicJourney() {
   const shouldReduceMotion = useReducedMotion();
   const { t } = useLanguage();
   const journeyData = useJourneyData();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
 
   // Calcul physique du scroll relatif à la section
   const { scrollYProgress } = useScroll({
@@ -42,11 +42,11 @@ export default function AcademicJourney() {
     offset: ["start center", "end 80%"]
   });
 
-  // Mapper le scroll (0->1) à la longueur du SVG (0->1)
-  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  // Mapper le scroll (0->1) à la progression
+  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <section ref={containerRef} id="academic" className="section-contain relative w-full max-w-7xl mx-auto py-32 px-4 sm:px-8 overflow-hidden z-10 scroll-mt-32">
+    <section ref={containerRef} id="academic" className="relative w-full max-w-7xl mx-auto py-32 px-4 sm:px-8 overflow-hidden z-10 scroll-mt-32">
       
       {/* HEADER - System Process Monitor Style */}
       <motion.div 
@@ -71,41 +71,17 @@ export default function AcademicJourney() {
       </motion.div>
 
       <div className="relative">
-        {/* PCB Trace Line (Ligne de Circuit Imprimé SVG animée) */}
+        {/* PCB Trace Line (Ligne de Circuit Imprimé animée) */}
         <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 pointer-events-none z-0">
-          <svg
-            className="absolute top-0 left-0 h-full w-[2px] overflow-visible"
-            viewBox="0 0 2 100"
-            preserveAspectRatio="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            {/* Piste de fond non alimentée */}
-            <line
-              x1="1"
-              y1="0"
-              x2="1"
-              y2="100"
-              stroke="currentColor"
-              strokeOpacity="0.1"
-              strokeWidth="2"
-              vectorEffect="non-scaling-stroke"
-              className="text-zinc-500 dark:text-white"
-            />
-            {/* Piste alimentée par l'énergie du scroll */}
-            <motion.line
-              x1="1"
-              y1="0"
-              x2="1"
-              y2="100"
-              strokeWidth="2"
-              vectorEffect="non-scaling-stroke"
-              className="stroke-brand-blue drop-shadow-[0_0_8px_rgba(138,180,248,0.8)]"
-              style={{
-                pathLength: shouldReduceMotion ? 1 : pathLength,
-              }}
-            />
-          </svg>
+          {/* Piste de fond non alimentée */}
+          <div className="absolute inset-0 w-full bg-zinc-500/10 dark:bg-white/10 rounded-full" />
+          {/* Piste alimentée par l'énergie du scroll */}
+          <motion.div
+            className="absolute top-0 left-0 w-full h-full bg-brand-blue drop-shadow-[0_0_8px_rgba(138,180,248,0.8)] origin-top will-change-transform rounded-full"
+            style={{
+              scaleY: shouldReduceMotion ? 1 : scaleY,
+            }}
+          />
         </div>
 
         {/* Blocs de Typographie Spatiale Flottante */}

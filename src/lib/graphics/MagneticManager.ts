@@ -94,30 +94,33 @@ export class MagneticManager {
   }
 
   public handleScroll(): void {
+    const wasAlreadyScrolling = this.isScrolling;
     this.isScrolling = true;
     if (this.scrollResetTimer !== null) {
       clearTimeout(this.scrollResetTimer);
     }
-    // Mute immédiat : toutes les cibles sont instantanément forcées à (0, 0)
-    this.items.forEach((item) => {
-      item.targetX = 0;
-      item.targetY = 0;
-      item.currentX = 0;
-      item.currentY = 0;
-      item.isActive = false;
-      try {
-        if (item.element.style.transform !== '') {
-          item.element.style.transform = '';
+    // Mute immédiat : toutes les cibles sont instantanément forcées à (0, 0) au premier tick de scroll
+    if (!wasAlreadyScrolling) {
+      this.items.forEach((item) => {
+        item.targetX = 0;
+        item.targetY = 0;
+        item.currentX = 0;
+        item.currentY = 0;
+        item.isActive = false;
+        try {
+          if (item.element.style.transform !== '') {
+            item.element.style.transform = '';
+          }
+        } catch {
+          // Safe reset
         }
-      } catch {
-        // Safe reset
-      }
-    });
+      });
 
-    // Suspendre la boucle RAF pendant le scroll pour 0% CPU et 0 mutation de style
-    if (this.unsubscribeFrame) {
-      this.unsubscribeFrame();
-      this.unsubscribeFrame = null;
+      // Suspendre la boucle RAF pendant le scroll pour 0% CPU et 0 mutation de style
+      if (this.unsubscribeFrame) {
+        this.unsubscribeFrame();
+        this.unsubscribeFrame = null;
+      }
     }
 
     this.scrollResetTimer = setTimeout(() => {
@@ -132,7 +135,9 @@ export class MagneticManager {
   public register(element: HTMLElement, intensity: number = 0.3): void {
     const cached = this.measureElement(element, intensity);
     this.items.set(element, cached);
-    this.ensureFrameSubscription();
+    if (this.cursorX > -1000) {
+      this.ensureFrameSubscription();
+    }
   }
 
   public unregister(element: HTMLElement): void {
