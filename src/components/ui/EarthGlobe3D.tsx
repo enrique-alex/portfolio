@@ -4,21 +4,22 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { Compass, RotateCcw, Crosshair, MapPin, Globe } from 'lucide-react';
 import { generateEarthCloud } from '@/lib/graphics/earthCloud';
+import { CAMEROON_CENTER } from '@/lib/geoData';
 
 export interface EarthGlobe3DProps {
   className?: string;
   onCoordinatesChange?: (coords: { yawDeg: number; pitchDeg: number }) => void;
 }
 
-const CAMEROON_YAW = (-12.0 * Math.PI) / 180.0;
-const CAMEROON_PITCH = (-4.5 * Math.PI) / 180.0;
+const CAMEROON_YAW = (-CAMEROON_CENTER[0] * Math.PI) / 180.0;
+const CAMEROON_PITCH = (CAMEROON_CENTER[1] * Math.PI) / 180.0;
 const MAX_PITCH = (75.0 * Math.PI) / 180.0;
 
 function computePointSize(pointCount: number): number {
   const R = 2.05;
-  const aTerre = 0.26344 * 4.0 * Math.PI * R * R;
+  const aTerre = 0.28324 * 4.0 * Math.PI * R * R;
   const avgSpacing = Math.sqrt(aTerre / (Math.max(1, pointCount) * 0.866));
-  return 0.70 * avgSpacing;
+  return 0.60 * avgSpacing;
 }
 
 export default function EarthGlobe3D({ className = '', onCoordinatesChange }: EarthGlobe3DProps) {
@@ -134,50 +135,40 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
         attribute float aDist;
         varying float vHighlight;
         varying float vFade;
-        varying float vDepth;
 
         void main() {
           vHighlight = aHighlight;
-          float pLen = length(position);
-          vec3 n = pLen > 0.0001 ? position / pLen : vec3(0.0, 1.0, 0.0);
+          vec3 n = normalize(position);
 
-          // Onde d'Airy rayonnante depuis le foyer Cameroun (4.5°N, 12.0°E)
+          // Onde sortante depuis Yaoundé (3.848°N, 11.502°E)
           float wave = sin(uTime * 3.0 - aDist * 9.0) * 0.5 + 0.5;
-          vec3 p = position + n * (aHighlight * wave * 0.04 * uMotion);
+          vec3 p = position + n * (aHighlight * wave * 0.03 * uMotion);
 
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
 
-          // Backface fading via normale et vue
-          vec3 normal = normalize(normalMatrix * n);
-          vec3 viewDir = normalize(-mv.xyz);
-          float facing = dot(normal, viewDir);
+          // Vrai vecteur de vue : horizon correct en perspective
+          vec3 vn = normalize(normalMatrix * n);
+          float facing = dot(vn, normalize(-mv.xyz));
           vFade = smoothstep(0.02, 0.45, facing);
 
-          // Shading de profondeur
-          vDepth = clamp((mv.z + 6.8) / 4.0, 0.0, 1.0);
-
-          float pz = max(-mv.z, 0.001);
-          float size = uPointSize * uScale * uPixelRatio / pz;
-          size *= 1.0 + aHighlight * 0.5 * wave * uMotion;
+          float size = uPointSize * uScale * uPixelRatio / -mv.z;
+          size *= 1.0 + aHighlight * (0.25 + 0.35 * wave * uMotion);
           gl_PointSize = clamp(size, 1.5, 14.0);
           gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
-        uniform vec3 uBaseColor;
         varying float vHighlight;
         varying float vFade;
-        varying float vDepth;
 
         void main() {
           float d = length(gl_PointCoord - vec2(0.5));
           if (d > 0.5) discard;
           float disc = 1.0 - smoothstep(0.22, 0.5, d);
-          vec3 colDepth = uBaseColor * (0.76 + 0.32 * vDepth);
-          vec3 colCameroon = vec3(1.0, 0.72, 0.14); // or ambré #FFB724
-          vec3 col = mix(colDepth, colCameroon, vHighlight);
-          float depthAlpha = 0.65 + 0.35 * vDepth;
-          float a = disc * (0.75 + vHighlight * 0.25) * vFade * depthAlpha;
+          vec3 colBase = vec3(0.90, 0.89, 0.75);     // lin / beige  #E5E3C0
+          vec3 colCameroon = vec3(1.0, 0.72, 0.14);  // or ambré     #FFB724
+          vec3 col = mix(colBase, colCameroon, vHighlight);
+          float a = disc * (0.75 + vHighlight * 0.25) * vFade;
           if (a < 0.02) discard;
           gl_FragColor = vec4(col, a);
         }
@@ -189,7 +180,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
     materialRef.current = material;
 
     const pointsMesh = new THREE.Points(geometry, material);
-    pointsMesh.rotation.order = 'YXZ';
+    pointsMesh.rotation.order = 'XYZ';
     pointsMesh.rotation.y = CAMEROON_YAW;
     pointsMesh.rotation.x = CAMEROON_PITCH;
     scene.add(pointsMesh);

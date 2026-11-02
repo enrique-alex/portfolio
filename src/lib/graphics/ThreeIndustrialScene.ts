@@ -201,14 +201,14 @@ export class ThreeIndustrialScene {
 
     this.earthCloudPromise = (async () => {
       try {
-        const [{ generateEarthCloud }, maskModule] = await Promise.all([
+        const [{ generateEarthCloud }, geoModule] = await Promise.all([
           import('./earthCloud'),
-          import('./landMask'),
+          import('../geoData'),
         ]);
 
         if (this.isDestroyed) return;
 
-        const earth = generateEarthCloud(this.pointCount, 42, maskModule);
+        const earth = generateEarthCloud(this.pointCount, 42, geoModule);
 
         this.topologyBuffers[1].set(earth.positions);
         this.earthHighlights.set(earth.highlights);
@@ -884,7 +884,7 @@ export class ThreeIndustrialScene {
     });
 
     this.pointsMesh = new THREE.Points(this.geometry, this.pointsMaterial);
-    this.pointsMesh.rotation.order = 'YXZ';
+    this.pointsMesh.rotation.order = 'XYZ';
     this.pointsMesh.frustumCulled = false;
 
     const aspect = typeof window !== 'undefined' ? (window.innerWidth || 1) / (window.innerHeight || 1) : 1;
@@ -1124,9 +1124,9 @@ export class ThreeIndustrialScene {
         const swayX = Math.cos((time / 1000.0) * 0.5) * (swayAmp * 0.4);
 
         const targetRotY =
-          (-12.0 * Math.PI) / 180.0 + swayY + (!isReduced ? this.mouseX * 0.03 : 0.0);
+          (-12.7395 * Math.PI) / 180.0 + swayY + (!isReduced ? this.mouseX * 0.03 : 0.0);
         const targetRotX =
-          (-4.5 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
+          (5.6914 * Math.PI) / 180.0 + swayX + (!isReduced ? this.mouseY * 0.03 : 0.0);
 
         // Plus court chemin angulaire
         const deltaY = Math.atan2(
@@ -1201,7 +1201,8 @@ export class ThreeIndustrialScene {
     }
 
     // 3. Répulsion volumétrique sous le pointeur / touch avec sécurisation absolue du falloff
-    if (this.isPointerActive && this.mousePos.active && !isReduced) {
+    // RÈGLE STRICTE UTILISATEUR : ZÉRO répulsion particulaire sur le Globe (targetTopologyIndex === 1)
+    if (this.isPointerActive && this.mousePos.active && !isReduced && this.targetTopologyIndex !== 1) {
       for (let i = 0; i < count; i++) {
         const px = this.basePositions[i * 3];
         const py = this.basePositions[i * 3 + 1];

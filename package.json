@@ -13,6 +13,7 @@
     "generate:seed": "tsx scripts/generate-seed-sql.ts",
     "generate:admin-secrets": "node scripts/generate-admin-secrets.mjs",
     "gen:land": "node scripts/gen-land-mask.mjs",
+    "gen:geo": "node scripts/gen-geo.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

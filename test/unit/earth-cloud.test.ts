@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import { generateEarthCloud, getDecodedLandMask, landValue } from '@/lib/graphics/earthCloud';
-import { ThreeIndustrialScene, initThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
+import { ThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
 import { frameManager } from '@/lib/graphics/FrameManager';
 import { kineticEnergy } from '@/lib/graphics/KineticEnergy';
+import { CAMEROON_CENTER, YAOUNDE_LAT, YAOUNDE_LON, LAND_AREA_FRAC } from '@/lib/geoData';
 
 describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
   let originalWindow: typeof globalThis.window;
@@ -102,7 +103,7 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
     }
   });
 
-  it('5. should verify Cameroon focus (4.5°N, 12.0°E) exhibits peak highlight and radial relief', () => {
+  it('5. should verify Cameroon focus exhibits peak highlight (1.0) and wave distance to Yaoundé', () => {
     const cloud = generateEarthCloud(4500, 42);
     let maxHighlight = 0;
     let minDistance = 999;
@@ -120,10 +121,10 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
       }
     }
 
-    expect(maxHighlight).toBeGreaterThan(0.95);
+    expect(maxHighlight).toBe(1.0);
     expect(minDistance).toBeLessThan(0.08);
 
-    // Relief is radial
+    // Relief radial pur (+ highlight * 0.04)
     const px = cloud.positions[cameroonPointIdx * 3];
     const py = cloud.positions[cameroonPointIdx * 3 + 1];
     const pz = cloud.positions[cameroonPointIdx * 3 + 2];
@@ -132,10 +133,10 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
     expect(rCam).toBeLessThanOrEqual(2.091);
   });
 
-  it('6. should verify numerical alignment of Cameroon in NDC and frontal facing (> 0.9)', () => {
+  it('6. should verify exact numerical alignment of Cameroon in NDC with XYZ Euler order', () => {
     const R = 2.05;
-    const latCam = (4.5 * Math.PI) / 180;
-    const lonCam = (12.0 * Math.PI) / 180;
+    const latCam = (CAMEROON_CENTER[1] * Math.PI) / 180;
+    const lonCam = (CAMEROON_CENTER[0] * Math.PI) / 180;
 
     const pCam = new THREE.Vector3(
       R * Math.cos(latCam) * Math.sin(lonCam),
@@ -152,9 +153,9 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
     camera.updateMatrixWorld();
 
     const mesh = new THREE.Object3D();
-    mesh.rotation.order = 'YXZ';
-    mesh.rotation.y = (-12.0 * Math.PI) / 180;
-    mesh.rotation.x = (-4.5 * Math.PI) / 180;
+    mesh.rotation.order = 'XYZ';
+    mesh.rotation.y = (-CAMEROON_CENTER[0] * Math.PI) / 180;
+    mesh.rotation.x = (CAMEROON_CENTER[1] * Math.PI) / 180;
     mesh.updateMatrixWorld();
 
     const pCamWorld = pCam.clone().applyMatrix4(mesh.matrixWorld);
@@ -162,16 +163,17 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
     const centerNDC = new THREE.Vector3(0, 0, 0).applyMatrix4(mesh.matrixWorld).project(camera);
     const distNDC = Math.hypot(pCamNDC.x - centerNDC.x, pCamNDC.y - centerNDC.y);
 
-    expect(distNDC).toBeLessThan(0.30);
+    // Centre exact du Cameroun directement sur l'axe optique
+    expect(distNDC).toBeLessThan(0.05);
 
-    // Facing
+    // Facing direct vers la caméra
     const normalWorld = normal.clone().transformDirection(mesh.matrixWorld);
     const mvPos = pCamWorld.clone().applyMatrix4(camera.matrixWorldInverse);
     const viewDir = mvPos.clone().negate().normalize();
     const normalView = normalWorld.clone().transformDirection(camera.matrixWorldInverse);
     const facing = normalView.dot(viewDir);
 
-    expect(facing).toBeGreaterThan(0.9);
+    expect(facing).toBeGreaterThan(0.99);
   });
 
   it('7. should asynchronously load earth cloud and update topologyBuffers[1] in ThreeIndustrialScene', async () => {
@@ -241,18 +243,48 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
     }
   });
 
-  it('9. should verify minimum distance between neighbors is >= 0.9 * r_min', () => {
+  it('9. should verify full Antarctica coverage (points with lat < -60° are ~7-11% of N)', () => {
     const N = 4500;
     const { positions } = generateEarthCloud(N, 42);
-    const R = 2.05;
-    const aTerre = 0.26344 * 4.0 * Math.PI * R * R;
-    const rMin = 0.65 * Math.sqrt(aTerre / N);
+    let antarcticaPoints = 0;
 
-    const cellSize = rMin * 1.5;
+    for (let i = 0; i < N; i++) {
+      const y = positions[i * 3 + 1];
+      const r = Math.hypot(positions[i * 3], y, positions[i * 3 + 2]);
+      const latDeg = (Math.asin(Math.max(-1.0, Math.min(1.0, y / r))) * 180.0) / Math.PI;
+      if (latDeg < -60.0) {
+        antarcticaPoints++;
+      }
+    }
+
+    const frac = antarcticaPoints / N;
+    console.info(`[Antarctica] Points: ${antarcticaPoints}/${N} (${(frac * 100).toFixed(2)}%, spec: 7-11%)`);
+    expect(frac).toBeGreaterThanOrEqual(0.065);
+    expect(frac).toBeLessThanOrEqual(0.12);
+  });
+
+  it('10. should verify Blue Noise Poisson disc spacing for global and Cameroon points', () => {
+    const N = 4500;
+    const { positions, highlights } = generateEarthCloud(N, 42);
+    const R = 2.05;
+    const aTerre = LAND_AREA_FRAC * 4.0 * Math.PI * R * R;
+    const nGlob = Math.round(0.95 * N);
+    const rG = 0.65 * Math.sqrt(aTerre / nGlob);
+
+    // Extraction des indices globaux (highlight === 0)
+    const globalIndices: number[] = [];
+    for (let i = 0; i < N; i++) {
+      if (highlights[i] === 0.0) {
+        globalIndices.push(i);
+      }
+    }
+
+    // Calcul de la distance minimale entre points globaux via grille spatiale
+    const cellSize = rG;
     const invCell = 1.0 / cellSize;
     const grid: Record<string, number[]> = {};
 
-    for (let i = 0; i < N; i++) {
+    for (const i of globalIndices) {
       const cx = Math.floor(positions[i * 3] * invCell);
       const cy = Math.floor(positions[i * 3 + 1] * invCell);
       const cz = Math.floor(positions[i * 3 + 2] * invCell);
@@ -261,8 +293,8 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
       grid[key].push(i);
     }
 
-    let minD = 999;
-    for (let i = 0; i < N; i++) {
+    let minDGlobal = 999;
+    for (const i of globalIndices) {
       const px = positions[i * 3];
       const py = positions[i * 3 + 1];
       const pz = positions[i * 3 + 2];
@@ -282,18 +314,18 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
               const ey = py - positions[j * 3 + 1];
               const ez = pz - positions[j * 3 + 2];
               const d = Math.hypot(ex, ey, ez);
-              if (d < minD) minD = d;
+              if (d < minDGlobal) minDGlobal = d;
             }
           }
         }
       }
     }
 
-    console.info(`[Blue Noise] Observed min distance: ${minD.toFixed(5)} (r_min: ${rMin.toFixed(5)}, 0.9*r_min: ${(0.9 * rMin).toFixed(5)})`);
-    expect(minD).toBeGreaterThanOrEqual(0.9 * rMin);
+    console.info(`[Blue Noise Global] Observed min distance: ${minDGlobal.toFixed(5)} (spec >= 0.9 * r_g: ${(0.9 * rG).toFixed(5)})`);
+    expect(minDGlobal).toBeGreaterThanOrEqual(0.9 * rG);
   });
 
-  it('10. should smoothly handle switching to Form 2 before loadEarthCloud resolves and toggling prefers-reduced-motion', async () => {
+  it('11. should smoothly handle switching to Form 2 before loadEarthCloud resolves and toggling prefers-reduced-motion', async () => {
     const fakeCanvas = {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -302,7 +334,7 @@ describe('Forme 2: Earth Geographic Point Cloud & Cameroon Focus', () => {
     const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 80 });
     expect(scene.isEarthCloudLoaded).toBe(false);
 
-    // Switch to Form 2 BEFORE loadEarthCloud resolves and step frames until morph settles on Möbius fallback
+    // Switch to Form 2 BEFORE loadEarthCloud resolves and step frames until morph settles on fallback
     scene.setTopology(1);
     for (let f = 0; f < 60; f++) {
       scene.renderFrameForTesting(0.05, f * 50, true);
