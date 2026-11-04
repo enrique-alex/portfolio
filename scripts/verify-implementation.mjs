@@ -54,12 +54,16 @@ for (const icoFile of ['src/app/favicon.ico', 'public/favicon.ico']) {
 }
 console.log('✓ 3. Binary favicon.ico & public/favicon.ico checks passed');
 
-// ─── 4. Verify cache busting in layout.tsx ──────────────────
+// ─── 4. Verify cache busting in layout.tsx & manifest.ts ────
 const layoutPath = path.resolve('src/app/layout.tsx');
 const layoutContent = fs.readFileSync(layoutPath, 'utf-8');
 assert.ok(layoutContent.includes('/icon.svg?v=4'), 'layout.tsx must contain /icon.svg?v=4');
 assert.ok(layoutContent.includes('/favicon.ico?v=4'), 'layout.tsx must contain /favicon.ico?v=4');
-console.log('✓ 4. Cache-busting icons metadata in layout.tsx passed');
+
+const manifestPath = path.resolve('src/app/manifest.ts');
+const manifestContent = fs.readFileSync(manifestPath, 'utf-8');
+assert.ok(manifestContent.includes('/icon.svg?v=4'), 'manifest.ts must contain /icon.svg?v=4');
+console.log('✓ 4. Cache-busting icons metadata in layout.tsx & manifest.ts passed');
 
 // ─── 5. Verify SideSlider.tsx & integration ─────────────────
 const sideSliderPath = path.resolve('src/components/ui/SideSlider.tsx');
@@ -82,8 +86,8 @@ console.log('✓ 5. SideSlider component implementation & SiteLayout integration
 // ─── 6. Verify globals.css scrollbar & cursor rules ─────────
 const cssPath = path.resolve('src/app/globals.css');
 const cssContent = fs.readFileSync(cssPath, 'utf-8');
-assert.ok(cssContent.includes('scrollbar-width: none;'), 'globals.css must hide scrollbar on desktop');
-assert.ok(cssContent.includes('display: none;'), 'globals.css must hide webkit scrollbar on desktop');
+assert.ok(cssContent.includes('scrollbar-width: none'), 'globals.css must hide scrollbar on desktop');
+assert.ok(cssContent.includes('display: none'), 'globals.css must hide webkit scrollbar on desktop');
 assert.ok(cssContent.includes('cursor: none !important;'), 'globals.css must hide cursor on desktop');
 assert.ok(cssContent.includes('background: #050505;'), 'globals.css must style fallback scrollbar track with #050505');
 assert.ok(cssContent.includes('rgba(0, 210, 255'), 'globals.css must style fallback scrollbar thumb with cyan glow');

@@ -95,7 +95,7 @@ describe('Web App Manifest Configuration', () => {
 
     const svgIcon = data.icons?.find((icon) => icon.sizes === 'any');
     expect(svgIcon).toBeDefined();
-    expect(svgIcon?.src).toBe('/icon.svg');
+    expect(svgIcon?.src).toBe('/icon.svg?v=4');
     expect(svgIcon?.type).toBe('image/svg+xml');
     expect(svgIcon?.purpose).toBe('any');
 

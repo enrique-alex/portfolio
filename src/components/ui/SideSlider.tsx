@@ -67,7 +67,9 @@ export default function SideSlider() {
     if (!isFinePointer) return;
 
     let observer: IntersectionObserver | null = null;
-    const checkSkills = () => {
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    const setupObserver = () => {
       const skillsElement = document.getElementById('skills');
       if (!skillsElement) return false;
 
@@ -89,15 +91,21 @@ export default function SideSlider() {
       return true;
     };
 
-    if (!checkSkills()) {
-      const timer = setTimeout(checkSkills, 250);
-      return () => {
-        clearTimeout(timer);
-        if (observer) observer.disconnect();
-      };
+    if (!setupObserver()) {
+      let attempts = 0;
+      pollInterval = setInterval(() => {
+        attempts++;
+        if (setupObserver() || attempts >= 20) {
+          if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+          }
+        }
+      }, 150);
     }
 
     return () => {
+      if (pollInterval) clearInterval(pollInterval);
       if (observer) observer.disconnect();
     };
   }, [isFinePointer]);
@@ -106,8 +114,13 @@ export default function SideSlider() {
   const scrollFromPointerY = useCallback((clientY: number, behavior: ScrollBehavior = 'instant') => {
     if (!trackRef.current) return;
     const rect = trackRef.current.getBoundingClientRect();
-    const clampedY = Math.min(Math.max(clientY - rect.top, 0), rect.height);
-    const targetProgress = clampedY / rect.height;
+    const TRACK_HEIGHT = 180;
+    const THUMB_HEIGHT = 28;
+    const maxThumbOffset = TRACK_HEIGHT - THUMB_HEIGHT;
+
+    // Alignement naturel du centre du curseur sous la souris
+    const clampedY = Math.min(Math.max(clientY - rect.top - THUMB_HEIGHT / 2, 0), maxThumbOffset);
+    const targetProgress = maxThumbOffset > 0 ? clampedY / maxThumbOffset : 0;
 
     const docElem = document.documentElement;
     const maxScroll = docElem.scrollHeight - window.innerHeight;
@@ -125,6 +138,13 @@ export default function SideSlider() {
     isDraggingRef.current = true;
     setIsDragging(true);
 
+    const targetEl = e.currentTarget;
+    try {
+      targetEl.setPointerCapture(e.pointerId);
+    } catch {
+      // In case environment does not support pointer capture
+    }
+
     scrollFromPointerY(e.clientY, 'auto');
 
     const onPointerMove = (moveEvent: PointerEvent) => {
@@ -133,9 +153,14 @@ export default function SideSlider() {
       scrollFromPointerY(moveEvent.clientY, 'instant');
     };
 
-    const onPointerUp = () => {
+    const onPointerUp = (upEvent: PointerEvent) => {
       isDraggingRef.current = false;
       setIsDragging(false);
+      try {
+        targetEl.releasePointerCapture(upEvent.pointerId);
+      } catch {
+        // Safe disposal
+      }
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
@@ -245,7 +270,7 @@ export default function SideSlider() {
             className="absolute top-0 w-1.5 sm:w-2 rounded-full bg-gradient-to-b from-[#00D2FF] to-[#0088FF] shadow-[0_0_12px_rgba(0,210,255,0.8),0_0_2px_#FFFFFF] group-hover:scale-110 active:scale-95 cursor-none transition-transform duration-150"
           >
             {/* Ligne médiane de préhension */}
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
+            <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
               <div className="h-2 w-0.5 rounded-full bg-white/80" />
             </div>
           </div>
