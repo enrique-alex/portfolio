@@ -16,7 +16,7 @@ describe('Official Personal Brand Logo (Monogram EN)', () => {
     expect(element.props.className).toBe('h-8 w-8');
   });
 
-  it('should include the 3 precise geometric PCB routing paths for the EN monogram', () => {
+  it('should include the 3 precise geometric PCB differential routing paths for the EN monogram', () => {
     const element = Logo({});
     const children = element.props.children;
     const paths = Array.isArray(children)
@@ -24,12 +24,12 @@ describe('Official Personal Brand Logo (Monogram EN)', () => {
       : [];
 
     expect(paths).toHaveLength(3);
-    // Outer 'E' frame: top bar, spine, bottom bar
-    expect(paths[0]?.props.d).toBe('M12 20H4V4h8');
-    // Middle 'E' bus trace docking into central diagonal node (12, 12)
-    expect(paths[1]?.props.d).toBe('M4 12h8');
-    // 'N' 45° diagonal trace and right vertical stem
-    expect(paths[2]?.props.d).toBe('M4 4l16 16V4');
+    // 'E' 45° chamfered bus trace
+    expect(paths[0]?.props.d).toBe('M11 4H6l-2 2v12l2 2h5');
+    // 'E' middle logic branch
+    expect(paths[1]?.props.d).toBe('M4 12h5');
+    // 'N' high-speed differential signal trace
+    expect(paths[2]?.props.d).toBe('M13 20V4l7 16V4');
   });
 
   it('should accept custom className, size, strokeWidth, and accessible title', () => {

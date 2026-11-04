@@ -12,6 +12,16 @@ export const viewport: Viewport = {
 };
 
 export const metadata = {
+  icons: {
+    icon: [
+      { url: '/icon.svg?v=3', type: 'image/svg+xml' },
+      { url: '/favicon.ico?v=3', sizes: '32x32' },
+    ],
+    shortcut: '/favicon.ico?v=3',
+    apple: [
+      { url: '/icon.svg?v=3', type: 'image/svg+xml' },
+    ],
+  },
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
     "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Automatisme, SCADA, C/C++, Python, Électronique.",
