@@ -1,13 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
   <!-- Obsidian container badge for high-contrast visibility on all browser tab backgrounds -->
-  <rect width="32" height="32" rx="6" fill="#050505" />
+  <rect width="32" height="32" rx="7" fill="#050505" />
   
-  <!-- Official Monogram EN: 45° Chamfered High-Speed PCB Differential Trace -->
-  <g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <!-- 'E' with 45° anti-reflection chamfers -->
-    <path d="M14 6H8l-2 2v16l2 2h6" />
-    <path d="M6 16h7" />
-    <!-- 'N' differential rail and diagonal -->
-    <path d="M17 26V6l9 20V6" />
+  <!-- Concept 1: The Feedback Core / Closed-Loop PID Control -->
+  <g transform="translate(4, 4)" stroke="#00D2FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Setpoint Reference Vector -->
+    <path d="M2 12h7" />
+    <!-- Controlled Output Vector -->
+    <path d="M15 12h7" />
+    <!-- Feedforward Direct Transfer Arc -->
+    <path d="M5 12a7 7 0 0 1 14 0" />
+    <path d="m17 10 2 2 2-2" />
+    <!-- Feedback Return Loop Arc -->
+    <path d="M19 12a7 7 0 0 1-14 0" />
+    <path d="m3 14 2-2 2 2" />
   </g>
+  <!-- Central Feedback Core Nucleus (High-contrast pure white) -->
+  <circle cx="16" cy="16" r="3.2" stroke="#FFFFFF" stroke-width="2" />
 </svg>

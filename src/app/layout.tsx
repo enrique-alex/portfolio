@@ -14,12 +14,12 @@ export const viewport: Viewport = {
 export const metadata = {
   icons: {
     icon: [
-      { url: '/icon.svg?v=3', type: 'image/svg+xml' },
-      { url: '/favicon.ico?v=3', sizes: '32x32' },
+      { url: '/icon.svg?v=4', type: 'image/svg+xml' },
+      { url: '/favicon.ico?v=4', sizes: '32x32' },
     ],
-    shortcut: '/favicon.ico?v=3',
+    shortcut: '/favicon.ico?v=4',
     apple: [
-      { url: '/icon.svg?v=3', type: 'image/svg+xml' },
+      { url: '/icon.svg?v=4', type: 'image/svg+xml' },
     ],
   },
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",

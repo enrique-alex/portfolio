@@ -89,6 +89,36 @@
   [role="button"], input, select, textarea, *, *::before, *::after {
     cursor: none !important;
   }
+
+  /* Masquage de la scrollbar native sur Desktop pour supprimer la gouttière grise OS
+     et empêcher le curseur de repasser en normal sur les bordures de fenêtre */
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+/* Fallback de scrollbar DA Obsidian / Cyan pour les conteneurs défilables internes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 210, 255, 0.3);
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 210, 255, 0.7);
 }
 
 /* Règle stricte : Ne JAMAIS masquer le curseur sur mobile/touch (pointer: coarse) */

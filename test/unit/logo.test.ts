@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Logo } from '@/components/ui/Logo';
 import manifest from '@/app/manifest';
 
-describe('Official Personal Brand Logo (Monogram EN)', () => {
+describe('Official Personal Brand Logo (Concept 1: The Feedback Core / La Boucle Fermée)', () => {
   it('should render standard SVG attributes following Lucide and Design Engineer standards', () => {
     const element = Logo({});
     expect(element.type).toBe('svg');
@@ -16,20 +16,36 @@ describe('Official Personal Brand Logo (Monogram EN)', () => {
     expect(element.props.className).toBe('h-8 w-8');
   });
 
-  it('should include the 3 precise geometric PCB differential routing paths for the EN monogram', () => {
+  it('should render the precision geometric core circle and closed-loop feedback vector paths', () => {
     const element = Logo({});
     const children = element.props.children;
     const paths = Array.isArray(children)
       ? children.filter((child) => child && child.type === 'path')
       : [];
+    const circle = Array.isArray(children)
+      ? children.find((child) => child && child.type === 'circle')
+      : undefined;
 
-    expect(paths).toHaveLength(3);
-    // 'E' 45° chamfered bus trace
-    expect(paths[0]?.props.d).toBe('M11 4H6l-2 2v12l2 2h5');
-    // 'E' middle logic branch
-    expect(paths[1]?.props.d).toBe('M4 12h5');
-    // 'N' high-speed differential signal trace
-    expect(paths[2]?.props.d).toBe('M13 20V4l7 16V4');
+    // Central feedback core circle verification
+    expect(circle).toBeDefined();
+    expect(circle?.props.cx).toBe('12');
+    expect(circle?.props.cy).toBe('12');
+    expect(circle?.props.r).toBe('3');
+
+    // 6 Closed-loop feedback vector paths verification
+    expect(paths).toHaveLength(6);
+    // Setpoint input vector
+    expect(paths[0]?.props.d).toBe('M2 12h7');
+    // Controlled output vector
+    expect(paths[1]?.props.d).toBe('M15 12h7');
+    // Feedforward upper arc
+    expect(paths[2]?.props.d).toBe('M5 12a7 7 0 0 1 14 0');
+    // Feedforward direction terminal
+    expect(paths[3]?.props.d).toBe('m17 10 2 2 2-2');
+    // Feedback return lower arc
+    expect(paths[4]?.props.d).toBe('M19 12a7 7 0 0 1-14 0');
+    // Feedback return direction terminal entering summing junction
+    expect(paths[5]?.props.d).toBe('m3 14 2-2 2 2');
   });
 
   it('should accept custom className, size, strokeWidth, and accessible title', () => {
@@ -37,7 +53,7 @@ describe('Official Personal Brand Logo (Monogram EN)', () => {
       className: 'h-10 w-10 text-brand-blue',
       size: 40,
       strokeWidth: 2.5,
-      title: 'Enrique Ndjakou Monogram',
+      title: 'Feedback Core Logo',
       'aria-hidden': false,
     });
 
@@ -49,20 +65,20 @@ describe('Official Personal Brand Logo (Monogram EN)', () => {
 
     const titleElement = element.props.children[0];
     expect(titleElement?.type).toBe('title');
-    expect(titleElement?.props.children).toBe('Enrique Ndjakou Monogram');
-    expect(titleElement?.props.id).toBe('en-monogram-title');
-    expect(element.props['aria-labelledby']).toBe('en-monogram-title');
+    expect(titleElement?.props.children).toBe('Feedback Core Logo');
+    expect(titleElement?.props.id).toBe('feedback-core-title');
+    expect(element.props['aria-labelledby']).toBe('feedback-core-title');
     expect(element.props.role).toBe('img');
   });
 
   it('should handle semantic accessibility automatically when title is provided without explicit aria-hidden', () => {
     const element = Logo({
-      title: 'Enrique Ndjakou - Ingénieur',
+      title: 'Enrique Ndjakou - The Feedback Core',
     });
 
     expect(element.props['aria-hidden']).toBeUndefined();
     expect(element.props.role).toBe('img');
-    expect(element.props['aria-labelledby']).toBe('en-monogram-title');
+    expect(element.props['aria-labelledby']).toBe('feedback-core-title');
   });
 });
 
