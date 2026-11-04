@@ -49,11 +49,11 @@ describe('SideSlider Navigation & Scroll Progress Indicator', () => {
     }
   });
 
-  it('should contain obsidian DA styling, cyan glow, and cursor-none in component definition', () => {
+  it('should contain obsidian DA styling, cyan glow, and persistent cursor-none in component definition', () => {
     const componentCode = SideSlider.toString();
     expect(componentCode).toContain('cursor-none');
     expect(componentCode).toContain('pointer: fine');
-    expect(componentCode).toContain('skills');
+    expect(componentCode).toContain('opacity-100');
     expect(componentCode).toContain('#00D2FF');
     expect(componentCode).toContain('scrollbar');
   });

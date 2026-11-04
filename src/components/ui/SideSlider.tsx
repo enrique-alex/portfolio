@@ -9,7 +9,7 @@ import { useReducedMotion } from 'framer-motion';
  * Designed to strictly match the portfolio's Obsidian / Electric Cyan DA:
  * - Obsidian #050505 glassmorphic container with subtle white borders.
  * - Electric cyan #00D2FF / brand-blue glow thumb indicator.
- * - Auto-hides gracefully when viewing the 'Compétences' section (#skills).
+ * - Persistently active across the whole page to guide user navigation.
  * - Interactive: Draggable thumb and clickable track for direct smooth scrolling.
  * - Cursor Isolation: Strict cursor-none enforcement ensures DualBodyCursor never reverts to OS pointer.
  * - Mobile safe: Exclusively active on devices with a fine pointer (mouse/trackpad).
@@ -18,7 +18,6 @@ export default function SideSlider() {
   const shouldReduceMotion = useReducedMotion();
   const [isFinePointer, setIsFinePointer] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isSkillsVisible, setIsSkillsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -62,55 +61,7 @@ export default function SideSlider() {
     };
   }, [isFinePointer, updateScrollProgress]);
 
-  // 3. Masquage automatique au niveau de la section Compétences (#skills)
-  useEffect(() => {
-    if (!isFinePointer) return;
-
-    let observer: IntersectionObserver | null = null;
-    let pollInterval: ReturnType<typeof setInterval> | null = null;
-
-    const setupObserver = () => {
-      const skillsElement = document.getElementById('skills');
-      if (!skillsElement) return false;
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (entry) {
-            setIsSkillsVisible(entry.isIntersecting);
-          }
-        },
-        {
-          root: null,
-          threshold: [0, 0.05, 0.1, 0.5],
-          rootMargin: '60px 0px 60px 0px',
-        }
-      );
-
-      observer.observe(skillsElement);
-      return true;
-    };
-
-    if (!setupObserver()) {
-      let attempts = 0;
-      pollInterval = setInterval(() => {
-        attempts++;
-        if (setupObserver() || attempts >= 20) {
-          if (pollInterval) {
-            clearInterval(pollInterval);
-            pollInterval = null;
-          }
-        }
-      }, 150);
-    }
-
-    return () => {
-      if (pollInterval) clearInterval(pollInterval);
-      if (observer) observer.disconnect();
-    };
-  }, [isFinePointer]);
-
-  // 4. Interaction Glisser-Déposer (Drag & Drop) et Clic sur la piste
+  // 3. Interaction Glisser-Déposer (Drag & Drop) et Clic sur la piste
   const scrollFromPointerY = useCallback((clientY: number, behavior: ScrollBehavior = 'instant') => {
     if (!trackRef.current) return;
     const rect = trackRef.current.getBoundingClientRect();
@@ -171,7 +122,7 @@ export default function SideSlider() {
     window.addEventListener('pointercancel', onPointerUp);
   };
 
-  // Keyboard navigation support
+  // Navigation au clavier accessible
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const docElem = document.documentElement;
     const maxScroll = docElem.scrollHeight - window.innerHeight;
@@ -212,20 +163,18 @@ export default function SideSlider() {
   return (
     <aside
       aria-label="Navigation latérale et progression du défilement"
-      className={`fixed right-3 sm:right-4 top-1/2 -translate-y-1/2 z-40 select-none cursor-none transition-all duration-300 ease-out ${
-        isSkillsVisible
-          ? 'opacity-0 pointer-events-none translate-x-6 scale-90'
-          : 'opacity-100 pointer-events-auto translate-x-0 scale-100'
-      }`}
+      className="fixed right-3 sm:right-4 top-1/2 -translate-y-1/2 z-40 select-none cursor-none opacity-100 pointer-events-auto translate-x-0 scale-100 transition-all duration-300 ease-out"
+      style={{ cursor: 'none' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         if (!isDragging) setIsHovered(false);
       }}
     >
-      <div className="relative flex items-center">
+      <div className="relative flex items-center" style={{ cursor: 'none' }}>
         {/* HUD Micro-Badge (pourcentage de défilement au survol ou pendant le drag) */}
         <div
           aria-hidden="true"
+          style={{ cursor: 'none' }}
           className={`pointer-events-none absolute right-full mr-3.5 flex items-center gap-1.5 rounded-lg border border-cyan-500/20 bg-[#050505]/95 px-2 py-0.5 font-mono text-[10px] font-semibold text-cyan-400 shadow-[0_0_15px_rgba(0,210,255,0.25)] backdrop-blur-md transition-all duration-200 ${
             isHovered || isDragging
               ? 'opacity-100 translate-x-0'
@@ -255,7 +204,8 @@ export default function SideSlider() {
           {/* Rail interne fin */}
           <div 
             aria-hidden="true"
-            className="h-full w-0.5 rounded-full bg-black/10 transition-colors duration-200 group-hover:bg-cyan-500/20 dark:bg-white/10" 
+            style={{ cursor: 'none' }}
+            className="h-full w-0.5 rounded-full bg-black/10 transition-colors duration-200 group-hover:bg-cyan-500/20 dark:bg-white/10 cursor-none" 
           />
 
           {/* Curseur de défilement (Thumb) électrique Cyan Glow */}
@@ -270,7 +220,7 @@ export default function SideSlider() {
             className="absolute top-0 w-1.5 sm:w-2 rounded-full bg-gradient-to-b from-[#00D2FF] to-[#0088FF] shadow-[0_0_12px_rgba(0,210,255,0.8),0_0_2px_#FFFFFF] group-hover:scale-110 active:scale-95 cursor-none transition-transform duration-150"
           >
             {/* Ligne médiane de préhension */}
-            <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
+            <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center" style={{ cursor: 'none' }}>
               <div className="h-2 w-0.5 rounded-full bg-white/80" />
             </div>
           </div>

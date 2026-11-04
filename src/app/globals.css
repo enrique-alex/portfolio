@@ -104,20 +104,33 @@
   }
 }
 
-/* Fallback de scrollbar DA Obsidian / Cyan pour les conteneurs défilables internes uniquement */
-:not(html):not(body)::-webkit-scrollbar {
+/* Suppression absolue des barres de défilement pour les éléments dotés de .scrollbar-hide */
+.scrollbar-hide,
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+.scrollbar-hide::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Fallback de scrollbar DA Obsidian / Cyan pour les conteneurs défilables internes uniquement (hors scrollbar-hide) */
+:not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-:not(html):not(body)::-webkit-scrollbar-track {
+:not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-track {
   background: #050505;
 }
-:not(html):not(body)::-webkit-scrollbar-thumb {
+:not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb {
   background: rgba(0, 210, 255, 0.3);
   border-radius: 9999px;
   border: 1px solid rgba(0, 210, 255, 0.2);
 }
-:not(html):not(body)::-webkit-scrollbar-thumb:hover {
+:not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 210, 255, 0.7);
 }
 
@@ -126,7 +139,7 @@
   html, body, a, button, [role="button"], input, select, textarea, *, *::before, *::after {
     cursor: auto !important;
   }
-}
+}
 /* Isolation et rendu différé du sous-arbre DOM hors-champ (DOMSize & Layout Thrashing reduction) */
 .section-contain {
   content-visibility: auto;

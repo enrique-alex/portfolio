@@ -333,9 +333,13 @@ export default function SkillsSection() {
         <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] lg:gap-12">
           
           {/* CATEGORY TABS (vertical sur desktop, horizontal sur mobile) */}
-          <div className="relative w-full lg:w-auto">
+          <div className="relative w-full overflow-hidden lg:overflow-visible lg:w-auto">
             <motion.div 
-              className="flex flex-row gap-2 overflow-x-auto pb-4 scrollbar-hide lg:flex-col lg:gap-3 lg:pb-0"
+              className="flex flex-row gap-2 overflow-x-auto pb-4 scrollbar-hide scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:!w-0 [&::-webkit-scrollbar]:!h-0 lg:flex-col lg:gap-3 lg:pb-0 lg:overflow-visible"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
               variants={{
                 hidden: { opacity: 0 },
                 show: {
