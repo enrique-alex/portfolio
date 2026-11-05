@@ -14,21 +14,21 @@ export const viewport: Viewport = {
 export const metadata = {
   icons: {
     icon: [
-      { url: '/favicon.ico?v=5', sizes: 'any' },
-      { url: '/icon.svg?v=5', type: 'image/svg+xml' },
-      { url: '/favicon-32x32.png?v=5', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png?v=5', sizes: '16x16', type: 'image/png' },
-      { url: '/icon-192.png?v=5', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512.png?v=5', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico?v=6', sizes: 'any' },
+      { url: '/icon.svg?v=6', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png?v=6', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png?v=6', sizes: '16x16', type: 'image/png' },
+      { url: '/icon-192.png?v=6', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png?v=6', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico?v=5',
+    shortcut: '/favicon.ico?v=6',
     apple: [
-      { url: '/apple-touch-icon.png?v=5', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-touch-icon.png?v=6', sizes: '180x180', type: 'image/png' },
     ],
     other: [
       {
         rel: 'apple-touch-icon-precomposed',
-        url: '/apple-touch-icon-precomposed.png?v=5',
+        url: '/apple-touch-icon-precomposed.png?v=6',
       },
     ],
   },
@@ -85,6 +85,16 @@ export default function RootLayout({
     // suppressHydrationWarning est indispensable avec next-themes pour éviter le flash au chargement
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
       <head>
+        <link rel="shortcut icon" href="/favicon.ico?v=6" />
+        <link rel="icon" href="/favicon.ico?v=6" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=6" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=6" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=6" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=6" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=6" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=6" />
+        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png?v=6" />
+        <link rel="manifest" href="/manifest.webmanifest?v=6" />
         <script
           dangerouslySetInnerHTML={{
             __html:

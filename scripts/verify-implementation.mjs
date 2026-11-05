@@ -39,12 +39,12 @@ console.log('✓ 3. Binary favicon.ico & public/favicon.ico checks passed');
 // ─── 4. Verify Layout & Manifest Cache-Busting ──────────────
 const layoutPath = path.resolve('src/app/layout.tsx');
 const layoutContent = fs.readFileSync(layoutPath, 'utf-8');
-assert.ok(layoutContent.includes('/icon.svg?v=4'), 'layout.tsx must contain /icon.svg?v=4');
-assert.ok(layoutContent.includes('/favicon.ico?v=4'), 'layout.tsx must contain /favicon.ico?v=4');
+assert.ok(/\/icon\.svg\?v=\d+/.test(layoutContent), 'layout.tsx must contain /icon.svg with cache-busting');
+assert.ok(/\/favicon\.ico\?v=\d+/.test(layoutContent), 'layout.tsx must contain /favicon.ico with cache-busting');
 
 const manifestPath = path.resolve('src/app/manifest.ts');
 const manifestContent = fs.readFileSync(manifestPath, 'utf-8');
-assert.ok(manifestContent.includes('/icon.svg?v=4'), 'manifest.ts must contain /icon.svg?v=4');
+assert.ok(/\/icon\.svg\?v=\d+/.test(manifestContent), 'manifest.ts must contain /icon.svg with cache-busting');
 console.log('✓ 4. Cache-busting icons metadata in layout.tsx & manifest.ts passed');
 
 // ─── 5. Verify SideSlider.tsx & persistent general visibility ───

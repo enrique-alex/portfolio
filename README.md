@@ -6,7 +6,7 @@
 **Apprenti Ingénieur en Automatisme, Supervision SCADA & Informatique Industrielle · Minakem Dunkerque**
 
 [![Live Platform](https://img.shields.io/badge/Live%20Platform-enrique--alex.pages.dev-00D2FF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://enrique-alex.pages.dev)
-[![Next.js](https://img.shields.io/badge/Next.js%2015-App%20Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js%2016-App%20Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React%2019-Strict-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript%205-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS%20v4-Oxide%20Engine-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
@@ -51,12 +51,16 @@ Ce dépôt héberge le code source du portfolio interactif présentant l'ensembl
 | Projet | Domaine Technique | Cible / Environnement | Métriques & Réalisations Clés |
 | :--- | :--- | :--- | :--- |
 | **[Contrôle-Commande Bicuve](https://enrique-alex.pages.dev/projects/controle-hydraulique-bicuve-2026)** | Automatique & Régulation | HIL Speedgoat · Matlab / Simulink | Régulation cascade double boucle. Identification indicielle, discrétisation par transformation bilinéaire ($T_e = 10\text{ ms}$). Temps de réponse divisé par 4, erreur statique rigoureusement nulle sous perturbation. |
-| **[Supervision SSI SEVESO](https://enrique-alex.pages.dev)** | SCADA & Réseaux Industriels | Ignition v8.1 · Moxa MB3170 · Esser SEI2 | Intégration de 23 centrales incendie Esser FlexES. Conversion essernet vers Modbus RTU (RS-485, 9600 bps, 8N1) et encapsulation Modbus TCP sur VLAN automatisme. Scrutation 500 ms, UDTs structurés. |
+| **[Supervision SSI SEVESO](https://enrique-alex.pages.dev/#experience)** | SCADA & Réseaux Industriels | Ignition v8.1 · Moxa MB3170 · Esser SEI2 | Intégration de 23 centrales incendie Esser FlexES. Conversion essernet vers Modbus RTU (RS-485, 9600 bps, 8N1) et encapsulation Modbus TCP sur VLAN automatisme. Scrutation 500 ms, UDTs structurés, historisation SQL Server. |
 | **[Filtre Actif de Tchebychev](https://enrique-alex.pages.dev/projects/filtre-tchebychev-2026)** | Électronique Analogique | KiCad · LTSpice · Gravure CNC | Filtre passe-bas actif d'ordre 4 (cellules Sallen-Key). Bande passante $4,5\text{ kHz}$, ondulation $\le 1\text{ dB}$, atténuation effective de $35\text{ dB}$ à $13\text{ kHz}$ validée à l'oscilloscope numérique. |
 | **[Robot Mobile Robotino](https://enrique-alex.pages.dev/projects/robotino-hockey-autonome-2026)** | Robotique & Systèmes Embarqués | Robotino 2 · Grafcet · Vision HSV | Match de hockey autonome. Suivi de palet invariant aux variations d'éclairage en espace HSV, odométrie à 2000 impulsions/tour pour anticipation du freinage et détection de ligne par capteur inductif (portée 4 mm). |
 | **[Microprocesseurs ATMEGA2560](https://enrique-alex.pages.dev/projects/microprocesseurs-atmega2560-2026)** | Informatique Bas Niveau | Assembleur AVR8 pur · ATMEGA2560 | 3 systèmes critiques programmés au niveau registres sans runtime C : gestionnaire d'interruption en mode veille profonde (0 polling), thermomètre distant (ADC + port parallèle + USART synchrones), alarme intrusion. |
 | **[Lyngk – Moteur Hexagonal](https://enrique-alex.pages.dev/projects/lyngk-moteur-jeu-c-2026)** | Algorithmique & Systèmes C | C pur · SDL3 · Architecture MVC | Modélisation du plateau hexagonal en coordonnées axiales via bitmasking 64 bits (43 cases traitées en 1 cycle machine). Algorithme DFS pour calcul de trajectoires. 0 fuite mémoire sous `-Wall -Wextra`. |
 | **[Shell Unix Natif](https://enrique-alex.pages.dev/projects/interpreteur-commandes-unix-2025)** | Systèmes d'Exploitation | C POSIX · Linux Kernel API | Émulateur de terminal exploitant directement `fork`, `execvp`, `dup2` et `pipe`. Gestionnaire déterministe de signaux asynchrones pour l'isolation des processus zombies et des flux I/O. |
+| **[Awale – Stratégie Combinatoire](https://enrique-alex.pages.dev/projects/awale-jeu-c-2026)** | Algorithmique & Systèmes | C ISO · Arithmétique Modulaire | Modélisation d'un plateau cyclique sous contrainte mémoire stricte. Arithmétique modulaire, pointeurs de fonctions, structures contiguës, espace mémoire strictement borné. |
+| **[PyGroove – Assistant Audio](https://enrique-alex.pages.dev/projects/pygroove-assistant-audio-2025)** | Génie Logiciel & Audio | Python · Tkinter · Pygame · Speech-Rec | Architecture multi-threadée isolant les flux I/O asynchrones, la reconnaissance vocale et le buffer DMA matériel de la carte son. |
+| **[Simulateur Agricole C++](https://enrique-alex.pages.dev/projects/simulateur-agricole-poo-2024)** | POO & Patrons de Conception | C++ ISO · Smart Pointers · Polymorphisme | Modélisation d'un environnement systémique en graphe circulaire. Élimination des pointeurs orphelins par comptage de références (`std::shared_ptr`/`std::weak_ptr`). |
+| **[Moteur Snake Arcade](https://enrique-alex.pages.dev/projects/moteur-jeu-snake-cpp-2024)** | Algorithmique Temps Réel | C++ ISO · Game Loop Déterministe | Gestion temps réel de la boucle d'affichage 60 FPS, détection collisionnelle discrète sans surcharge processeur. |
 
 ---
 
@@ -68,7 +72,7 @@ Le portfolio n'est pas une vitrine statique : c'est une application d'ingénieri
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        FRONTEND CLIENT (EDGE)                          │
 │                                                                        │
-│   Next.js 15 (App Router)  │  React 19  │  Tailwind CSS v4 (Oxide)     │
+│   Next.js 16 (App Router)  │  React 19  │  Tailwind CSS v4 (Oxide)     │
 │   Framer Motion (Physics)  │  Three.js (GPU Particle Canvas)           │
 │   DualBodyCursor (Fine)    │  SideSlider (Obsidian Mechatronic Bar)    │
 └───────────────────────────────────┬────────────────────────────────────┘
@@ -90,12 +94,12 @@ Le portfolio n'est pas une vitrine statique : c'est une application d'ingénieri
 - Curseur double corps : tête de visée centrale blanche haute précision et anneau suiveur cyan `#00D2FF` traduisant visuellement la dynamique d'une boucle fermée d'asservissement.
 
 ### 2. SideSlider Mécatronique
-- Barre de défilement latérale haute précision en verre obsidienne (`#050505`) et traceur cyan.
-- Suivi bidirectionnel de position verticale avec calcul d'interpolation linéaire (`lerp`) et aimantation discrète (`snap`).
-- Masquage contextuel automatique lors de l'interaction avec des composants scrollables internes (onglets de compétences, blocs de code, carrousels) pour bannir tout conflit de barre de défilement parasite.
+- Barre de défilement latérale haute précision en verre obsidienne (`#050505`) et traceur cyan (`#00D2FF`).
+- Suivi bidirectionnel de position verticale avec calcul d'interpolation linéaire (`lerp`), capsule interactive draggable et micro-badge HUD monospace.
+- Présence continue et persistante sur l'ensemble de la page (y compris la section compétences) avec isolation stricte du pointeur (`cursor: none !important`) interdisant tout retour à la flèche OS classique.
 
 ### 3. Stack Données & Déploiement Edge Serverless
-- **Next.js 15 App Router** : Rendu hybride (Server Components statiques et Client Components interactifs) éliminant tout décalage d'agencement (`CLS: 0.00`).
+- **Next.js 16 App Router** : Rendu hybride (Server Components statiques et Client Components interactifs) éliminant tout décalage d'agencement (`CLS: 0.00`).
 - **Tailwind CSS v4** : Compilation directe via le moteur Rust Oxide, syntaxe moderne `@theme` et isolation complète des styles tiers.
 - **Cloudflare D1** : Base de données relationnelle SQLite distribuée sur le réseau Anycast mondial, gérée par des migrations SQL versionnées (`migrations/0001` à `0006`).
 - **Sécurité Industrielle** : Politique de sécurité de contenu stricte (`Content-Security-Policy`), en-têtes anti-clickjacking (`X-Frame-Options: DENY`), isolation cross-origin (`COOP` et `CORP`), et limitation de débit sur les routes d'authentification (`0004_login_rate_limit.sql`).
@@ -188,7 +192,7 @@ portfolio/
 │   ├── generate-seed-sql.ts       # Synchronisation des projets vers SQL D1
 │   └── generate-admin-secrets.mjs # Génération des clés de dérivation PBKDF2
 ├── src/
-│   ├── app/                       # Next.js 15 App Router
+│   ├── app/                       # Next.js 16 App Router
 │   │   ├── (site)/                # Routes publiques (accueil, vue projet [slug])
 │   │   ├── admin/                 # Console de gestion restreinte
 │   │   ├── api/                   # Serverless API routes (projets, uploads R2)

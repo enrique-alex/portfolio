@@ -17,7 +17,6 @@ def generate_brand_icons():
         # Standard Android / PWA raster icons
         ("public/icon-192.png", 192, 132, 0),
         ("public/icon-512.png", 512, 352, 0),
-        ("src/app/icon.png", 192, 132, 0),
 
         # Maskable Android icons (extra safe padding)
         ("public/icon-maskable-192.png", 192, 110, 0),
@@ -110,24 +109,26 @@ svg {{
         if res.returncode != 0 or not os.path.exists(target_path):
             print(f"Error rendering {rel_path}: {res.stderr}")
         else:
-            # Verify and optimize with Pillow
+            # Verify, enforce RGBA and optimize with Pillow
             img = Image.open(target_path)
+            img = img.convert("RGBA")
             # Ensure proper dimensions
             if img.size != (total_size, total_size):
                 img = img.resize((total_size, total_size), Image.Resampling.LANCZOS)
-                img.save(target_path, "PNG", optimize=True)
-            print(f"Generated {rel_path} ({total_size}x{total_size})")
+            img.save(target_path, "PNG", optimize=True)
+            print(f"Generated {rel_path} ({total_size}x{total_size}, RGBA)")
 
-    # Generate Multi-Resolution favicon.ico (16x16, 32x32, 48x48)
+    # Generate Multi-Resolution favicon.ico (16x16, 32x32, 48x48) in strict RGBA format
     with Image.open("public/favicon-48x48.png") as ico_48:
+        ico_rgba = ico_48.convert("RGBA")
         for ico_dest in ["public/favicon.ico", "src/app/favicon.ico"]:
             ico_path = os.path.abspath(ico_dest)
-            ico_48.save(
+            ico_rgba.save(
                 ico_path,
                 format="ICO",
                 sizes=[(16, 16), (32, 32), (48, 48)],
             )
-            print(f"Generated multi-res {ico_dest} (16, 32, 48)")
+            print(f"Generated multi-res {ico_dest} (16, 32, 48, RGBA)")
 
     # Clean up temp html and 48px temp png
     if os.path.exists(temp_html):
