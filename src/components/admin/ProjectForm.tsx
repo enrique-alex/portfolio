@@ -215,7 +215,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                 className="h-5 w-5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600"
               />
               <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Mettre en avant (carte plus grande sur l'accueil)
+                Mettre en avant (carte plus grande sur l&apos;accueil)
               </span>
             </label>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">

@@ -34,7 +34,7 @@ export default async function TrashPage() {
             Corbeille
           </h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Les projets supprimés sont conservés ici pendant 90 jours avant d'être définitivement effacés.
+            Les projets supprimés sont conservés ici pendant 90 jours avant d&apos;être définitivement effacés.
           </p>
         </div>
         <div className="shrink-0">

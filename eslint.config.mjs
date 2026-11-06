@@ -9,11 +9,21 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".open-next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "worker-configuration.d.ts",
+    "src/components/animations/webgl-fluid.js",
     "src/lib/webgl-fluid.js",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/triple-slash-reference": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/refs": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -35,12 +35,12 @@ export const metadata = {
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
     "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Automatisme, SCADA, C/C++, Python, Électronique.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://enrique-alex.pages.dev"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev"),
   openGraph: {
     title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
     description:
       "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Apprenti Automatisme & Informatique Industrielle chez Minakem Dunkerque.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://enrique-alex.pages.dev",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev",
     siteName: "Portfolio · Enrique Alex Ndjakou",
     locale: "fr_FR",
     type: "website",

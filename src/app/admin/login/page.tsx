@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
               Administration
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Cette section est réservée à l'administrateur du site.
+              Cette section est réservée à l&apos;administrateur du site.
             </p>
           </div>
 

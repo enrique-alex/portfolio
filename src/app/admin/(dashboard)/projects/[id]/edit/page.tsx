@@ -23,7 +23,7 @@ export default async function EditProjectPage(
           Projet introuvable
         </h2>
         <p className="text-zinc-500 dark:text-zinc-400 mb-8 text-center max-w-md">
-          Le projet que vous essayez de modifier n'existe pas ou a été supprimé.
+          Le projet que vous essayez de modifier n&apos;existe pas ou a été supprimé.
         </p>
         <Link 
           href="/admin"

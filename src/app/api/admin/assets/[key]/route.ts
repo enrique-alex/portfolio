@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
     }
 
     const headers = new Headers();
-    object.writeHttpMetadata(headers as any);
+    object.writeHttpMetadata(headers as unknown as Headers);
     headers.set("etag", object.httpEtag);
     
     // Fallback explicite pour le content-type si non écrit par writeHttpMetadata
@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
       headers.set("content-type", object.httpMetadata.contentType);
     }
 
-    return new NextResponse(object.body as any, {
+    return new NextResponse(object.body as unknown as BodyInit, {
       status: 200,
       headers,
     });
