@@ -12,9 +12,12 @@ vi.mock('next/link', () => ({
     React.createElement('a', { href, ...props }, children),
 }));
 
+let mockThemeState = { theme: 'dark', resolvedTheme: 'dark' };
+
 vi.mock('next-themes', () => ({
   useTheme: () => ({
-    theme: 'dark',
+    theme: mockThemeState.theme,
+    resolvedTheme: mockThemeState.resolvedTheme,
     setTheme: vi.fn(),
   }),
 }));
@@ -88,10 +91,13 @@ describe('Mobile Navigation Architecture & Accessibility (WCAG 2.1 AA/AAA & Mobi
       expect(html).toContain('role="navigation"');
       expect(html).toContain('aria-label="Dock de navigation principal"');
 
-      // Verify primary shortcuts exist and have touch targets >= 48px
+      // Verify all 6 portfolio sections exist and have touch targets >= 48px
       expect(html).toContain('href="#home"');
-      expect(html).toContain('href="#projects"');
+      expect(html).toContain('href="#profile"');
+      expect(html).toContain('href="#academic"');
       expect(html).toContain('href="#experience"');
+      expect(html).toContain('href="#projects"');
+      expect(html).toContain('href="#skills"');
       expect(html).toContain('min-h-[48px]');
 
       // Verify active item aria-current="page"
@@ -102,6 +108,101 @@ describe('Mobile Navigation Architecture & Accessibility (WCAG 2.1 AA/AAA & Mobi
       expect(html).toContain('aria-expanded="false"');
       expect(html).toContain('aria-controls="mobile-hud-drawer"');
       expect(html).toContain('aria-label="Ouvrir la console HUD"');
+    });
+
+    it('should dynamically update active indicator when active category changes', () => {
+      // Test when active category changes to "Compétences"
+      const htmlSkills = renderToString(
+        React.createElement(MobileNavDock, {
+          activeSegment: 'Compétences',
+          onSelectSegment: vi.fn(),
+          isHudOpen: false,
+          onToggleHud: vi.fn(),
+          hudTriggerRef: { current: null },
+        })
+      );
+
+      // Verify skills item is active and has aria-current="page"
+      expect(htmlSkills).toContain('aria-label="06 Compétences"');
+      expect(htmlSkills).toContain('aria-current="page"');
+
+      // Test when active category changes to "À Propos"
+      const htmlAbout = renderToString(
+        React.createElement(MobileNavDock, {
+          activeSegment: 'À Propos',
+          onSelectSegment: vi.fn(),
+          isHudOpen: false,
+          onToggleHud: vi.fn(),
+          hudTriggerRef: { current: null },
+        })
+      );
+
+      expect(htmlAbout).toContain('aria-label="02 À Propos"');
+      expect(htmlAbout).toContain('aria-current="page"');
+    });
+
+    it('should apply Apple Liquid Glass styling with backdrop filter and specular borders', () => {
+      mockThemeState = { theme: 'dark', resolvedTheme: 'dark' };
+      const html = renderToString(
+        React.createElement(MobileNavDock, {
+          activeSegment: 'Accueil',
+          onSelectSegment: vi.fn(),
+          isHudOpen: false,
+          onToggleHud: vi.fn(),
+          hudTriggerRef: { current: null },
+        })
+      );
+
+      // Verify Apple Liquid Glass blur and translucency
+      expect(html).toContain('backdrop-filter:blur(20px) saturate(1.8)');
+      expect(html).toContain('border:1px solid rgba(0, 210, 255,');
+      expect(html).toContain('rgba(10, 10, 14, 0.75)');
+    });
+
+    it('should correctly adapt Apple Liquid Glass styling when theme is system with light or dark preference', () => {
+      // Test when theme setting is "system" but resolvedTheme is "dark"
+      mockThemeState = { theme: 'system', resolvedTheme: 'dark' };
+      const htmlSystemDark = renderToString(
+        React.createElement(MobileNavDock, {
+          activeSegment: 'Accueil',
+          onSelectSegment: vi.fn(),
+          isHudOpen: false,
+          onToggleHud: vi.fn(),
+          hudTriggerRef: { current: null },
+        })
+      );
+      expect(htmlSystemDark).toContain('rgba(10, 10, 14, 0.75)');
+
+      // Test when theme setting is "light"
+      mockThemeState = { theme: 'light', resolvedTheme: 'light' };
+      const htmlLight = renderToString(
+        React.createElement(MobileNavDock, {
+          activeSegment: 'Accueil',
+          onSelectSegment: vi.fn(),
+          isHudOpen: false,
+          onToggleHud: vi.fn(),
+          hudTriggerRef: { current: null },
+        })
+      );
+      expect(htmlLight).toContain('rgba(255, 255, 255, 0.75)');
+      mockThemeState = { theme: 'dark', resolvedTheme: 'dark' }; // reset
+    });
+
+    it('should dynamically update active indicator when active category changes in English', () => {
+      currentLocale = 'en';
+      const htmlProjects = renderToString(
+        React.createElement(MobileNavDock, {
+          activeSegment: 'Projects',
+          onSelectSegment: vi.fn(),
+          isHudOpen: false,
+          onToggleHud: vi.fn(),
+          hudTriggerRef: { current: null },
+        })
+      );
+
+      expect(htmlProjects).toContain('aria-label="05 Projects"');
+      expect(htmlProjects).toContain('aria-current="page"');
+      currentLocale = 'fr'; // reset
     });
 
     it('should reflect HUD open state in aria-expanded and aria-label', () => {

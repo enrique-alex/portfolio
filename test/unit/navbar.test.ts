@@ -12,9 +12,12 @@ vi.mock('next/link', () => ({
     React.createElement('a', { href, ...props }, children),
 }));
 
+let mockTheme = { theme: 'dark', resolvedTheme: 'dark' };
+
 vi.mock('next-themes', () => ({
   useTheme: () => ({
-    theme: 'dark',
+    theme: mockTheme.theme,
+    resolvedTheme: mockTheme.resolvedTheme,
     setTheme: vi.fn(),
   }),
 }));
@@ -106,5 +109,26 @@ describe('Navbar Accessibility & WCAG 2.5.3 (Label in Name)', () => {
     expect(html).toContain('data-segment="Expérience"');
     expect(html).toContain('data-segment="Projets"');
     expect(html).toContain('data-segment="Compétences"');
+  });
+
+  it('should render dynamic mobile status telemetry badge reflecting active section with Apple Liquid Glass styling', () => {
+    const html = renderToString(React.createElement(Navbar));
+    // Mobile indicator should contain active segment name (Accueil initially)
+    expect(html).toContain('Accueil');
+    // Mobile indicator should have Apple Liquid Glass backdrop styling
+    expect(html).toContain('backdrop-filter:blur(20px) saturate(1.8)');
+  });
+
+  it('should adapt to system theme mode resolving to dark properly', () => {
+    mockTheme = { theme: 'system', resolvedTheme: 'dark' };
+    const html = renderToString(React.createElement(Navbar));
+    expect(html).toContain('rgba(255,255,255,0.12)');
+    mockTheme = { theme: 'dark', resolvedTheme: 'dark' }; // reset
+  });
+
+  it('should render dedicated contact CTA with uplink anchor', () => {
+    const html = renderToString(React.createElement(Navbar));
+    expect(html).toContain('href="#contact"');
+    expect(html).toContain('Me contacter');
   });
 });
