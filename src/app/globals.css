@@ -140,8 +140,7 @@
     cursor: auto !important;
   }
 }
-/* Isolation et rendu différé du sous-arbre DOM hors-champ (DOMSize & Layout Thrashing reduction) */
+/* Isolation de layout/style par section sans fausser la hauteur réelle de défilement (scroll-spy & smooth scroll) */
 .section-contain {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 700px;
+  contain: layout style;
 }

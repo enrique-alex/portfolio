@@ -14,7 +14,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="section-contain relative w-full border-t border-black/10 bg-white py-8 dark:border-white/10 dark:bg-[#050505]">
+    <footer className="section-contain relative w-full border-t border-black/10 bg-white pt-8 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:py-8 dark:border-white/10 dark:bg-[#050505]">
       {/* Decorative Top Laser Line */}
       <div className="absolute left-0 right-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-brand-blue/50 to-transparent opacity-50 dark:via-brand-blue/30" />
       

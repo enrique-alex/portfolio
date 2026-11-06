@@ -12,14 +12,14 @@ export default function ContactSection() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section id="contact" className="section-contain relative w-full py-24 lg:py-32 overflow-hidden scroll-mt-32">
+    <section id="contact" className="section-contain relative w-full pt-24 pb-28 md:py-24 lg:py-32 overflow-hidden scroll-mt-32">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/5 via-transparent to-transparent opacity-50 dark:from-brand-blue/10"></div>
       
       <div className="mx-auto flex w-full max-w-7xl flex-col px-4 relative z-10">
         
-        {/* HEADER - System Process Monitor Style */}
+        {/* HEADER */}
         <motion.div 
           className="mb-16 flex w-full flex-col items-start border-b border-black/10 pb-6 dark:border-white/10"
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
@@ -29,8 +29,8 @@ export default function ContactSection() {
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
             <Send className="h-4 w-4" />
-            <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
-              System.Transmission.Gateway
+            <span className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+              Contact & Collaboration
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
