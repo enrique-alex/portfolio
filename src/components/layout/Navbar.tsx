@@ -4,10 +4,12 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Sun, Moon, Languages, Lock } from 'lucide-react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../theme/LanguageProvider';
 import { Logo } from '../ui/Logo';
 import Link from 'next/link';
+import MobileNavDock from './MobileNavDock';
+import MobileHudDrawer from './MobileHudDrawer';
 
 function useNavLinks() {
   const { t } = useLanguage();
@@ -27,15 +29,16 @@ export default function Navbar() {
   const NAV_LINKS = useNavLinks();
   const { locale, setLocale, t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileHudOpen, setIsMobileHudOpen] = useState(false);
   const [activeSegment, setActiveSegment] = useState(t('nav.home'));
   
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
 
-  // Refs for the pill indicator
+  // Refs for the pill indicator & HUD trigger
   const navRef = useRef<HTMLElement>(null);
+  const hudTriggerRef = useRef<HTMLButtonElement>(null);
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
 
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function Navbar() {
     };
     
     handleScroll();
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Intersection Observer to update active navigation segment on scroll
     const observer = new IntersectionObserver(
@@ -100,11 +103,9 @@ export default function Navbar() {
 
   return (
     <>
-
-
       <header
         className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-700 ease-out ${
-          isScrolled ? 'pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]' : 'pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))]'
+          isScrolled ? 'pb-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))]' : 'pb-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))]'
         }`}
       >
         <div 
@@ -180,7 +181,7 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* ACTIONS (Theme, Lang, Admin) */}
+          {/* ACTIONS DESKTOP (Theme, Lang, Contact, Admin) */}
           <div className="hidden items-center gap-2 md:flex">
             {/* THEME TOGGLE */}
             {mounted && (
@@ -257,111 +258,33 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* BURGER MOBILE */}
-          <button
-            type="button"
-            className="z-50 relative flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-full md:hidden"
-            style={{
-              background: mounted && theme === 'dark'
-                ? 'rgba(255,255,255,0.06)'
-                : 'rgba(0,0,0,0.04)',
-              border: mounted && theme === 'dark'
-                ? '1px solid rgba(255,255,255,0.1)'
-                : '1px solid rgba(0,0,0,0.06)',
-              backdropFilter: 'blur(12px)',
-            }}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-expanded={isMobileMenuOpen}
-            aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          >
-            <span className={`h-[1.5px] w-5 bg-zinc-900 transition-all duration-300 dark:bg-white ${isMobileMenuOpen ? 'translate-y-[7.5px] rotate-45' : ''}`}></span>
-            <span className={`h-[1.5px] w-5 bg-zinc-900 transition-all duration-300 dark:bg-white ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`h-[1.5px] w-5 bg-zinc-900 transition-all duration-300 dark:bg-white ${isMobileMenuOpen ? '-translate-y-[7.5px] -rotate-45' : ''}`}></span>
-          </button>
+          {/* INDICATEUR D'ÉTAT MOBILE ÉPURÉ (Zéro burger encombrant, cockpit fluide) */}
+          <div className="flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-2.5 py-1 text-[11px] font-mono text-cyan-400 md:hidden">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500" />
+            </span>
+            <span className="tracking-widest uppercase font-semibold">ONLINE</span>
+          </div>
         </div>
-
-        {/* OVERLAY MENU MOBILE */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-              className="fixed inset-0 z-40 flex flex-col items-center justify-center pb-[env(safe-area-inset-bottom)] md:hidden"
-              style={{
-                background: mounted && theme === 'dark'
-                  ? 'rgba(5,5,5,0.92)'
-                  : 'rgba(255,255,255,0.95)',
-                backdropFilter: isTouch ? 'blur(20px) saturate(1.5)' : 'blur(40px) saturate(1.8)',
-                WebkitBackdropFilter: isTouch ? 'blur(20px) saturate(1.5)' : 'blur(40px) saturate(1.8)',
-              }}
-            >
-              <nav className="flex flex-col items-center gap-8">
-                {NAV_LINKS.map((link, i) => (
-                  <motion.a
-                    key={link.name}
-                    href={link.href}
-                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : i * 0.08 }}
-                    className="text-3xl font-light tracking-tight text-zinc-600 transition-colors hover:text-zinc-900 dark:text-white/70 dark:hover:text-white"
-                    onClick={() => {
-                      setActiveSegment(link.name);
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    {link.name}
-                  </motion.a>
-                ))}
-                {mounted && (
-                  <button
-                    onClick={() => {
-                      setTheme(theme === 'dark' ? 'light' : 'dark');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 text-lg font-medium text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
-                  >
-                    {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                    {theme === 'dark' ? t('nav.themeDay') : t('nav.themeNight')}
-                  </button>
-                )}
-
-                {/* Language toggle mobile */}
-                <button
-                  onClick={() => {
-                    setLocale(locale === 'fr' ? 'en' : 'fr');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 text-lg font-medium text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
-                >
-                  <Languages className="h-5 w-5" />
-                  {locale === 'fr' ? 'English' : 'Français'}
-                </button>
-
-                {/* Admin toggle mobile */}
-                <Link
-                  href="/admin/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 text-lg font-medium text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
-                  aria-label="Accès administrateur"
-                >
-                  <Lock className="h-5 w-5" />
-                  {t('nav.admin')}
-                </Link>
-
-                <a
-                  href="#contact"
-                  className="mt-8 rounded-full bg-zinc-900 px-8 py-4 text-lg font-medium text-white shadow-[0_0_40px_rgba(0,0,0,0.1)] transition-transform active:scale-95 dark:bg-white dark:text-black dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {t('nav.contact')}
-                </a>
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
+
+      {/* FLOATING MOBILE DOCK & CONTEXTUAL HUD DRAWER (Découplé du header pour isoler le stacking context) */}
+      <MobileNavDock
+        activeSegment={activeSegment}
+        onSelectSegment={(seg) => setActiveSegment(seg)}
+        isHudOpen={isMobileHudOpen}
+        onToggleHud={() => setIsMobileHudOpen(!isMobileHudOpen)}
+        hudTriggerRef={hudTriggerRef}
+      />
+
+      <MobileHudDrawer
+        isOpen={isMobileHudOpen}
+        onClose={() => setIsMobileHudOpen(false)}
+        triggerRef={hudTriggerRef}
+        activeSegment={activeSegment}
+        onSelectSegment={(seg) => setActiveSegment(seg)}
+      />
     </>
   );
 }

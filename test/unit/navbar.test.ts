@@ -29,12 +29,48 @@ vi.mock('@/components/theme/LanguageProvider', () => ({
 
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, style, className, initial, animate, exit, transition, ...props }: any) =>
-      React.createElement('div', { className, style, ...props }, children),
-    a: ({ children, style, className, initial, animate, exit, transition, ...props }: any) =>
-      React.createElement('a', { className, style, ...props }, children),
+    div: ({
+      children,
+      style,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & {
+      layoutId?: string;
+      initial?: unknown;
+      animate?: unknown;
+      exit?: unknown;
+      transition?: unknown;
+    }) => {
+      const rest = { ...props };
+      delete rest.layoutId;
+      delete rest.initial;
+      delete rest.animate;
+      delete rest.exit;
+      delete rest.transition;
+      return React.createElement('div', { className, style, ...rest }, children);
+    },
+    a: ({
+      children,
+      style,
+      className,
+      ...props
+    }: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+      layoutId?: string;
+      initial?: unknown;
+      animate?: unknown;
+      exit?: unknown;
+      transition?: unknown;
+    }) => {
+      const rest = { ...props };
+      delete rest.layoutId;
+      delete rest.initial;
+      delete rest.animate;
+      delete rest.exit;
+      delete rest.transition;
+      return React.createElement('a', { className, style, ...rest }, children);
+    },
   },
-  AnimatePresence: ({ children }: any) => children,
+  AnimatePresence: ({ children }: { children?: React.ReactNode }) => children,
   useReducedMotion: () => false,
 }));
 

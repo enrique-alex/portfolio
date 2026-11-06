@@ -8,7 +8,8 @@ import { Activity } from 'lucide-react';
 import { 
   SiC, SiCplusplus, SiPython, SiTypescript, SiPostgresql, SiMysql,
   SiArduino, SiLinux, SiGit, SiGithub, SiReact, SiNextdotjs,
-  SiDocker, SiFigma, SiLatex
+  SiDocker, SiFigma, SiLatex,
+  SiWireshark, SiMqtt
 } from 'react-icons/si';
 import { FaProjectDiagram } from 'react-icons/fa';
 import { VscVscode, VscTerminalBash } from 'react-icons/vsc';
@@ -19,7 +20,8 @@ import {
   Bot, Ruler, Brain, Users, Target, Lightbulb, 
   Globe, ClipboardList, Code, Gauge, Settings,
   CircuitBoard, Monitor, Workflow, FileSpreadsheet,
-  Presentation, FileText, Cpu, Radio
+  Presentation, FileText, Cpu, Radio,
+  Network, ShieldCheck, Wifi
 } from 'lucide-react';
 
 // ─── DATA ─────────────────────────────────────────────────
@@ -103,9 +105,14 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.embedded.sub'),
       color: { r: 239, g: 68, b: 68 },
       skills: [
+        { name: 'Protocoles Réseau & TCP/IP', level: 72, icon: Network },
+        { name: 'Wireshark & Métrologie DPI', level: 70, icon: SiWireshark },
         { name: 'Arduino / µContrôleurs', level: 70, icon: SiArduino },
-        { name: 'ASM AVR8', level: 55, icon: Cpu },
+        { name: 'IoT & LPWAN (LoRaWAN / BLE)', level: 68, icon: Wifi },
+        { name: 'Sécurité mTLS & Chiffrement', level: 65, icon: ShieldCheck },
+        { name: 'MQTT (Mosquitto)', level: 68, icon: SiMqtt },
         { name: 'Capteurs Industriels', level: 62, icon: Gauge },
+        { name: 'ASM AVR8', level: 55, icon: Cpu },
         { name: 'CAN / USART', level: 50, icon: Radio },
       ],
     },
@@ -168,6 +175,8 @@ const MARQUEE_TOOLS: MarqueeTool[] = [
   { name: 'Figma', icon: SiFigma, brandColor: '#F24E1E' },
   { name: 'Bash', icon: VscTerminalBash, brandColor: '#4EAA25' },
   { name: 'Microcontrôleur', icon: BiMicrochip, brandColor: '#00BCD4' },
+  { name: 'Wireshark', icon: SiWireshark, brandColor: '#1679A7' },
+  { name: 'MQTT', icon: SiMqtt, brandColor: '#660066' },
   { name: 'MySQL', icon: SiMysql, brandColor: '#4479A1' },
   { name: 'PostgreSQL', icon: SiPostgresql, brandColor: '#336791' },
 ];

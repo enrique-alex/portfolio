@@ -168,13 +168,14 @@ export default function CursorFluid() {
                 ref={canvasRef}
                 style={{
                      width: '100vw',
-                     height: '100vh',
+                     height: '100dvh',
+                     minHeight: '100vh',
                      filter: resolvedTheme === 'light' ? 'invert(1) hue-rotate(180deg) brightness(0.6)' : 'none',
                      mixBlendMode: resolvedTheme === 'light' ? 'multiply' : 'screen',
                      opacity: resolvedTheme === 'light' ? 0.35 : 0.45,
                      transition: 'filter 1s ease-in-out, opacity 1s ease-in-out'
                 }}
-                className="absolute inset-0 z-0 pointer-events-none"
+                className="absolute inset-0 z-0 pointer-events-none h-screen h-[100dvh] w-screen"
                 aria-hidden="true"
             />
         </div>

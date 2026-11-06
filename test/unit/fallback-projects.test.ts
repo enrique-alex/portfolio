@@ -6,8 +6,8 @@ describe("Fallback Projects and Local Dev Resilience", () => {
   it("should have complete sets of fallback projects for 'fr' and 'en'", () => {
     expect(FALLBACK_PROJECTS.fr).toBeDefined();
     expect(FALLBACK_PROJECTS.en).toBeDefined();
-    expect(FALLBACK_PROJECTS.fr.length).toBe(12);
-    expect(FALLBACK_PROJECTS.en.length).toBe(12);
+    expect(FALLBACK_PROJECTS.fr.length).toBe(13);
+    expect(FALLBACK_PROJECTS.en.length).toBe(13);
   });
 
   it("every fallback project should satisfy the Project schema requirements", () => {
@@ -36,11 +36,11 @@ describe("Fallback Projects and Local Dev Resilience", () => {
 
   it("should retrieve all projects via getProjects when D1 is unattached", async () => {
     const frProjects = await getProjects("fr");
-    expect(frProjects.length).toBe(12);
+    expect(frProjects.length).toBe(13);
     expect(frProjects[0].slug).toBe("controle-hydraulique-bicuve-2026");
 
     const enProjects = await getProjects("en");
-    expect(enProjects.length).toBe(12);
+    expect(enProjects.length).toBe(13);
     expect(enProjects[0].title).toBe("Real-Time Control, Dual-Tank Hydraulic Process");
   });
 
