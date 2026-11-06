@@ -1,7 +1,8 @@
 /// <reference types="@cloudflare/vitest-plugin/types" />
 /// <reference path="../../worker-configuration.d.ts" />
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { env } from "cloudflare:test";
+import { FALLBACK_PROJECTS } from "@/lib/db/fallback-projects";
 import {
   createProjectAtomic,
   updateProjectAtomic,
@@ -320,5 +321,64 @@ describe("Sort Order and Project Lifecycle Integration Tests", () => {
       expect(activeProjects[4]).toMatchObject({ id: "p3", sort_order: 4 });
       expect(activeProjects[5]).toMatchObject({ id: "p4", sort_order: 5 });
     });
+  });
+
+  afterAll(async () => {
+    // Restore clean seed data for any subsequent tests in the suite
+    await env.portfolio_db.prepare("DELETE FROM project_translations").run();
+    await env.portfolio_db.prepare("DELETE FROM projects").run();
+
+    for (let index = 0; index < FALLBACK_PROJECTS.fr.length; index++) {
+      const p = FALLBACK_PROJECTS.fr[index];
+      const en = FALLBACK_PROJECTS.en[index];
+
+      await env.portfolio_db
+        .prepare(
+          `INSERT INTO projects (
+            id, slug, year, technologies, theme_color_r, theme_color_g, theme_color_b,
+            github_url, cover_image, gallery, sort_order, is_featured, deleted_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`
+        )
+        .bind(
+          p.id,
+          p.slug,
+          p.year,
+          JSON.stringify(p.technologies),
+          p.themeColor.r,
+          p.themeColor.g,
+          p.themeColor.b,
+          p.githubUrl ?? null,
+          p.coverImage ?? null,
+          p.gallery ? JSON.stringify(p.gallery) : null,
+          index,
+          p.isFeatured ? 1 : 0
+        )
+        .run();
+
+      await env.portfolio_db
+        .prepare(
+          `INSERT INTO project_translations (
+            project_id, locale, title, category, short_description, detailed_description, technical_challenges, impact
+          ) VALUES (?, 'fr', ?, ?, ?, ?, ?, ?),
+                   (?, 'en', ?, ?, ?, ?, ?, ?)`
+        )
+        .bind(
+          p.id,
+          p.title,
+          p.category,
+          p.shortDescription,
+          p.detailedDescription,
+          p.technicalChallenges,
+          p.impact,
+          en.id,
+          en.title,
+          en.category,
+          en.shortDescription,
+          en.detailedDescription,
+          en.technicalChallenges,
+          en.impact
+        )
+        .run();
+    }
   });
 });

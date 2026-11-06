@@ -59,6 +59,43 @@ function CategoryIcon({ category }: { category: string }) {
             </svg>
         );
     }
+    if (category === 'Robotique & Systèmes Autonomes' || category === 'Robotics & Autonomous Systems') {
+        // Robotic arm / Joint kinematics
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
+                <rect x="3" y="19" width="18" height="3" rx="1" />
+                <circle cx="8" cy="16" r="2" />
+                <line x1="8" y1="14" x2="13" y2="8" />
+                <circle cx="13" cy="8" r="2" />
+                <line x1="14.5" y1="9.5" x2="19" y2="12" />
+                <circle cx="19" cy="12" r="1.5" />
+                <path d="M19 10.5v3" />
+            </svg>
+        );
+    }
+    if (category === 'Modélisation Multiphysique' || category === 'Multiphysics Modeling') {
+        // Energy bond / Multi-domain flux
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
+                <path d="M2 12h3l3-7 4 14 3-9 2 4h5" />
+                <circle cx="8" cy="5" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
+            </svg>
+        );
+    }
+    if (category === 'Réseaux Embarqués & Cybersécurité' || category === 'Embedded Networks & Cybersecurity') {
+        // Secure Network / Shielded node
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-full w-full">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <circle cx="12" cy="11" r="2" />
+                <path d="M12 7v2" />
+                <path d="M12 13v2" />
+                <path d="M9 11H7" />
+                <path d="M17 11h-2" />
+            </svg>
+        );
+    }
     if (category === 'Informatique Bas Niveau' || category === 'Low-Level Computing') {
         // Microprocessor / Register
         return (

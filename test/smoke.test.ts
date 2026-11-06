@@ -16,5 +16,10 @@ describe("D1 Database Smoke Test", () => {
 
     expect(result).not.toBeNull();
     expect(result?.sql).toContain("sort_order");
+
+    const count = await env.portfolio_db
+      .prepare("SELECT count(*) as total FROM projects WHERE deleted_at IS NULL")
+      .first<{ total: number }>();
+    expect(count?.total).toBe(15);
   });
 });

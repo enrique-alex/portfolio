@@ -34,6 +34,7 @@ export default defineConfig(async () => {
       }),
     ],
     test: {
+      fileParallelism: false,
       setupFiles: ["./test/apply-migrations.ts"],
     },
   };
