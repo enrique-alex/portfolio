@@ -3,21 +3,25 @@ import subprocess
 from PIL import Image, ImageDraw
 
 
-def apply_squircle_mask(img: Image.Image, rx: float) -> Image.Image:
-    """Apply a 4x supersampled anti-aliased rounded rectangle alpha mask so outer corners are 100% transparent."""
+def downsample_squircle_rgba(img: Image.Image, target_size: int, render_rx: float) -> Image.Image:
+    """Mask at supersampled resolution and downsample via premultiplied-alpha BOX filter (zero LANCZOS ringing)."""
     w, h = img.size
-    scale = 4
-    mask = Image.new("L", (w * scale, h * scale), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.rounded_rectangle(
-        [(0, 0), (w * scale - 1, h * scale - 1)],
-        radius=int(round(rx * scale)),
-        fill=255,
-    )
-    mask = mask.resize((w, h), Image.Resampling.LANCZOS)
-    out = img.convert("RGBA")
-    out.putalpha(mask)
-    return out
+    rgba = img.convert("RGBA")
+    if render_rx > 0:
+        mask_hi = Image.new("L", (w * 2, h * 2), 0)
+        draw = ImageDraw.Draw(mask_hi)
+        draw.rounded_rectangle(
+            [(0, 0), (w * 2 - 1, h * 2 - 1)],
+            radius=int(round(render_rx * 2)),
+            fill=255,
+        )
+        mask = mask_hi.resize((w, h), Image.Resampling.BOX)
+        masked = Image.composite(rgba, Image.new("RGBA", (w, h), (0, 0, 0, 0)), mask)
+        return masked.resize((target_size, target_size), Image.Resampling.BOX)
+    else:
+        if (w, h) != (target_size, target_size):
+            return rgba.resize((target_size, target_size), Image.Resampling.BOX)
+        return rgba
 
 
 def generate_brand_icons():
@@ -40,10 +44,10 @@ def generate_brand_icons():
         ("public/icon-maskable-192.png", 192, 384, 0.62, 0, "2.25", False),
         ("public/icon-maskable-512.png", 512, 512, 0.62, 0, "2.25", False),
 
-        # Favicon PNGs (supersampled at 256px then LANCZOS downsampled with pure transparent rounded corners)
+        # Favicon PNGs (supersampled at 256px then BOX-averaged with premultiplied alpha)
         ("public/favicon-32x32.png", 32, 256, 0.80, 7, "2.3", True),
         ("public/favicon-16x16.png", 16, 256, 0.82, 3.5, "2.35", True),
-        ("public/favicon-48x48.png", 48, 256, 0.80, 10, "2.3", True),
+        ("public/favicon-48x48.png", 48, 384, 0.80, 10.5, "2.3", True),
     ]
 
     temp_html = os.path.abspath("temp_icon_render.html")
@@ -127,24 +131,28 @@ html, body {{
             print(f"Error rendering {rel_path}: {res.stderr}")
         else:
             img = Image.open(target_path).convert("RGBA")
-            if img.size != (target_size, target_size):
-                img = img.resize((target_size, target_size), Image.Resampling.LANCZOS)
-            if rx > 0:
-                img = apply_squircle_mask(img, rx)
+            img = downsample_squircle_rgba(img, target_size, render_rx)
             img.save(target_path, "PNG", optimize=True)
             print(f"Generated {rel_path} ({target_size}x{target_size}, RGBA)")
 
-    # Generate Multi-Resolution favicon.ico (16x16, 32x32, 48x48) in strict RGBA format
-    with Image.open("public/favicon-48x48.png") as ico_48:
-        ico_rgba = ico_48.convert("RGBA")
+    # Generate Multi-Resolution favicon.ico embedding the distinct optically-compensated 16x16, 32x32, and 48x48 frames
+    with (
+        Image.open("public/favicon-16x16.png") as ico_16,
+        Image.open("public/favicon-32x32.png") as ico_32,
+        Image.open("public/favicon-48x48.png") as ico_48,
+    ):
+        im16 = ico_16.convert("RGBA")
+        im32 = ico_32.convert("RGBA")
+        im48 = ico_48.convert("RGBA")
         for ico_dest in ["public/favicon.ico", "src/app/favicon.ico"]:
             ico_path = os.path.abspath(ico_dest)
-            ico_rgba.save(
+            im48.save(
                 ico_path,
                 format="ICO",
+                append_images=[im16, im32],
                 sizes=[(16, 16), (32, 32), (48, 48)],
             )
-            print(f"Generated multi-res {ico_dest} (16, 32, 48, RGBA)")
+            print(f"Generated multi-res {ico_dest} (16, 32, 48 distinct frames, RGBA)")
 
     # Generate 1200x630 OpenGraph / Social Link Preview Card (public/og-image.png)
     og_target = os.path.abspath("public/og-image.png")

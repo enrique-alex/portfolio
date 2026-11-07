@@ -12,6 +12,12 @@ export const viewport: Viewport = {
   themeColor: '#050505',
 };
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.CF_PAGES === '1'
+    ? 'https://enrique-alex.pages.dev'
+    : 'https://portfolio.enriquekemayou.workers.dev');
+
 export const metadata = {
   icons: {
     icon: [
@@ -36,7 +42,7 @@ export const metadata = {
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
     "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Systèmes embarqués, robotique, commande temps réel, C/C++, Python et architecture industrielle & logicielle.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev"),
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
   },
@@ -44,7 +50,7 @@ export const metadata = {
     title: "Enrique Alex Ndjakou · Ingénieur en Génie Électrique, Mécatronique & Systèmes Embarqués",
     description:
       "Élève Ingénieur à Polytech Lille & Apprenti chez Minakem · 15 Systèmes & Architectures : Systèmes Embarqués (C/C++, AVR8), Robotique, Commande Temps Réel, SCADA & R&D Internationale.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev",
+    url: SITE_URL,
     siteName: "Enrique.Ndjakou · Engineering Portfolio",
     locale: "fr_FR",
     alternateLocale: ["en_US"],

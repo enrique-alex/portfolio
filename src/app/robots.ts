@@ -6,6 +6,11 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://portfolio.enriquekemayou.workers.dev'}/sitemap.xml`,
+    sitemap: `${
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (process.env.CF_PAGES === '1'
+        ? 'https://enrique-alex.pages.dev'
+        : 'https://portfolio.enriquekemayou.workers.dev')
+    }/sitemap.xml`,
   }
 }

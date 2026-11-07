@@ -4,7 +4,11 @@ import { getProjects } from '@/lib/db/projects'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await getProjects('fr');
   
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://portfolio.enriquekemayou.workers.dev';
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.CF_PAGES === '1'
+      ? 'https://enrique-alex.pages.dev'
+      : 'https://portfolio.enriquekemayou.workers.dev');
 
   const projectUrls = projects.map((project) => ({
     url: `${baseUrl}/projects/${project.slug}`,

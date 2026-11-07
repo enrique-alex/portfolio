@@ -54,11 +54,12 @@ assert.ok(/\/og-image\.png\?v=7/.test(layoutContent), 'layout.tsx must contain /
 assert.ok(layoutContent.includes('width: 1200'), 'layout.tsx must specify standard 1200px OpenGraph width');
 assert.ok(layoutContent.includes('height: 630'), 'layout.tsx must specify standard 630px OpenGraph height');
 assert.ok(layoutContent.includes("themeColor: '#050505'"), 'layout.tsx viewport must define themeColor #050505');
+assert.ok(layoutContent.includes('https://enrique-alex.pages.dev'), 'layout.tsx must resolve https://enrique-alex.pages.dev when CF_PAGES is active');
 
 const manifestPath = path.resolve('src/app/manifest.ts');
 const manifestContent = fs.readFileSync(manifestPath, 'utf-8');
 assert.ok(/\/icon\.svg\?v=7/.test(manifestContent), 'manifest.ts must contain /icon.svg?v=7');
-console.log('✓ 4. Cache-busting icons & OpenGraph 1200x630 metadata in layout.tsx & manifest.ts passed');
+console.log('✓ 4. Cache-busting icons, CF_PAGES domain resolution & OpenGraph 1200x630 metadata passed');
 
 // ─── 5. Verify SideSlider.tsx & persistent general visibility ───
 const sideSliderPath = path.resolve('src/components/ui/SideSlider.tsx');

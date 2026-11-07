@@ -123,7 +123,7 @@ Pour garantir une mise en valeur optimale dans les navigateurs (thèmes sombres 
 - **Navigateurs Desktop (`16×16`, `32×32`, `48×48`)** : `favicon.ico` multi-résolution et `icon.svg` vectoriel encapsulés dans un badge squircle Obsidienne (`#050505`) doté d'une lueur radiale (`#0A1926`) et d'un liseré spéculaire (`#00D2FF` / `#FFFFFF`).
 - **iOS Safari / iPadOS** : `public/apple-touch-icon.png` (180×180 px PNG plein fond obsidienne `#050505`, zone de sécurité adaptée au masque squircle d'Apple).
 - **Android Chrome & PWA** : `public/icon-192.png` et `public/icon-512.png` accompagnés de versions maskables (`icon-maskable-192.png`, `icon-maskable-512.png`) respectant la safe-zone circulaire de 80 %.
-- **Prévisualisation Sociale OpenGraph & Twitter Card (`public/og-image.png`)** : Carte `1200×630` px (`1.91:1`, optimisée `< 100 Ko`) mettant en scène le Monolithe `EN`, les 4 piliers d'ingénierie multidisciplinaires et l'ambition R&D internationale.
+- **Prévisualisation Sociale OpenGraph & Twitter Card (`public/og-image.png`)** : Carte `1200×630` px (`1.91:1`, optimisée `< 200 Ko`) mettant en scène le Monolithe `EN`, les 4 piliers d'ingénierie multidisciplinaires et l'ambition R&D internationale.
 
 ---
 
@@ -202,7 +202,7 @@ portfolio/
 │   │   ├── animations/            # DualBodyCursor, KineticCanvas, Preloader
 │   │   ├── sections/              # Hero, AcademicJourney, Projects, Contact
 │   │   ├── theme/                 # Providers (Theme, Language fr/en, Projects)
-│   │   └── ui/                    # Logo Feedback Core, SideSlider, Badges
+│   │   └── ui/                    # Logo Isometric EN Monolith, SideSlider, Badges
 │   └── lib/                       # Utilitaires de session, cryptographie, D1 client
 └── test/                          # Suite de tests Vitest (unit & integration)
     ├── unit/                      # Tests unitaires composants, logo, curseurs
