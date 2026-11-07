@@ -29,6 +29,23 @@ interface D1ProjectRow {
 }
 
 function mapRowToProject(row: D1ProjectRow): Project {
+  const parsedTechs = JSON.parse(row.technologies) as string[];
+  let localizedTechs = parsedTechs;
+
+  if (row.locale === "en") {
+    const enFallback = FALLBACK_PROJECTS.en.find((p) => p.id === row.id);
+    const frFallback = FALLBACK_PROJECTS.fr.find((p) => p.id === row.id);
+    // Use English technology labels when the D1 row still holds the default French seed array
+    if (
+      enFallback &&
+      frFallback &&
+      parsedTechs.length === frFallback.technologies.length &&
+      parsedTechs.every((t, i) => t === frFallback.technologies[i])
+    ) {
+      localizedTechs = enFallback.technologies;
+    }
+  }
+
   return {
     id: row.id,
     title: row.title,
@@ -39,7 +56,7 @@ function mapRowToProject(row: D1ProjectRow): Project {
     detailedDescription: row.detailed_description,
     technicalChallenges: row.technical_challenges,
     impact: row.impact,
-    technologies: JSON.parse(row.technologies) as string[],
+    technologies: localizedTechs,
     isFeatured: Boolean(row.is_featured),
     themeColor: {
       r: row.theme_color_r,

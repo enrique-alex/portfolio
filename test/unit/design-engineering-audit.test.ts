@@ -69,6 +69,8 @@ import mobileHudDrawerContent from '@/components/layout/MobileHudDrawer.tsx?raw'
 // @ts-expect-error Vite raw query import
 import projectCardContent from '@/components/ui/ProjectCard.tsx?raw';
 
+import { getAdaptiveBentoSpan } from '@/components/ui/ProjectsGrid';
+
 describe('Principal Design Engineering Audit Invariants', () => {
   it('1. should eradicate generic AI copywriting clichés ("passionné par", "Waiting for incoming signals", "Séquence d\'Amorçage") in both FR and EN while highlighting multidisciplinary engineering & international mobility', () => {
     currentTestLocale = 'fr';
@@ -266,7 +268,7 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(webglFluidContent).toContain('window.addEventListener("webgl-resonance"');
   });
 
-  it('10. should give every single one of the 15 projects a unique bespoke SVG schematic, telemetry spec, zero-violet themeColor, and hole-free responsive Bento grid across mobile/tablet/desktop', () => {
+  it('10. should give every single one of the 15 projects a unique bespoke SVG schematic, bilingual telemetry spec, localized EN technologies, zero-violet themeColor, and hole-free responsive Bento grid across mobile/tablet/desktop for N=1..15', () => {
     for (const locale of ['fr', 'en'] as const) {
       for (const proj of FALLBACK_PROJECTS[locale]) {
         const { r, g, b } = proj.themeColor;
@@ -282,6 +284,40 @@ describe('Principal Design Engineering Audit Invariants', () => {
         expect(magneticCardContent).toContain(`case '${proj.id}':`);
         expect(magneticCardContent).toContain(`'${proj.id}':`);
       }
+    }
+
+    // Verify 100% English localization of project cards (specs & technology badges)
+    currentTestLocale = 'en';
+    const projEnHtml = renderToString(React.createElement(ProjectsSection));
+    expect(projEnHtml).toContain('4th-Order · 4.5 kHz');
+    expect(projEnHtml).toContain('EMR/MCS · 18.5 ms');
+    expect(projEnHtml).toContain('PWM · Opto-Isolated');
+    expect(projEnHtml).toContain('Sallen-Key Topology');
+    expect(projEnHtml).toContain('MVC Architecture');
+    expect(projEnHtml).toContain('POSIX Processes');
+    expect(projEnHtml).not.toContain('Cellules Sallen-Key');
+    expect(projEnHtml).not.toContain('Processus Posix');
+    expect(projEnHtml).not.toContain('Ordre 4 · 4.5 kHz');
+    currentTestLocale = 'fr';
+
+    // Verify hole-free Bento packing across all subset sizes N = 1..15 on Tablet (2 cols) and Desktop (3 cols)
+    for (let n = 1; n <= 15; n++) {
+      const subset = FALLBACK_PROJECTS.fr.slice(0, n);
+      let tabletCells = 0;
+      let desktopCells = 0;
+      subset.forEach((_, idx) => {
+        const { spanClasses } = getAdaptiveBentoSpan(idx, subset);
+        tabletCells += spanClasses.includes('md:col-span-2') ? 2 : 1;
+        desktopCells += spanClasses.includes('lg:col-span-3')
+          ? 3
+          : spanClasses.includes('lg:col-span-2')
+          ? 2
+          : 1;
+      });
+      if (n >= 2) {
+        expect(tabletCells % 2, `Tablet grid has an empty cell for N=${n}`).toBe(0);
+      }
+      expect(desktopCells % 3, `Desktop grid has an empty cell for N=${n}`).toBe(0);
     }
 
     // Verify adaptive multi-viewport grid in ProjectsGrid.tsx

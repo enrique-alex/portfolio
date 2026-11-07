@@ -11,10 +11,10 @@ import { useLanguage } from '@/components/theme/LanguageProvider';
 
 /**
  * Calcule les classes d'occupation Bento (Mobile 1 col / Tablette 2 cols / Desktop 3 cols)
- * en garantissant zéro cellule orpheline quel que soit le filtre actif et en alternant
+ * en garantissant zéro cellule orpheline quel que soit le filtre actif (N = 1..15+) et en alternant
  * gauche/droite les cartes larges sur grand écran.
  */
-function getAdaptiveBentoSpan(index: number, list: Project[]): { spanClasses: string; isCardWide: boolean } {
+export function getAdaptiveBentoSpan(index: number, list: Project[]): { spanClasses: string; isCardWide: boolean } {
     const total = list.length;
     const project = list[index];
 
@@ -37,9 +37,9 @@ function getAdaptiveBentoSpan(index: number, list: Project[]): { spanClasses: st
             : { spanClasses: 'col-span-1 md:col-span-1 lg:col-span-1', isCardWide: false };
     }
 
-    // Pour N > 3 (ex: les 15 projets) :
-    // Sur Tablette (2 colonnes) : les projets isFeatured prennent 2 colonnes; si le nombre de projets
-    // non-featured est impair, le dernier s'étend sur 2 colonnes pour fermer la grille proprement.
+    // Pour N > 3 (ex: N = 4, 5, ..., 15) :
+    // 1. Sur Tablette (2 colonnes) : les projets isFeatured prennent 2 colonnes; si le nombre de projets
+    // non-featured est impair, le dernier non-featured s'étend sur 2 colonnes pour fermer la grille sans trou.
     const nonFeaturedIndices = list.map((p, i) => (!p.isFeatured ? i : -1)).filter((i) => i !== -1);
     const isLastOddNonFeaturedOnTablet =
         !project.isFeatured &&
@@ -47,21 +47,37 @@ function getAdaptiveBentoSpan(index: number, list: Project[]): { spanClasses: st
         index === nonFeaturedIndices[nonFeaturedIndices.length - 1];
     const mdClass = project.isFeatured || isLastOddNonFeaturedOnTablet ? 'md:col-span-2' : 'md:col-span-1';
 
-    // Sur Desktop (3 colonnes) : chaque carte 2-colonnes doit être appariée avec une carte 1-colonne (2 + 1 = 3),
-    // et le reste des cartes 1-colonne doit être un multiple de 3 ((total + wideCount) % 3 === 0).
+    // 2. Sur Desktop (3 colonnes) :
+    // Priorité aux projets isFeatured pour les emplacements larges (2 colonnes), complétés si nécessaire
+    // par les premiers projets de la liste pour garantir (total + wideCount) % 3 === 0 (zéro trou).
     const featuredIndices = list.map((p, i) => (p.isFeatured ? i : -1)).filter((i) => i !== -1);
-    const maxPairableWide = Math.min(featuredIndices.length, Math.floor(total / 2));
-    let wideCount = maxPairableWide;
+    const nonFeaturedCandidates = list.map((p, i) => (!p.isFeatured ? i : -1)).filter((i) => i !== -1);
+    const candidateWideIndices = [...featuredIndices, ...nonFeaturedCandidates];
+
+    const maxPairableWide = Math.floor(total / 2);
+    // On vise prioritairement le nombre de projets phares, plafonné à maxPairableWide
+    let wideCount = Math.min(featuredIndices.length, maxPairableWide);
     while (wideCount > 0 && (total + wideCount) % 3 !== 0) {
         wideCount--;
     }
+    // Si wideCount === 0 et que total % 3 !== 0 (ex: 4 ou 5 projets non-featured), on promeut 1 ou 2 cartes en 2 colonnes
+    if ((total + wideCount) % 3 !== 0) {
+        for (let w = 1; w <= maxPairableWide; w++) {
+            if ((total + w) % 3 === 0) {
+                wideCount = w;
+                break;
+            }
+        }
+    }
 
-    const wideRank = featuredIndices.indexOf(index);
-    const isDesktopWide = wideRank !== -1 && wideRank < wideCount;
+    const activeWideIndices = candidateWideIndices.slice(0, wideCount);
+    const wideRank = activeWideIndices.indexOf(index);
+    const isDesktopWide = wideRank !== -1;
 
     let lgClass = 'lg:col-span-1';
     if (isDesktopWide) {
-        // Alternance gauche (cols 1-2) / droite (cols 2-3) pour un rythme Bento asymétrique équilibré
+        // Alternance gauche (cols 1-2) / droite (cols 2-3) uniquement lorsqu'il existe au moins une carte 1-colonne
+        // située APRÈS cette carte large ou disponible par flux dense pour occuper la colonne 1.
         lgClass = wideRank % 2 === 1 ? 'lg:col-start-2 lg:col-span-2' : 'lg:col-span-2';
     }
 
@@ -83,8 +99,12 @@ export default function ProjectsGrid() {
     // Extraction des catégories uniques (l'ordre d'apparition originel est conservé)
     const categories = Array.from(new Set(projectsData.map(p => p.category)));
 
-    const filteredProjects = activeCategory 
-        ? projectsData.filter(p => p.category === activeCategory)
+    // Si l'utilisateur change de langue pendant qu'un filtre de catégorie est sélectionné,
+    // si la catégorie active n'existe plus dans la nouvelle langue, on retombe proprement sur "Tous"
+    const effectiveCategory = activeCategory && categories.includes(activeCategory) ? activeCategory : null;
+
+    const filteredProjects = effectiveCategory 
+        ? projectsData.filter(p => p.category === effectiveCategory)
         : projectsData;
 
     const containerVariants: Variants = {
@@ -131,12 +151,12 @@ export default function ProjectsGrid() {
                 <button
                     onClick={() => setActiveCategory(null)}
                     className={`relative flex-shrink-0 rounded-full px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider active:scale-[0.97] transition-[transform,color,border-color,background-color] duration-150 ease-[var(--ease-out)] ${
-                        activeCategory === null
+                        effectiveCategory === null
                             ? 'text-white dark:text-zinc-950'
                             : 'border border-black/10 bg-white/60 text-zinc-700 hover:border-black/25 hover:text-zinc-950 dark:border-white/10 dark:bg-[#0A0C10]/70 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white'
                     }`}
                 >
-                    {activeCategory === null && (
+                    {effectiveCategory === null && (
                         <motion.span
                             layoutId="project-filter-pill"
                             className="absolute inset-0 -z-10 rounded-full bg-zinc-900 dark:bg-white"
@@ -149,7 +169,7 @@ export default function ProjectsGrid() {
                     </span>
                 </button>
                 {categories.map((category) => {
-                    const isSelected = activeCategory === category;
+                    const isSelected = effectiveCategory === category;
                     const count = projectsData.filter((p) => p.category === category).length;
                     return (
                         <button
@@ -187,8 +207,11 @@ export default function ProjectsGrid() {
             >
                 <AnimatePresence mode="popLayout">
                     {isLoading ? (
-                        Array.from({ length: 6 }).map((_, index) => {
-                            const spanClasses = index === 0 ? "col-span-1 md:col-span-2 lg:col-span-2" : "col-span-1";
+                        Array.from({ length: 5 }).map((_, index) => {
+                            const spanClasses =
+                                index === 0
+                                    ? "col-span-1 md:col-span-2 lg:col-span-2"
+                                    : "col-span-1 md:col-span-1 lg:col-span-1";
                             return (
                                 <div key={`skeleton-${index}`} className={spanClasses}>
                                     <ProjectCardSkeleton isFeatured={index === 0} />

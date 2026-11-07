@@ -5,23 +5,45 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Project } from '@/lib/data';
 
-// --- Signature télémétrique propre à chacun des 15 projets ---
-const PROJECT_SPECS: Record<string, string> = {
-    'controle-hydraulique': 'HIL · Δt 10 ms',
-    'cellule-robotique': 'TCP < 0.2 mm · I/O',
-    'toyota-prius-bond-graph': 'SCAP · 2.83 L/100',
-    'vehicule-electrique-rem': 'REM/SMC · 18.5 ms',
-    'iot-network-infra': 'mTLS X.509 · LoRa',
-    'filtre-tchebychev': 'Ordre 4 · 4.5 kHz',
-    'lyngk': 'Bitmask 64b · O(1)',
-    'microprocesseurs': 'AVR8 Bare-Metal',
-    'awale': 'Anneau Z/12Z · C99',
-    'pygroove': 'Multi-Thread DMA',
-    'terminal-c': 'POSIX · fork/pipe',
-    'ferme-poo': 'RAII · Smart Ptr',
-    'snake': 'Delta-Time · 2D',
-    'budget': 'Vectorisation Num.',
-    'voiture-bluetooth': 'PWM · Opto-Isolé',
+import { useLanguage } from '@/components/theme/LanguageProvider';
+import { Locale } from '@/lib/i18n';
+
+// --- Signature télémétrique bilingue propre à chacun des 15 projets ---
+const PROJECT_SPECS: Record<Locale, Record<string, string>> = {
+    fr: {
+        'controle-hydraulique': 'HIL · Δt 10 ms',
+        'cellule-robotique': 'TCP < 0.2 mm · I/O',
+        'toyota-prius-bond-graph': 'SCAP · 2.83 L/100',
+        'vehicule-electrique-rem': 'REM/SMC · 18.5 ms',
+        'iot-network-infra': 'mTLS X.509 · LoRa',
+        'filtre-tchebychev': 'Ordre 4 · 4.5 kHz',
+        'lyngk': 'Bitmask 64b · O(1)',
+        'microprocesseurs': 'AVR8 Bare-Metal',
+        'awale': 'Anneau Z/12Z · C99',
+        'pygroove': 'Multi-Thread DMA',
+        'terminal-c': 'POSIX · fork/pipe',
+        'ferme-poo': 'RAII · Smart Ptr',
+        'snake': 'Delta-Time · 2D',
+        'budget': 'Vectorisation Num.',
+        'voiture-bluetooth': 'PWM · Opto-Isolé',
+    },
+    en: {
+        'controle-hydraulique': 'HIL · Δt 10 ms',
+        'cellule-robotique': 'TCP < 0.2 mm · I/O',
+        'toyota-prius-bond-graph': 'SCAP · 2.83 L/100',
+        'vehicule-electrique-rem': 'EMR/MCS · 18.5 ms',
+        'iot-network-infra': 'mTLS X.509 · LoRa',
+        'filtre-tchebychev': '4th-Order · 4.5 kHz',
+        'lyngk': '64b Bitmask · O(1)',
+        'microprocesseurs': 'AVR8 Bare-Metal',
+        'awale': 'Z/12Z Ring · C99',
+        'pygroove': 'Multi-Thread DMA',
+        'terminal-c': 'POSIX · fork/pipe',
+        'ferme-poo': 'RAII · Smart Ptr',
+        'snake': 'Delta-Time · 2D',
+        'budget': 'Num. Vectorization',
+        'voiture-bluetooth': 'PWM · Opto-Isolated',
+    },
 };
 
 // --- Schéma technique vectoriel unique pour chacun des 15 projets (avec repli par catégorie) ---
@@ -238,6 +260,7 @@ export default function MagneticProjectCard({
     sequenceNumber?: string;
     onClick: (p: Project) => void;
 }) {
+    const { locale } = useLanguage();
     const cardRef = useRef<HTMLDivElement>(null);
     const rectRef = useRef<DOMRect | null>(null);
     const [isHovered, setIsHovered] = useState(false);
@@ -291,7 +314,7 @@ export default function MagneticProjectCard({
     const tc = project.themeColor;
     const rgbStr = `${tc.r}, ${tc.g}, ${tc.b}`;
     const hasCover = Boolean(project.coverImage);
-    const specLabel = PROJECT_SPECS[project.id];
+    const specLabel = PROJECT_SPECS[locale]?.[project.id] ?? PROJECT_SPECS.fr[project.id];
     const visibleTechLimit = isFeatured ? 6 : 4;
     const visibleTechs = project.technologies.slice(0, visibleTechLimit);
     const extraTechCount = Math.max(0, project.technologies.length - visibleTechLimit);
