@@ -1,8 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import fs from 'node:fs';
-import path from 'node:path';
 import { translations } from '@/lib/i18n';
 import { FALLBACK_PROJECTS } from '@/lib/db/fallback-projects';
 
@@ -52,6 +50,11 @@ import Footer from '@/components/layout/Footer';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { ThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
 
+// @ts-expect-error Vite raw query import
+import siteLayoutContent from '@/app/(site)/layout.tsx?raw';
+// @ts-expect-error Vite raw query import
+import rootLayoutContent from '@/app/layout.tsx?raw';
+
 describe('Principal Design Engineering Audit Invariants', () => {
   it('1. should eradicate generic AI copywriting clichés ("passionné par", "Waiting for incoming signals", "Séquence d\'Amorçage") in both FR and EN', () => {
     currentTestLocale = 'fr';
@@ -78,18 +81,9 @@ describe('Principal Design Engineering Audit Invariants', () => {
   });
 
   it('2. should mount KineticCanvas instead of CursorFluid in SiteLayout and avoid full-DOM transition-colors on body', () => {
-    const siteLayoutContent = fs.readFileSync(
-      path.resolve(process.cwd(), 'src/app/(site)/layout.tsx'),
-      'utf-8'
-    );
     expect(siteLayoutContent).toContain('import KineticCanvas from "@/components/animations/KineticCanvas"');
     expect(siteLayoutContent).toContain('<KineticCanvas />');
     expect(siteLayoutContent).not.toContain('<CursorFluid />');
-
-    const rootLayoutContent = fs.readFileSync(
-      path.resolve(process.cwd(), 'src/app/layout.tsx'),
-      'utf-8'
-    );
     expect(rootLayoutContent).not.toContain('transition-colors duration-700');
   });
 
