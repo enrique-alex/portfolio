@@ -94,13 +94,13 @@ export default function CursorFluid() {
                         VELOCITY_DISSIPATION: 2.0,
                         PRESSURE: 0.2,
                         PRESSURE_ITERATIONS: isTouch ? 10 : 20,
-                        SPLAT_RADIUS: 0.25,
-                        SHADING: true,
-                        COLORFUL: true,
-                        COLOR_UPDATE_SPEED: 8,
-                        BACK_COLOR: { r: 0, g: 0, b: 0 },
+                        SPLAT_RADIUS: 0.2,
+                        SHADING: false,
+                        COLORFUL: false,
+                        COLOR_UPDATE_SPEED: 4,
+                        BACK_COLOR: { r: 5, g: 5, b: 5 },
                         TRANSPARENT: true,
-                        BLOOM: false, // Desactive le bloom eblouissant qui blanchit le theme sombre
+                        BLOOM: false,
                         BLOOM_ITERATIONS: 4,
                         BLOOM_RESOLUTION: 256,
                         BLOOM_INTENSITY: 0.2,
@@ -114,7 +114,6 @@ export default function CursorFluid() {
         };
 
         // Planification asynchrone hors du chemin critique LCP
-        // Priorité absolue accordée au premier paint FCP et à l'image Hero
         let idleId: number | null = null;
         let timerId: ReturnType<typeof setTimeout> | null = null;
 
@@ -141,6 +140,7 @@ export default function CursorFluid() {
         };
 
         window.addEventListener('webgl-resonance', handleResonance);
+        const currentCanvas = canvasRef.current;
 
         return () => {
              cleaned = true;
@@ -152,6 +152,14 @@ export default function CursorFluid() {
              }
              window.removeEventListener('webgl-resonance', handleResonance);
              window.removeEventListener('error', silentErrorGuard as EventListener);
+             if (currentCanvas && typeof currentCanvas.getContext === 'function') {
+                 const gl = currentCanvas.getContext('webgl2') || currentCanvas.getContext('webgl');
+                 const loseContextExt = gl?.getExtension('WEBGL_lose_context');
+                 if (loseContextExt) {
+                     loseContextExt.loseContext();
+                 }
+             }
+             fluidInstance.current = null;
         };
     }, [shouldRender]);
 

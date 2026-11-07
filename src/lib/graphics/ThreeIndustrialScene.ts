@@ -177,19 +177,6 @@ export class ThreeIndustrialScene {
     }
 
     this.init();
-
-    // Chargement différé : import dynamique du masque à la première nécessité
-    if (typeof window !== 'undefined') {
-      if ('requestIdleCallback' in window) {
-        (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => {
-          this.loadEarthCloud();
-        });
-      } else {
-        setTimeout(() => {
-          this.loadEarthCloud();
-        }, 50);
-      }
-    }
   }
 
   /**
@@ -255,30 +242,32 @@ export class ThreeIndustrialScene {
       this.canvas.addEventListener('webglcontextrestored', this.boundContextRestored, false);
     }
 
-    if (typeof window === 'undefined') return;
-
-    // Initialisation WebGLRenderer haute performance
-    try {
-      this.renderer = new THREE.WebGLRenderer({
-        canvas: this.canvas,
-        alpha: true,
-        antialias: false,
-        depth: false,
-        stencil: false,
-        powerPreference: 'high-performance',
-      });
-      this.renderer.setClearColor(0x000000, 0);
-
-      const rawDpr = window.devicePixelRatio || 1;
-      const dpr = Math.min(rawDpr, 1.5);
-      this.renderer.setPixelRatio(dpr);
-      this.updateSize();
-    } catch (e) {
-      console.warn('[ThreeIndustrialScene] Contexte WebGL inaccessible pour Three.js :', e);
-    }
-
     // Construction géométrie et shader particulaire
     this.buildGeometry();
+
+    if (typeof window === 'undefined') return;
+
+    // Initialisation WebGLRenderer haute performance (avec garde pour environnements de test sans contexte WebGL)
+    if (this.canvas && typeof this.canvas.getContext === 'function') {
+      try {
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.canvas,
+          alpha: true,
+          antialias: false,
+          depth: false,
+          stencil: false,
+          powerPreference: 'high-performance',
+        });
+        this.renderer.setClearColor(0x000000, 0);
+
+        const rawDpr = window.devicePixelRatio || 1;
+        const dpr = Math.min(rawDpr, 1.5);
+        this.renderer.setPixelRatio(dpr);
+        this.updateSize();
+      } catch (e) {
+        console.warn('[ThreeIndustrialScene] Contexte WebGL inaccessible pour Three.js :', e);
+      }
+    }
 
     // Interaction souris desktop
     this.boundPointerMove = (e: PointerEvent | MouseEvent) => {
@@ -965,10 +954,6 @@ export class ThreeIndustrialScene {
         if (el) {
           foundSection = true;
           const rect = el.getBoundingClientRect();
-          // Préchargement différé anticipé à l'approche de la Forme 2
-          if (rect.top <= vh * 1.5 && (sectionIds[i] === 'profile' || sectionIds[i] === 'academic')) {
-            this.loadEarthCloud();
-          }
           if (rect.top <= triggerY && rect.bottom >= triggerY) {
             targetIdx = sectionTopologyMap[sectionIds[i]] ?? 0;
             break;
@@ -1003,10 +988,6 @@ export class ThreeIndustrialScene {
   public setTopology(index: number): void {
     if (index < 0 || index >= this.topologyBuffers.length || index === this.targetTopologyIndex) {
       return;
-    }
-
-    if (index === 1 && !this.earthCloudLoaded) {
-      this.loadEarthCloud();
     }
 
     for (let i = 0; i < this.pointCount * 3; i++) {
@@ -1096,6 +1077,7 @@ export class ThreeIndustrialScene {
     // 1. Morphing Organique avec damping inertiel en 1 - exp(-k * dt) :
     const targetBuf = this.topologyBuffers[this.targetTopologyIndex];
     let hasMorphDelta = false;
+    let hasAttrDelta = false;
     const isForm2Target = this.targetTopologyIndex === 1 && this.earthCloudLoaded;
     const morphBaseDamp = 1.0 - Math.exp(-(isReduced ? 10.2 : 2.42) * clampedDt);
 
@@ -1108,8 +1090,9 @@ export class ThreeIndustrialScene {
         if (Math.abs(diff) > 0.0001) {
           this.basePositions[idx + c] += diff * speed_i;
           hasMorphDelta = true;
-        } else {
+        } else if (this.basePositions[idx + c] !== targetBuf[idx + c]) {
           this.basePositions[idx + c] = targetBuf[idx + c];
+          hasMorphDelta = true;
         }
       }
 
@@ -1120,23 +1103,29 @@ export class ThreeIndustrialScene {
       const diffH = targetH - this.currentHighlights[i];
       if (Math.abs(diffH) > 0.0001) {
         this.currentHighlights[i] += diffH * speed_i;
-      } else {
+        hasAttrDelta = true;
+      } else if (this.currentHighlights[i] !== targetH) {
         this.currentHighlights[i] = targetH;
+        hasAttrDelta = true;
       }
 
       const diffD = targetD - this.currentDistances[i];
       if (Math.abs(diffD) > 0.0001) {
         this.currentDistances[i] += diffD * speed_i;
-      } else {
+        hasAttrDelta = true;
+      } else if (this.currentDistances[i] !== targetD) {
         this.currentDistances[i] = targetD;
+        hasAttrDelta = true;
       }
     }
 
-    if (this.highlightAttribute) {
-      this.highlightAttribute.needsUpdate = true;
-    }
-    if (this.distAttribute) {
-      this.distAttribute.needsUpdate = true;
+    if (hasAttrDelta) {
+      if (this.highlightAttribute) {
+        this.highlightAttribute.needsUpdate = true;
+      }
+      if (this.distAttribute) {
+        this.distAttribute.needsUpdate = true;
+      }
     }
 
     if (hasMorphDelta) {
@@ -1146,7 +1135,7 @@ export class ThreeIndustrialScene {
     }
 
     // Gestion fluide du poids de la Forme 2 via 1 - exp(-k * dt)
-    const targetForm2Weight = this.targetTopologyIndex === 1 ? 1.0 : 0.0;
+    const targetForm2Weight = isForm2Target ? 1.0 : 0.0;
     this.form2Weight += (targetForm2Weight - this.form2Weight) * (1.0 - Math.exp(-6.0 * clampedDt));
     if (Math.abs(targetForm2Weight - this.form2Weight) < 0.001) {
       this.form2Weight = targetForm2Weight;
@@ -1154,8 +1143,8 @@ export class ThreeIndustrialScene {
 
     // Rotation & Orientation pré-trame pour synchronisation géométrique parfaite
     if (this.pointsMesh) {
-      if (this.targetTopologyIndex === 1) {
-        // Forme 2 active : orientation frontale automatique vers le Cameroun (-12° Y, -4.5° X)
+      if (isForm2Target) {
+        // Forme 2 (Earth Cloud explicite) active : orientation frontale automatique vers l'axe Cameroun-France
         const f = 1.0 - Math.exp(-4.5 * clampedDt);
 
         const swayAmp = isReduced ? 0.0 : (2.5 * Math.PI) / 180.0;
@@ -1185,7 +1174,7 @@ export class ThreeIndustrialScene {
         this.pointsMesh.position.x += (0.0 - this.pointsMesh.position.x) * f;
         this.pointsMesh.position.y += (0.0 - this.pointsMesh.position.y) * f;
       } else if (!isReduced) {
-        // Section inactive : rotation planétaire douce avec damping 1 - exp(-k * dt)
+        // Topologie mathématique active : rotation planétaire douce avec damping 1 - exp(-k * dt)
         const rotDamp = 1.0 - Math.exp(-8.0 * clampedDt);
         const rotationSpeedY = 0.06 * clampedDt + this.mouseX * 0.01;
         this.pointsMesh.rotation.y += rotationSpeedY;
@@ -1193,7 +1182,7 @@ export class ThreeIndustrialScene {
         this.pointsMesh.position.x += (this.mouseX * 0.15 - this.pointsMesh.position.x) * rotDamp;
         this.pointsMesh.position.y += (this.mouseY * 0.15 - this.pointsMesh.position.y) * rotDamp;
       } else {
-        // Section inactive en prefers-reduced-motion : retour amorti vers le neutre
+        // Section en prefers-reduced-motion : retour amorti vers le neutre
         const f = 1.0 - Math.exp(-4.5 * clampedDt);
         const deltaY = Math.atan2(
           Math.sin(0.0 - this.pointsMesh.rotation.y),
@@ -1240,8 +1229,8 @@ export class ThreeIndustrialScene {
     }
 
     // 3. Répulsion volumétrique sous le pointeur / touch avec sécurisation absolue du falloff
-    // RÈGLE STRICTE UTILISATEUR : ZÉRO répulsion particulaire sur le Globe (targetTopologyIndex === 1)
-    if (this.isPointerActive && this.mousePos.active && !isReduced && this.targetTopologyIndex !== 1) {
+    // RÈGLE STRICTE UTILISATEUR : ZÉRO répulsion particulaire sur le Globe (isForm2Target)
+    if (this.isPointerActive && this.mousePos.active && !isReduced && !isForm2Target) {
       for (let i = 0; i < count; i++) {
         const px = this.basePositions[i * 3];
         const py = this.basePositions[i * 3 + 1];
@@ -1301,48 +1290,52 @@ export class ThreeIndustrialScene {
     const effectiveEnergy = Math.max(energy, scrollEnergy);
     const hasWave = !isReduced && effectiveEnergy > 0.001;
     const swimAmp = hasWave ? effectiveEnergy * 0.16 : 0.0;
+    const wasDisplaced = this.hasDisplacement;
     let hasActiveOffsets = false;
+    const needsPositionWrite = hasMorphDelta || hasWave || wasDisplaced || this.isPointerActive;
 
-    for (let i = 0; i < count; i++) {
-      this.offsetX[i] *= offsetKeep;
-      this.offsetY[i] *= offsetKeep;
-      this.offsetZ[i] *= offsetKeep;
+    if (needsPositionWrite) {
+      for (let i = 0; i < count; i++) {
+        this.offsetX[i] *= offsetKeep;
+        this.offsetY[i] *= offsetKeep;
+        this.offsetZ[i] *= offsetKeep;
 
-      if (Math.abs(this.offsetX[i]) < 0.0001) this.offsetX[i] = 0.0;
-      if (Math.abs(this.offsetY[i]) < 0.0001) this.offsetY[i] = 0.0;
-      if (Math.abs(this.offsetZ[i]) < 0.0001) this.offsetZ[i] = 0.0;
+        if (Math.abs(this.offsetX[i]) < 0.0001) this.offsetX[i] = 0.0;
+        if (Math.abs(this.offsetY[i]) < 0.0001) this.offsetY[i] = 0.0;
+        if (Math.abs(this.offsetZ[i]) < 0.0001) this.offsetZ[i] = 0.0;
 
-      if (
-        this.offsetX[i] !== 0.0 ||
-        this.offsetY[i] !== 0.0 ||
-        this.offsetZ[i] !== 0.0
-      ) {
-        hasActiveOffsets = true;
+        if (
+          this.offsetX[i] !== 0.0 ||
+          this.offsetY[i] !== 0.0 ||
+          this.offsetZ[i] !== 0.0
+        ) {
+          hasActiveOffsets = true;
+        }
+
+        const idx = i * 3;
+        let swimX = 0;
+        let swimY = 0;
+        let swimZ = 0;
+
+        if (hasWave) {
+          // Micro-bruit harmonique sinusoïdal (nuée d'oiseaux nageant fluidement)
+          const birdPhase = wavePhase * 1.4 + (i % 80) * 0.09;
+          swimX = Math.sin(birdPhase + this.basePositions[idx + 1] * 1.8) * swimAmp;
+          swimY = Math.cos(birdPhase * 0.85 + this.basePositions[idx + 2] * 1.8) * swimAmp;
+          swimZ = Math.sin(birdPhase * 1.15 + this.basePositions[idx] * 1.8) * swimAmp;
+        }
+
+        this.currentPositions[idx] = this.basePositions[idx] + this.offsetX[i] + swimX;
+        this.currentPositions[idx + 1] = this.basePositions[idx + 1] + this.offsetY[i] + swimY;
+        this.currentPositions[idx + 2] = this.basePositions[idx + 2] + this.offsetZ[i] + swimZ;
       }
 
-      const idx = i * 3;
-      let swimX = 0;
-      let swimY = 0;
-      let swimZ = 0;
-
-      if (hasWave) {
-        // Micro-bruit harmonique sinusoïdal (nuée d'oiseaux nageant fluidement)
-        const birdPhase = wavePhase * 1.4 + (i % 80) * 0.09;
-        swimX = Math.sin(birdPhase + this.basePositions[idx + 1] * 1.8) * swimAmp;
-        swimY = Math.cos(birdPhase * 0.85 + this.basePositions[idx + 2] * 1.8) * swimAmp;
-        swimZ = Math.sin(birdPhase * 1.15 + this.basePositions[idx] * 1.8) * swimAmp;
+      if (this.positionAttribute && (hasMorphDelta || hasWave || hasActiveOffsets || wasDisplaced)) {
+        this.positionAttribute.needsUpdate = true;
       }
-
-      this.currentPositions[idx] = this.basePositions[idx] + this.offsetX[i] + swimX;
-      this.currentPositions[idx + 1] = this.basePositions[idx + 1] + this.offsetY[i] + swimY;
-      this.currentPositions[idx + 2] = this.basePositions[idx + 2] + this.offsetZ[i] + swimZ;
     }
 
     this.hasDisplacement = hasWave || hasActiveOffsets;
-
-    if (this.positionAttribute) {
-      this.positionAttribute.needsUpdate = true;
-    }
 
     const scrollDamp = 1.0 - Math.exp(-6.58 * clampedDt);
     this.scrollVelocityY *= 1.0 - scrollDamp;
@@ -1373,6 +1366,10 @@ export class ThreeIndustrialScene {
 
   public get currentPositionsBuffer(): Float32Array {
     return this.currentPositions;
+  }
+
+  public get positionAttributeForTesting(): THREE.BufferAttribute | null {
+    return this.positionAttribute;
   }
 
   public get cameraInstance(): THREE.PerspectiveCamera {
@@ -1496,6 +1493,11 @@ export class ThreeIndustrialScene {
     }
 
     if (this.renderer) {
+      try {
+        this.renderer.forceContextLoss();
+      } catch {
+        // Ignore if WebGL context is already lost
+      }
       this.renderer.dispose();
       this.renderer = null;
     }

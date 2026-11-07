@@ -65,35 +65,33 @@ export default function SocialLinks() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex w-full items-center justify-between overflow-hidden rounded-xl border border-black/5 bg-white/40 p-4 transition-all duration-500 hover:scale-[1.02] hover:bg-white hover:shadow-xl dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.05] dark:hover:shadow-2xl"
+                className="group relative flex w-full items-center justify-between overflow-hidden rounded-xl border border-black/10 bg-white/80 p-4 transition-[transform,border-color,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-brand-blue/40 hover:bg-white hover:shadow-lg dark:border-white/10 dark:bg-[#0A0C10]/85 dark:hover:border-[#00D2FF]/40 dark:hover:bg-[#0F131A]"
                 style={{
                   '--hover-color': link.brandColor
                 } as CSSPropertiesWithVars}
               >
-                {/* Hover Gradient Background */}
-                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-10 dark:opacity-0 dark:group-hover:opacity-20"
-                  style={{ background: `linear-gradient(135deg, ${link.brandColor}, transparent)` }}
-                ></div>
+                {/* Subtle Lateral Telemetry Accent */}
+                <div
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-brand-blue dark:bg-[#00D2FF]"
+                />
                 
                 <div className="relative z-10 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-black/5 bg-black/5 transition-colors group-hover:border-transparent dark:border-white/10 dark:bg-white/5"
-                    style={{ 
-                      color: 'currentColor' 
-                    }}
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-lg border border-black/10 bg-black/[0.03] text-zinc-700 transition-colors duration-200 group-hover:border-brand-blue/30 group-hover:text-brand-blue dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-200 dark:group-hover:border-[#00D2FF]/30 dark:group-hover:text-[#00D2FF]"
                   >
-                    <Icon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+                    <Icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
                   </div>
                   <div>
                     <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                       {link.name}
                     </p>
-                    <p className="mt-0.5 font-medium text-zinc-900 dark:text-zinc-100 transition-colors group-hover:text-[var(--hover-color)]">
+                    <p className="mt-0.5 font-mono text-sm font-semibold text-zinc-900 transition-colors duration-200 group-hover:text-brand-blue dark:text-zinc-100 dark:group-hover:text-[#00D2FF]">
                       {link.value}
                     </p>
                   </div>
                 </div>
 
-                <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-black/5 bg-black/[0.02] text-zinc-400 transition-all group-hover:rotate-45 group-hover:scale-110 group-hover:bg-black/5 group-hover:text-zinc-900 dark:border-white/10 dark:bg-white/[0.02] dark:group-hover:bg-white/10 dark:group-hover:text-white">
+                <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-black/[0.02] text-zinc-500 transition-[transform,background-color,color,border-color] duration-200 group-hover:rotate-45 group-hover:scale-105 group-hover:border-brand-blue/30 group-hover:bg-brand-blue/10 group-hover:text-brand-blue dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-400 dark:group-hover:border-[#00D2FF]/30 dark:group-hover:bg-[#00D2FF]/10 dark:group-hover:text-[#00D2FF]">
                   <ArrowUpRight className="h-4 w-4" />
                 </div>
               </a>

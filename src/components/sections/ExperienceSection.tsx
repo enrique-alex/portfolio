@@ -33,7 +33,7 @@ function useExperienceData(): ExperienceData[] {
       period: t('experience.0.period'),
       status: 'ACTIVE',
       missions: t('experience.0.missions'),
-      skills: ['Automatisme', 'Informatique Industrielle', 'MS SQL Server (T-SQL)', 'Ignition SCADA', 'Python'],
+      skills: t('experience.0.skills').split(','),
       detailedTitle: t('experience.0.detailed.title'),
       detailedItems: detailedItems,
     },
@@ -44,7 +44,7 @@ function useExperienceData(): ExperienceData[] {
       period: t('experience.1.period'),
       status: 'COMPLETED',
       missions: t('experience.1.missions'),
-      skills: ['Logistique', 'Travail en équipe', 'Gestion du stress', 'Optimisation des flux']
+      skills: t('experience.1.skills').split(','),
     }
   ];
 }
@@ -74,30 +74,30 @@ export default function ExperienceSection() {
       
       <div className="mx-auto flex w-full max-w-6xl flex-col px-4 relative z-10">
         
-        {/* Header - System Process Monitor Style */}
+        {/* Header - Field Engineering */}
         <motion.div 
           className="mb-16 flex flex-col items-start border-b border-black/10 pb-6 dark:border-white/10"
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: shouldReduceMotion ? 0 : undefined }}
+          transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28 }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-            <Activity className="h-4 w-4" />
+            <Activity className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
             <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
-              System.Process.Monitor
+              {t('experience.header.tag')}
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
             {t('experience.header.title')}
           </h2>
-          <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-4 font-mono text-sm text-zinc-600 dark:text-zinc-400">
             {t('experience.header.subtitle')}
           </p>
         </motion.div>
 
         {/* Spatial Accordion List */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {experiencesData.map((exp, index) => {
             const isExpanded = expandedId === exp.id;
             const isActive = exp.status === 'ACTIVE';
@@ -108,17 +108,18 @@ export default function ExperienceSection() {
                 initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : index * 0.1, type: shouldReduceMotion ? false : 'spring', stiffness: 100 }}
+                transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : index * 0.1, type: shouldReduceMotion ? false : 'spring', stiffness: 260, damping: 28 }}
                 className="group relative flex flex-col"
               >
                 {/* Accordion Header Row */}
                 <button
                   onClick={() => toggleExpand(exp.id)}
+                  aria-expanded={isExpanded}
                   className={`
-                    relative z-10 flex w-full flex-col items-start gap-4 border-l-[3px] bg-black/[0.01] px-4 py-5 sm:px-6 sm:py-6 
-                    text-left transition-all duration-500 hover:bg-black/[0.03] 
-                    dark:bg-white/[0.01] dark:hover:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between
-                    ${isExpanded ? 'backdrop-blur-sm' : ''}
+                    relative z-10 flex w-full flex-col items-start gap-4 border-l-[3px] bg-white/60 px-4 py-5 sm:px-6 sm:py-6 
+                    text-left transition-[background-color,border-color] duration-200 hover:bg-black/[0.03] 
+                    dark:bg-[#0A0C10]/70 dark:hover:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between
+                    ${isExpanded ? 'backdrop-blur-md' : ''}
                     ${isActive ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'}
                   `}
                 >
@@ -150,7 +151,7 @@ export default function ExperienceSection() {
                           </>
                         ) : (
                           <>
-                            <CheckCircle2 className="h-3 w-3" />
+                            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
                             {t('experience.status.completed')}
                           </>
                         )}
@@ -158,11 +159,11 @@ export default function ExperienceSection() {
                     </div>
                     
                     <div>
-                      <h3 className="text-xl font-bold tracking-tight text-zinc-900 transition-colors duration-300 group-hover:text-brand-blue dark:text-zinc-100 dark:group-hover:text-brand-blue sm:text-2xl">
+                      <h3 className="text-xl font-bold tracking-tight text-zinc-900 transition-colors duration-200 group-hover:text-brand-blue dark:text-zinc-100 dark:group-hover:text-[#00D2FF] sm:text-2xl">
                         {exp.title}
                       </h3>
                       <div className="mt-1 flex items-center gap-2">
-                        <Network className="h-3.5 w-3.5 text-zinc-400" />
+                        <Network className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
                         <p className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
                           @ {exp.company}
                         </p>
@@ -170,29 +171,29 @@ export default function ExperienceSection() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-black/5 bg-black/[0.02] text-zinc-400 transition-all duration-300 group-hover:border-black/10 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/5 dark:bg-white/[0.02] dark:group-hover:border-white/10 dark:group-hover:bg-white/[0.04] dark:group-hover:text-white sm:mt-0">
+                  <div className="mt-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.02] text-zinc-500 transition-[border-color,background-color,color] duration-200 group-hover:border-black/20 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/10 dark:bg-white/[0.02] dark:group-hover:border-white/20 dark:group-hover:bg-white/[0.06] dark:group-hover:text-white sm:mt-0">
                     <motion.div
                       animate={{ rotate: isExpanded ? 180 : 0 }}
-                      transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 200, damping: 20 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 24 }}
                     >
-                      <ChevronDown className="h-5 w-5" />
+                      <ChevronDown className="h-5 w-5" aria-hidden="true" />
                     </motion.div>
                   </div>
                 </button>
 
-                {/* Expanded Liquid Glass Content */}
+                {/* Expanded Content */}
                 <AnimatePresence initial={false}>
                   {isExpanded && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 100, damping: 20 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 260, damping: 28 }}
                       className="overflow-hidden"
                     >
                       <div className={`
                         border-l-[3px] px-4 py-6 sm:px-8 sm:py-8 backdrop-blur-md
-                        ${isActive ? 'border-emerald-500/50 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]' : 'border-zinc-300 bg-black/[0.02] dark:border-zinc-700 dark:bg-white/[0.02]'}
+                        ${isActive ? 'border-emerald-500/60 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.015]' : 'border-zinc-300 bg-black/[0.02] dark:border-zinc-700 dark:bg-white/[0.02]'}
                       `}>
                         <div className="grid gap-10 md:grid-cols-3">
                           
@@ -201,7 +202,7 @@ export default function ExperienceSection() {
                             <div className="mb-4 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
                               <Terminal className="h-4 w-4 text-zinc-500" />
                               <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                                {exp.detailedTitle ? exp.detailedTitle : 'Output.Missions'}
+                                {exp.detailedTitle ? exp.detailedTitle : t('experience.missions.label')}
                               </h4>
                             </div>
                             {exp.detailedItems ? (
@@ -225,7 +226,7 @@ export default function ExperienceSection() {
                             <div className="mb-4 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
                               <Cpu className="h-4 w-4 text-zinc-500" />
                               <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                                Sys.Tech_Stack
+                                {t('experience.stack.label')}
                               </h4>
                             </div>
                             <div className="flex flex-wrap gap-2">

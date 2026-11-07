@@ -55,17 +55,17 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.automation.sub'),
       color: { r: 16, g: 185, b: 129 },
       skills: [
-        { name: t('skills.item.robotics_ind'), level: 72, icon: Bot },
-        { name: t('skills.item.emr'), level: 70, icon: Workflow },
-        { name: t('skills.item.bond_graph'), level: 68, icon: Activity },
-        { name: t('skills.item.amr'), level: 68, icon: Gauge },
-        { name: 'Grafcet / GEMMA', level: 65, icon: FaProjectDiagram },
-        { name: 'Ignition (SCADA)', level: 65, icon: Monitor },
-        { name: t('skills.item.isa182'), level: 55, icon: Activity },
-        { name: t('skills.item.pid'), level: 60, icon: Gauge },
-        { name: 'TIA Portal', level: 55, icon: Settings },
-        { name: 'MATLAB', level: 60, icon: Activity },
-        { name: 'Simulink', level: 55, icon: Workflow },
+        { name: 'Ignition (SCADA)', level: 92, icon: Monitor },
+        { name: t('skills.item.isa182'), level: 88, icon: Activity },
+        { name: t('skills.item.robotics_ind'), level: 90, icon: Bot },
+        { name: t('skills.item.emr'), level: 88, icon: Workflow },
+        { name: t('skills.item.bond_graph'), level: 86, icon: Activity },
+        { name: t('skills.item.amr'), level: 85, icon: Gauge },
+        { name: 'Grafcet / GEMMA', level: 88, icon: FaProjectDiagram },
+        { name: t('skills.item.pid'), level: 84, icon: Gauge },
+        { name: 'MATLAB', level: 85, icon: Activity },
+        { name: 'Simulink', level: 82, icon: Workflow },
+        { name: 'TIA Portal', level: 78, icon: Settings },
       ],
     },
     // ② Développement Logiciel
@@ -75,16 +75,16 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.devsoft.sub'),
       color: { r: 59, g: 130, b: 246 },
       skills: [
-        { name: 'C', level: 75, icon: SiC },
-        { name: 'C++', level: 65, icon: SiCplusplus },
-        { name: 'Python', level: 70, icon: SiPython },
-        { name: t('skills.item.poo'), level: 65, icon: Code },
-        { name: t('skills.item.algo'), level: 70, icon: Brain },
-        { name: 'Linux / Shell Unix', level: 68, icon: SiLinux },
-        { name: 'Git / GitHub', level: 65, icon: SiGit },
-        { name: 'SQL', level: 55, icon: SiPostgresql },
-        { name: 'JavaScript / TypeScript', level: 50, icon: SiTypescript },
-        { name: 'React / Next.js', level: 45, icon: SiReact },
+        { name: 'C', level: 90, icon: SiC },
+        { name: 'Python', level: 88, icon: SiPython },
+        { name: 'SQL', level: 88, icon: SiPostgresql },
+        { name: 'C++', level: 84, icon: SiCplusplus },
+        { name: t('skills.item.algo'), level: 86, icon: Brain },
+        { name: t('skills.item.poo'), level: 85, icon: Code },
+        { name: 'JavaScript / TypeScript', level: 85, icon: SiTypescript },
+        { name: 'React / Next.js', level: 82, icon: SiReact },
+        { name: 'Linux / Shell Unix', level: 84, icon: SiLinux },
+        { name: 'Git / GitHub', level: 86, icon: SiGit },
       ],
     },
     // ③ Électronique & Instrumentation
@@ -94,11 +94,11 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.electronics.sub'),
       color: { r: 168, g: 85, b: 247 },
       skills: [
-        { name: 'LTSpice', level: 60, icon: CircuitBoard },
-        { name: 'KiCad', level: 55, icon: CircuitBoard },
-        { name: 'Logisim', level: 55, icon: CircuitBoard },
-        { name: t('skills.item.oscilloscope'), level: 58, icon: Gauge },
-        { name: 'CATIA V5 / CAO', level: 50, icon: Ruler },
+        { name: 'LTSpice', level: 86, icon: CircuitBoard },
+        { name: t('skills.item.oscilloscope'), level: 85, icon: Gauge },
+        { name: 'KiCad', level: 82, icon: CircuitBoard },
+        { name: 'Logisim', level: 84, icon: CircuitBoard },
+        { name: 'CATIA V5 / CAO', level: 78, icon: Ruler },
       ],
     },
     // ④ Systèmes Embarqués
@@ -108,15 +108,15 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.embedded.sub'),
       color: { r: 239, g: 68, b: 68 },
       skills: [
-        { name: t('skills.item.network_proto'), level: 72, icon: Network },
-        { name: t('skills.item.wireshark'), level: 70, icon: SiWireshark },
-        { name: 'Arduino / µContrôleurs', level: 70, icon: SiArduino },
-        { name: 'IoT & LPWAN (LoRaWAN / BLE)', level: 68, icon: Wifi },
-        { name: t('skills.item.mtls'), level: 65, icon: ShieldCheck },
-        { name: 'MQTT (Mosquitto)', level: 68, icon: SiMqtt },
-        { name: t('skills.item.sensors'), level: 62, icon: Gauge },
-        { name: 'ASM AVR8', level: 55, icon: Cpu },
-        { name: 'CAN / USART', level: 50, icon: Radio },
+        { name: 'Arduino / µContrôleurs', level: 90, icon: SiArduino },
+        { name: t('skills.item.network_proto'), level: 88, icon: Network },
+        { name: t('skills.item.wireshark'), level: 86, icon: SiWireshark },
+        { name: 'IoT & LPWAN (LoRaWAN / BLE)', level: 86, icon: Wifi },
+        { name: 'MQTT (Mosquitto)', level: 85, icon: SiMqtt },
+        { name: t('skills.item.mtls'), level: 84, icon: ShieldCheck },
+        { name: t('skills.item.sensors'), level: 82, icon: Gauge },
+        { name: 'ASM AVR8', level: 80, icon: Cpu },
+        { name: 'CAN / USART', level: 78, icon: Radio },
       ],
     },
     // ⑤ Bureautique & Rédaction technique
@@ -126,10 +126,10 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.office.sub'),
       color: { r: 236, g: 72, b: 153 }, // Pink
       skills: [
-        { name: 'Word', level: 80, icon: FileText },
-        { name: 'Excel', level: 75, icon: FileSpreadsheet },
-        { name: 'PowerPoint', level: 75, icon: Presentation },
-        { name: 'Overleaf / LaTeX', level: 65, icon: SiLatex },
+        { name: 'Overleaf / LaTeX', level: 90, icon: SiLatex },
+        { name: 'Word', level: 92, icon: FileText },
+        { name: 'Excel', level: 88, icon: FileSpreadsheet },
+        { name: 'PowerPoint', level: 88, icon: Presentation },
       ],
     },
     // ⑥ Compétences Transversales
@@ -139,11 +139,11 @@ function useSkillCategories(): SkillCategory[] {
       subtitle: t('skills.cat.transversal.sub'),
       color: { r: 245, g: 158, b: 11 },
       skills: [
-        { name: t('skills.item.project_mgmt'), level: 65, icon: ClipboardList },
-        { name: t('skills.item.teamwork'), level: 75, icon: Users },
-        { name: t('skills.item.tech_comm'), level: 60, icon: Target },
-        { name: t('skills.item.problem_solving'), level: 72, icon: Lightbulb },
-        { name: t('skills.item.tech_english'), level: 55, icon: Globe },
+        { name: t('skills.item.problem_solving'), level: 90, icon: Lightbulb },
+        { name: t('skills.item.teamwork'), level: 88, icon: Users },
+        { name: t('skills.item.project_mgmt'), level: 86, icon: ClipboardList },
+        { name: t('skills.item.tech_comm'), level: 85, icon: Target },
+        { name: t('skills.item.tech_english'), level: 80, icon: Globe },
       ],
     },
   ];
@@ -193,36 +193,49 @@ const MARQUEE_TOOLS: MarqueeTool[] = [
 // ─── Animated Skill Bar ───────────────────────────────────
 function SkillBar({ skill, color, index }: { skill: Skill; color: { r: number; g: number; b: number }; index: number }) {
   const shouldReduceMotion = useReducedMotion();
+  const { t } = useLanguage();
   const IconComponent = skill.icon;
+  const tierLabel =
+    skill.level >= 86
+      ? t('skills.tier.core')
+      : skill.level >= 80
+      ? t('skills.tier.advanced')
+      : t('skills.tier.operational');
+
   return (
     <motion.div 
       className="group flex flex-col gap-2"
       initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: shouldReduceMotion ? 0 : index * 0.07, duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 150, damping: 20 }}
+      transition={{ delay: shouldReduceMotion ? 0 : index * 0.05, duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 220, damping: 24 }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
           <IconComponent 
             size={16} 
             aria-hidden="true"
             className="flex-shrink-0 text-zinc-600 dark:text-zinc-400" 
           />
-          <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{skill.name}</span>
+          <span className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">{skill.name}</span>
         </div>
-        <span className="text-xs font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
-          {skill.level}%
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="rounded border border-black/10 bg-black/[0.03] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-400">
+            {tierLabel}
+          </span>
+          <span className="font-mono text-xs font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
+            {`${skill.level}%`}
+          </span>
+        </div>
       </div>
       <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
         <motion.div 
           className="absolute inset-y-0 left-0 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${skill.level}%` }}
-          transition={{ delay: shouldReduceMotion ? 0 : 0.3 + index * 0.1, duration: shouldReduceMotion ? 0 : 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.15 + index * 0.06, type: 'spring', stiffness: 120, damping: 22 }}
           style={{ 
-            background: `linear-gradient(90deg, rgb(${color.r},${color.g},${color.b}), rgba(${color.r},${color.g},${color.b},0.6))`,
-            boxShadow: `0 0 12px rgba(${color.r},${color.g},${color.b},0.3)`
+            background: `linear-gradient(90deg, rgb(${color.r},${color.g},${color.b}), rgba(${color.r},${color.g},${color.b},0.65))`,
+            boxShadow: `0 0 10px rgba(${color.r},${color.g},${color.b},0.25)`
           }}
         />
       </div>
@@ -236,21 +249,21 @@ function ToolCard({ tool, isTouch, 'aria-hidden': ariaHidden }: { tool: MarqueeT
   return (
     <div 
       aria-hidden={ariaHidden}
-      className={`tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-2xl border border-black/[0.06] hover:border-black/20 dark:hover:border-white/20 ${
-        isTouch ? 'bg-white/80 dark:bg-zinc-900/80' : 'bg-white/60 backdrop-blur-sm dark:bg-white/[0.03]'
-      } px-4 py-2.5 sm:px-5 sm:py-3.5 transition-all duration-300 hover:scale-105 dark:border-white/[0.08]`}
+      className={`tool-card group relative flex flex-shrink-0 items-center gap-2.5 sm:gap-3 rounded-xl border border-black/[0.08] hover:border-black/25 dark:hover:border-white/25 ${
+        isTouch ? 'bg-white/90 dark:bg-[#0A0C10]/90' : 'bg-white/75 backdrop-blur-sm dark:bg-[#0A0C10]/80'
+      } px-4 py-2.5 sm:px-5 sm:py-3 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 dark:border-white/[0.08]`}
       style={{
         '--brand': tool.brandColor,
       } as CSSPropertiesWithVars}
     >
-      <div className="relative z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-black/[0.04] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.04]">
+      <div className="relative z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-black/[0.06] bg-black/[0.02] dark:border-white/[0.08] dark:bg-white/[0.04]">
         <IconComp 
           size={18} 
           aria-hidden="true"
-          className="flex-shrink-0 text-zinc-500 transition-colors duration-300 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white" 
+          className="flex-shrink-0 text-zinc-600 transition-colors duration-200 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white" 
         />
       </div>
-      <span className="relative z-10 text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-900 dark:text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+      <span className="relative z-10 font-mono text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-950 dark:group-hover:text-white transition-colors duration-200">
         {tool.name}
       </span>
     </div>
@@ -268,8 +281,8 @@ function InfiniteMarquee({ tools, direction = 'left', speed = 35, isTouch, label
       role="region"
     >
       {/* Fade edges with gradient */}
-      <div aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 h-full w-32 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80" />
-      <div aria-hidden="true" className="pointer-events-none absolute right-0 top-0 z-10 h-full w-32 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80" />
+      <div aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 h-full w-32 bg-gradient-to-r from-[#F8F9FA] via-[#F8F9FA]/80 to-transparent dark:from-[#050505] dark:via-[#050505]/80" />
+      <div aria-hidden="true" className="pointer-events-none absolute right-0 top-0 z-10 h-full w-32 bg-gradient-to-l from-[#F8F9FA] via-[#F8F9FA]/80 to-transparent dark:from-[#050505] dark:via-[#050505]/80" />
       
       <div 
         className="marquee-track flex w-max gap-4 will-change-transform"
@@ -323,24 +336,24 @@ export default function SkillsSection() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 relative z-10">
         
-        {/* HEADER - System Process Monitor Style */}
+        {/* HEADER - Capability Matrix */}
         <motion.div 
           className="mb-16 flex w-full flex-col items-start border-b border-black/10 pb-6 dark:border-white/10 lg:mb-20"
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
+          transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28 }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-            <Activity className="h-4 w-4" aria-hidden="true" />
+            <Activity className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
             <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
-              System.Process.Monitor
+              {t('skills.header.tag')}
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
             {t('skills.header.title')}
           </h2>
-          <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-4 font-mono text-sm text-zinc-600 dark:text-zinc-400">
             {t('skills.header.subtitle')}
           </p>
         </motion.div>
@@ -375,42 +388,47 @@ export default function SkillsSection() {
                     variants={{
                       hidden: { 
                         opacity: 0, 
-                        y: shouldReduceMotion ? 0 : 30, 
-                        filter: (shouldReduceMotion || isTouch) ? 'blur(0px)' : 'blur(8px)' 
+                        y: shouldReduceMotion ? 0 : 20, 
                       },
                       show: { 
                         opacity: 1, 
                         y: 0, 
-                        filter: 'blur(0px)',
-                        transition: { duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 120, damping: 20 } 
+                        transition: { duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 260, damping: 26 } 
                       },
                     }}
                     onClick={() => setActiveCategory(cat.id)}
+                    aria-pressed={isActive}
                     className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-transform duration-200 active:scale-[0.99] lg:w-full overflow-hidden ${
                       isActive 
-                        ? 'bg-black/[0.04] dark:bg-white/[0.06]'
-                        : 'bg-transparent'
+                        ? 'text-zinc-900 dark:text-white'
+                        : 'bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
                     }`}
-                    style={isActive ? {
-                      boxShadow: `inset 0 0 0 1px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.2), 0 4px 12px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.08)`
-                    } : undefined}
                   >
+                    {isActive && (
+                      <motion.span
+                        layoutId="skills-category-pill"
+                        className="pointer-events-none absolute inset-0 rounded-2xl bg-white/85 dark:bg-[#0A0C10]/90"
+                        style={{
+                          boxShadow: `inset 0 0 0 1px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.4), 0 4px 16px rgba(0,0,0,0.06)`,
+                        }}
+                        transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
 
                     <div 
                       aria-hidden="true"
                       className="relative z-10 mb-2 h-2 w-2 rounded-full transition-opacity duration-200"
                       style={{ 
                         background: `rgb(${cat.color.r},${cat.color.g},${cat.color.b})`,
-                        opacity: isActive ? 1 : 0.3,
-                        boxShadow: isActive ? `0 0 8px rgba(${cat.color.r},${cat.color.g},${cat.color.b},0.5)` : 'none'
+                        opacity: isActive ? 1 : 0.35,
                       }}
                     />
                     <span className={`relative z-10 text-sm font-semibold text-zinc-900 dark:text-white transition-opacity duration-200 ${
-                      isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
+                      isActive ? 'opacity-100' : 'opacity-65 group-hover:opacity-100'
                     }`}>
                       {cat.title}
                     </span>
-                    <span className="relative z-10 mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 hidden lg:block line-clamp-2">
+                    <span className="relative z-10 mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 hidden lg:block line-clamp-2">
                       {cat.subtitle}
                     </span>
                   </motion.button>
@@ -421,7 +439,7 @@ export default function SkillsSection() {
             {/* Fade cue on right edge for horizontal scroll on mobile */}
             <div 
               aria-hidden="true" 
-              className="pointer-events-none absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white dark:from-[#050505] to-transparent lg:hidden" 
+              className="pointer-events-none absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#F8F9FA] dark:from-[#050505] to-transparent lg:hidden" 
             />
           </div>
 
@@ -432,34 +450,33 @@ export default function SkillsSection() {
                 key={activeCategory}
                 initial={{ 
                   opacity: 0, 
-                  y: shouldReduceMotion ? 0 : 15, 
-                  filter: (shouldReduceMotion || isTouch) ? 'blur(0px)' : 'blur(6px)' 
+                  y: shouldReduceMotion ? 0 : 12, 
                 }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ 
                   opacity: 0, 
-                  y: shouldReduceMotion ? 0 : -15, 
-                  filter: (shouldReduceMotion || isTouch) ? 'blur(0px)' : 'blur(6px)' 
+                  y: shouldReduceMotion ? 0 : -12, 
                 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeInOut' }}
-                className="rounded-3xl border border-black/5 bg-black/[0.02] p-8 backdrop-blur-sm dark:border-white/5 dark:bg-white/[0.02] lg:p-10"
+                transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28 }}
+                className="rounded-2xl border border-black/10 bg-white/80 p-8 backdrop-blur-md dark:border-white/10 dark:bg-[#0A0C10]/85 lg:p-10"
                 style={{
-                  boxShadow: `0 0 0 0.5px rgba(${active.color.r},${active.color.g},${active.color.b},0.1), 0 8px 32px rgba(0,0,0,0.04)`,
+                  boxShadow: `inset 0 1px 0 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(${active.color.r},${active.color.g},${active.color.b},0.12)`,
                 }}
               >
-                <div className="mb-8 flex items-center justify-between">
+                <div className="mb-8 flex items-center justify-between border-b border-black/10 pb-5 dark:border-white/10">
                   <div>
                     <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{active.title}</h3>
-                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">{active.subtitle}</p>
+                    <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">{active.subtitle}</p>
                   </div>
                   <div 
-                    className="flex h-10 w-10 items-center justify-center rounded-xl"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border"
                     style={{ 
-                      background: `rgba(${active.color.r},${active.color.g},${active.color.b},0.1)`,
+                      borderColor: `rgba(${active.color.r},${active.color.g},${active.color.b},0.25)`,
+                      background: `rgba(${active.color.r},${active.color.g},${active.color.b},0.08)`,
                       color: `rgb(${active.color.r},${active.color.g},${active.color.b})`
                     }}
                   >
-                    <span className="text-lg font-bold">{active.skills.length}</span>
+                    <span className="font-mono text-base font-bold tabular-nums">{active.skills.length}</span>
                   </div>
                 </div>
 
@@ -469,29 +486,29 @@ export default function SkillsSection() {
                   ))}
                 </div>
 
-                <div className="mt-8 flex items-center gap-6 border-t border-black/5 pt-6 dark:border-white/5">
+                <div className="mt-8 flex items-center gap-6 border-t border-black/10 pt-6 dark:border-white/10">
                   <div>
-                    <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+                    <span className="font-mono text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
                       {Math.round(active.skills.reduce((a, s) => a + s.level, 0) / active.skills.length)}%
                     </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('skills.stats.average')}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('skills.stats.average')}</p>
                   </div>
-                  <div className="h-8 w-px bg-black/5 dark:bg-white/5" />
+                  <div className="h-8 w-px bg-black/10 dark:bg-white/10" />
                   <div>
-                    <span className="text-2xl font-bold text-zinc-900 dark:text-white">
-                      {active.skills.filter(s => s.level >= 85).length}
+                    <span className="font-mono text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
+                      {active.skills.filter(s => s.level >= 65).length}
                     </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('skills.stats.expert')}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('skills.stats.expert')}</p>
                   </div>
-                  <div className="h-8 w-px bg-black/5 dark:bg-white/5" />
+                  <div className="h-8 w-px bg-black/10 dark:bg-white/10" />
                   <div>
                     <span 
-                      className="text-2xl font-bold"
+                      className="font-mono text-2xl font-bold tabular-nums"
                       style={{ color: `rgb(${active.color.r},${active.color.g},${active.color.b})` }}
                     >
                       {active.skills.reduce((a, s) => Math.max(a, s.level), 0)}%
                     </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('skills.stats.top')}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('skills.stats.top')}</p>
                   </div>
                 </div>
               </motion.div>
@@ -499,32 +516,25 @@ export default function SkillsSection() {
           </div>
         </div>
 
-        {/* ─── TOOLBOX MARQUEE (Premium) ─── */}
+        {/* ─── TOOLBOX MARQUEE (Sans halo violet flou) ─── */}
         <motion.div 
           className="relative mt-24 w-full"
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 30 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: shouldReduceMotion ? 0 : 0.3, duration: shouldReduceMotion ? 0 : 0.7 }}
+          transition={{ delay: shouldReduceMotion ? 0 : 0.2, duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 260, damping: 28 }}
         >
-          {/* Radial glow backdrop */}
-          <div className="pointer-events-none absolute -inset-x-20 -top-16 -bottom-16 z-0 opacity-30 dark:opacity-20" 
-            style={{
-              background: 'radial-gradient(ellipse 80% 50% at 50% 50%, rgba(99,102,241,0.15), transparent)',
-            }}
-          />
-
           <div className="relative z-10">
             <div className="mb-8 flex flex-col items-center">
-              <div className="mb-3 h-px w-16 bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-600" />
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-600 dark:text-zinc-400">
+              <div className="mb-3 h-px w-16 bg-gradient-to-r from-transparent via-zinc-400 to-transparent dark:via-zinc-600" />
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.25em] text-zinc-700 dark:text-zinc-300">
                 {t('skills.marquee.title')}
               </p>
-              <p className="mt-1 text-[11px] text-zinc-400/60 dark:text-zinc-500/50">
+              <p className="mt-1 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
                 {t('skills.marquee.subtitle')}
               </p>
             </div>
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               <InfiniteMarquee tools={topRow} direction="left" speed={45} isTouch={isTouch} label={`${t('skills.marquee.title')} - Piste 1`} />
               <InfiniteMarquee tools={bottomRow} direction="right" speed={50} isTouch={isTouch} label={`${t('skills.marquee.title')} - Piste 2`} />
             </div>

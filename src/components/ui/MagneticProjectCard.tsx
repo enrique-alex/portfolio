@@ -198,22 +198,31 @@ export default function MagneticProjectCard({
         <motion.div
             ref={cardRef}
             layoutId={`project-${project.id}`}
+            role="link"
+            tabIndex={0}
+            aria-label={project.title}
             onClick={() => onClick(project)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClick(project);
+                }
+            }}
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.985 }}
             style={{
                 transform: (!isTouchDevice && isHovered)
                     ? 'perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))'
                     : 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
-                transition: 'transform 0.18s cubic-bezier(0.2, 0, 0.2, 1)',
+                transition: 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
-            className={`group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border ${
+            className={`group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-2xl border outline-none focus-visible:ring-2 focus-visible:ring-brand-blue dark:focus-visible:ring-[#00D2FF] ${
                 isFeatured 
-                ? "border-zinc-300 dark:border-white/10 bg-zinc-100/90 dark:bg-zinc-900/90 hover:bg-zinc-100 dark:hover:bg-zinc-900 p-8 lg:p-12" 
-                : "border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100/80 dark:hover:bg-zinc-900/80 p-8 md:p-10"
-            } transition-colors duration-200`}
+                ? "border-black/15 dark:border-white/15 bg-white/90 dark:bg-[#0A0C10]/90 hover:border-black/30 dark:hover:border-white/25 p-7 lg:p-10" 
+                : "border-black/10 dark:border-white/10 bg-white/80 dark:bg-[#080A0E]/90 hover:border-black/25 dark:hover:border-white/20 p-7 md:p-8"
+            } shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[border-color,background-color] duration-200`}
         >
             {/* COVER IMAGE (conditional) */}
             {hasCover && (
@@ -222,81 +231,48 @@ export default function MagneticProjectCard({
                         src={project.coverImage!}
                         alt={project.title}
                         fill
-                        className="object-cover z-0 transition-transform duration-700 group-hover:scale-105"
+                        className="object-cover z-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                         sizes={isFeatured
                             ? "(max-width: 768px) 100vw, 66vw"
                             : "(max-width: 768px) 100vw, 33vw"
                         }
                     />
                     {/* Dark gradient overlay for text readability (WCAG AA compliant) */}
-                    <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/60 to-black/30 dark:from-black/95 dark:via-black/70 dark:to-black/40 pointer-events-none" />
+                    <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/95 via-black/70 to-black/35 pointer-events-none" />
                 </>
             )}
 
-            {/* 1. ACCENT VERTICAL GAUCHE (Theme Color, toujours visible) */}
+            {/* 1. ACCENT VERTICAL GAUCHE (Indicateur chromatique calibré) */}
             <div 
-                className="absolute left-0 top-0 h-full w-[3px] origin-left transition-transform duration-300 group-hover:scale-x-[1.67] z-[2]"
+                className="absolute left-0 top-0 h-full w-[2px] origin-left transition-transform duration-300 group-hover:scale-x-150 z-[2]"
                 style={{ 
                     background: `linear-gradient(180deg, rgb(${tc.r},${tc.g},${tc.b}), transparent)`,
-                    opacity: isTouchDevice ? 0.7 : (isHovered ? 1 : 0.4),
-                    boxShadow: (isTouchDevice || isHovered) ? `0 0 20px rgba(${tc.r},${tc.g},${tc.b},0.3)` : 'none'
+                    opacity: isTouchDevice ? 0.8 : (isHovered ? 1 : 0.55),
                 }}
             />
 
-            {/* Glow ambiante au hover */}
-            {!hasCover && (
-                <div 
-                    className="absolute inset-0 rounded-[2rem] transition-opacity duration-700 pointer-events-none"
-                    style={{
-                        background: `radial-gradient(ellipse at 0% 0%, rgba(${tc.r},${tc.g},${tc.b},0.06), transparent 60%)`,
-                        opacity: isTouchDevice ? 0.5 : (isHovered ? 1 : 0)
-                    }}
-                />
-            )}
-
-            {/* Texture Noise SVG (only when no cover image) */}
-            {!hasCover && (
-                <div 
-                    className="absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
-                    style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')" }}
-                ></div>
-            )}
-
-            {/* 2. ICONE DE CATEGORIE (arriere-plan, rotation au hover) */}
+            {/* 2. ICONE DE CATEGORIE (Schéma technique en filigrane) */}
             {!hasCover && (
                 <motion.div 
                     className="absolute right-6 bottom-20 h-14 w-14 pointer-events-none z-0"
                     style={{ color: `rgb(${tc.r},${tc.g},${tc.b})` }}
                     animate={{ 
-                        rotate: isTouchDevice ? 4 : (isHovered ? 8 : 0),
-                        opacity: isTouchDevice ? 0.4 : (isHovered ? 0.5 : 0.2),
-                        scale: isTouchDevice ? 1.05 : (isHovered ? 1.1 : 1)
+                        rotate: isTouchDevice ? 0 : (isHovered ? 6 : 0),
+                        opacity: isTouchDevice ? 0.28 : (isHovered ? 0.42 : 0.16),
+                        scale: isTouchDevice ? 1 : (isHovered ? 1.06 : 1)
                     }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                 >
                     <CategoryIcon category={project.category} />
                 </motion.div>
             )}
 
-            {/* 5. NUMERO DE SEQUENCE (Featured cards uniquement) */}
-            {sequenceNumber && !hasCover && (
-                <div 
-                    className="absolute bottom-4 right-6 text-[7rem] lg:text-[9rem] font-black leading-none pointer-events-none select-none z-0 opacity-[0.03] dark:opacity-[0.04]"
-                    style={{ 
-                        WebkitTextStroke: '2px currentColor',
-                        color: 'transparent'
-                    }}
-                >
-                    {sequenceNumber}
-                </div>
-            )}
-
             {/* Dynamic Spotlight en CSS natif */}
             {mounted && !isTouchDevice && (
                 <div
-                    className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:mix-blend-screen"
+                    className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                     style={{
-                        background: 'radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.06), transparent 80%)',
+                        background: 'radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.045), transparent 80%)',
                     }}
                 />
             )}
@@ -304,15 +280,26 @@ export default function MagneticProjectCard({
             {/* CONTENU PRINCIPAL */}
             <div className={`relative z-10 flex h-full flex-col justify-between ${hasCover ? 'text-white' : ''}`}>
                 <div>
-                    {/* 3. HEADER : Annee + Badge Compteur Modules */}
-                    <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-                        <span className={`text-sm font-semibold tracking-wider ${hasCover ? 'text-white/80' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                            {project.year}
-                        </span>
-                        <span className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-widest ${
+                    {/* 3. HEADER : Annee + Séquence + Badge Compteur Modules */}
+                    <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className={`font-mono text-xs font-bold tabular-nums tracking-wider ${hasCover ? 'text-white/85' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                                {project.year}
+                            </span>
+                            {sequenceNumber && (
+                                <span className={`font-mono text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded border ${
+                                    hasCover
+                                        ? 'border-white/20 bg-white/10 text-white/90'
+                                        : 'border-brand-blue/30 bg-brand-blue/10 text-brand-blue dark:border-[#00D2FF]/30 dark:bg-[#00D2FF]/10 dark:text-[#00D2FF]'
+                                }`}>
+                                    {`SYS.${sequenceNumber}`}
+                                </span>
+                            )}
+                        </div>
+                        <span className={`rounded-md border px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest ${
                             hasCover 
-                                ? 'border-white/20 bg-white/10 text-white/90 backdrop-blur-sm' 
-                                : 'border-black/10 bg-black/5 text-zinc-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300'
+                                ? 'border-white/20 bg-black/40 text-white/90 backdrop-blur-sm' 
+                                : 'border-black/10 bg-black/[0.03] text-zinc-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300'
                         }`}>
                             {project.technologies.length} Mod. · {project.category}
                         </span>
@@ -320,36 +307,36 @@ export default function MagneticProjectCard({
 
                     <motion.h3 
                         layoutId={`project-title-${project.id}`}
-                        className={`mb-4 text-lg font-bold tracking-tight md:text-xl ${hasCover ? 'text-white drop-shadow-lg' : 'text-zinc-900 dark:text-white'}`}
+                        className={`mb-3 text-lg font-bold tracking-tight md:text-xl ${hasCover ? 'text-white' : 'text-zinc-900 dark:text-white'}`}
                     >
                         {project.title}
                     </motion.h3>
                     
                     <motion.p
                         layoutId={`project-desc-${project.id}`}
-                        className={`max-w-md text-sm leading-relaxed ${hasCover ? 'text-white/80' : 'text-zinc-600 dark:text-zinc-400'}`}
+                        className={`max-w-xl text-sm leading-relaxed line-clamp-3 ${hasCover ? 'text-zinc-200' : 'text-zinc-600 dark:text-zinc-400'}`}
                     >
                         {project.shortDescription}
                     </motion.p>
 
                     <p 
-                        className="mt-4 text-xs font-semibold uppercase tracking-wide"
-                        style={{ color: `rgb(${tc.r}, ${tc.g}, ${tc.b})` }}
+                        className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-wider line-clamp-2"
+                        style={{ color: hasCover ? '#38BDF8' : `rgb(${tc.r}, ${tc.g}, ${tc.b})` }}
                     >
                         {project.impact}
                     </p>
                 </div>
 
                 {/* BAS : Technologies + Fleche CTA */}
-                <div className="mt-auto pt-8 flex items-end justify-between gap-4">
-                    <div className="flex flex-wrap gap-2">
+                <div className="mt-auto pt-6 flex items-end justify-between gap-4 border-t border-black/5 dark:border-white/5">
+                    <div className="flex flex-wrap gap-1.5">
                         {project.technologies.slice(0, isFeatured ? 6 : 4).map((tech) => (
                             <span 
                                 key={tech}
-                                className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
+                                className={`rounded border px-2 py-0.5 font-mono text-[11px] font-medium ${
                                     hasCover
-                                        ? 'border-white/20 bg-white/10 text-white/90 backdrop-blur-sm'
-                                        : 'border-black/10 bg-black/5 text-zinc-800 dark:border-white/10 dark:bg-white/10 dark:text-zinc-200'
+                                        ? 'border-white/20 bg-black/40 text-white/90 backdrop-blur-sm'
+                                        : 'border-black/10 bg-black/[0.03] text-zinc-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-200'
                                 }`}
                             >
                                 {tech}
@@ -359,18 +346,18 @@ export default function MagneticProjectCard({
 
                     {/* 4. FLECHE CTA ANIMEE */}
                     <motion.div 
-                        className={`flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full border ${
+                        className={`flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full border ${
                             hasCover
-                                ? 'border-white/20 bg-white/10'
-                                : 'border-black/10 bg-black/5 dark:border-white/10 dark:bg-white/5'
+                                ? 'border-white/25 bg-white/10'
+                                : 'border-black/10 bg-black/[0.03] dark:border-white/15 dark:bg-white/[0.04]'
                         }`}
                         animate={{ 
-                            x: isTouchDevice ? 2 : (isHovered ? 4 : 0),
-                            scale: isTouchDevice ? 1.05 : (isHovered ? 1.1 : 1)
+                            x: isTouchDevice ? 0 : (isHovered ? 3 : 0),
+                            scale: isTouchDevice ? 1 : (isHovered ? 1.08 : 1)
                         }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        transition={{ type: 'spring', stiffness: 320, damping: 24 }}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={hasCover ? 'text-white' : 'text-zinc-600 dark:text-zinc-300'}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={hasCover ? 'text-white' : 'text-zinc-700 dark:text-zinc-200'}>
                             <line x1="5" y1="12" x2="19" y2="12" />
                             <polyline points="12 5 19 12 12 19" />
                         </svg>

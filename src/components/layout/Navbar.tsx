@@ -346,14 +346,14 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-500 ease-out ${
+        className={`fixed top-0 left-0 right-0 z-40 w-full transition-[padding] duration-300 ease-out ${
           isScrolled
             ? 'pb-2.5 pt-[calc(0.6rem+env(safe-area-inset-top,0px))]'
             : 'pb-4 md:pb-6 pt-[calc(1rem+env(safe-area-inset-top,0px))] md:pt-[calc(1.5rem+env(safe-area-inset-top,0px))]'
         }`}
       >
         <div
-          className={`mx-auto flex items-center justify-between transition-all duration-500 ease-out relative z-50 ${
+          className={`mx-auto flex items-center justify-between transition-[background-color,box-shadow,padding] duration-300 ease-out relative z-50 ${
             isScrolled
               ? 'max-w-6xl gap-4 lg:gap-8 rounded-[22px] mx-3 sm:mx-auto px-4 sm:px-6 py-2'
               : 'max-w-7xl bg-transparent px-5 sm:px-6 lg:px-12 py-1.5'
@@ -377,14 +377,14 @@ export default function Navbar() {
           {/* LOGO */}
           <a
             href="#home"
-            className="group relative z-50 flex items-center gap-2.5 text-xl font-bold tracking-tighter text-zinc-900 transition-all hover:opacity-90 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-lg py-1 px-1.5 -ml-1.5"
+            className="group relative z-50 flex items-center gap-2.5 text-xl font-bold tracking-tighter text-zinc-900 transition-opacity hover:opacity-90 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-lg py-1 px-1.5 -ml-1.5"
             onClick={() => handleSelectSegment(portfolioSections[0]?.name || 'Accueil', { sectionId: 'home' })}
             aria-label="Enrique.Ndjakou"
           >
             <Logo className="h-7 w-7 text-zinc-900 transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-blue dark:text-white dark:group-hover:text-brand-blue" />
             <span className="relative">
               Enrique<span className="text-brand-blue">.Ndjakou</span>
-              <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-gradient-to-r from-brand-blue to-transparent transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 h-[1px] w-full origin-left scale-x-0 bg-gradient-to-r from-brand-blue to-transparent transition-transform duration-300 group-hover:scale-x-100"></span>
             </span>
           </a>
 
@@ -420,7 +420,7 @@ export default function Navbar() {
                   href={link.href}
                   data-segment={link.name}
                   onClick={() => handleSelectSegment(link.name, { sectionId: link.id })}
-                  className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300 ${
+                  className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 ${
                     isActive
                       ? 'text-zinc-900 dark:text-white'
                       : 'text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white'
@@ -438,7 +438,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-all duration-300 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+                className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-colors duration-200 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
                 style={{
                   background: isDark
                     ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
@@ -459,7 +459,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
-              className="group relative flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-zinc-500 transition-all duration-300 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+              className="group relative flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-zinc-500 transition-colors duration-200 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
               style={{
                 background: isDark
                   ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
@@ -481,14 +481,14 @@ export default function Navbar() {
               className="relative group overflow-hidden rounded-full p-[1px] focus:outline-none"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-brand-blue via-brand-blue/50 to-brand-blue rounded-full opacity-70 group-hover:opacity-100 transition-opacity duration-300"></span>
-              <span className="relative block px-4 py-1.5 rounded-full bg-white dark:bg-[#0a0a0a] text-xs font-semibold text-zinc-900 dark:text-white transition-colors duration-300 group-hover:bg-transparent group-hover:text-white">
+              <span className="relative block px-4 py-1.5 rounded-full bg-white dark:bg-[#0a0a0a] text-xs font-semibold text-zinc-900 dark:text-white transition-colors duration-200 group-hover:bg-transparent group-hover:text-white">
                 {t('nav.contact')}
               </span>
             </a>
 
             <Link
               href="/admin/login"
-              className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-all duration-300 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+              className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-colors duration-200 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
               style={{
                 background: isDark
                   ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
@@ -504,7 +504,7 @@ export default function Navbar() {
 
           {/* CAPSULE DE SECTION ACTIVE MOBILE (Apple Liquid Glass sobre et synchronisée) */}
           <div
-            className="flex items-center gap-1.5 rounded-full border border-black/8 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.06] px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-200 md:hidden transition-all duration-300"
+            className="flex items-center gap-1.5 rounded-full border border-black/8 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.06] px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-200 md:hidden transition-colors duration-200"
             style={{
               backdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(20px) saturate(1.8)',
               WebkitBackdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(20px) saturate(1.8)',

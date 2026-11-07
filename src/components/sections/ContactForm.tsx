@@ -87,19 +87,19 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-black/[0.02] shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#050505]/80 dark:shadow-2xl">
+    <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white/80 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0A0C10]/90 dark:shadow-2xl">
       
-      {/* Terminal Header */}
-      <div className="flex items-center justify-between border-b border-black/5 bg-black/5 px-4 py-3 dark:border-white/5 dark:bg-white/5">
-        <div className="flex items-center gap-2">
-          <Terminal className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-          <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Message_Console</span>
+      {/* Engineering Console Header */}
+      <div className="flex items-center justify-between border-b border-black/10 bg-black/[0.03] px-5 py-3.5 dark:border-white/10 dark:bg-white/[0.03]">
+        <div className="flex items-center gap-2.5">
+          <Terminal className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
+          <span className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:text-zinc-300">
+            TX // DIRECT_CHANNEL
+          </span>
         </div>
-        <div className="flex gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-red-400/80"></div>
-          <div className="h-2.5 w-2.5 rounded-full bg-amber-400/80"></div>
-          <div className="h-2.5 w-2.5 rounded-full bg-green-400/80"></div>
-        </div>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+          TLS 1.3 · VERIFIED
+        </span>
       </div>
 
       {/* Form Body */}
@@ -117,7 +117,7 @@ export default function ContactForm() {
         />
         
         <div className="group relative">
-          <label htmlFor="name" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue">
+          <label htmlFor="name" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue dark:group-focus-within:text-[#00D2FF]">
             {t('contact.form.name.label')}
           </label>
           <input 
@@ -128,13 +128,13 @@ export default function ContactForm() {
             maxLength={100}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             placeholder={t('contact.form.name.placeholder')}
-            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-brand-blue disabled:opacity-50"
+            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-[#00D2FF] disabled:opacity-50"
             disabled={isSubmitting}
           />
         </div>
 
         <div className="group relative">
-          <label htmlFor="email" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue">
+          <label htmlFor="email" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue dark:group-focus-within:text-[#00D2FF]">
             {t('contact.form.email.label')}
           </label>
           <input 
@@ -148,7 +148,7 @@ export default function ContactForm() {
               if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
             }}
             placeholder={t('contact.form.email.placeholder')}
-            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-brand-blue disabled:opacity-50"
+            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-[#00D2FF] disabled:opacity-50"
             disabled={isSubmitting}
             aria-invalid={fieldErrors.email ? 'true' : undefined}
             aria-describedby={fieldErrors.email ? 'email-error' : undefined}
@@ -161,7 +161,7 @@ export default function ContactForm() {
         </div>
 
         <div className="group relative">
-          <label htmlFor="message" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue">
+          <label htmlFor="message" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue dark:group-focus-within:text-[#00D2FF]">
             {t('contact.form.message.label')}
           </label>
           <textarea 
@@ -176,7 +176,7 @@ export default function ContactForm() {
               if (fieldErrors.message) setFieldErrors(prev => ({ ...prev, message: undefined }));
             }}
             placeholder={t('contact.form.message.placeholder')}
-            className="w-full resize-none rounded-lg border border-black/10 bg-white/50 p-4 font-mono text-sm text-zinc-900 transition-all focus:border-brand-blue/50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-blue/10 dark:border-white/10 dark:bg-black/50 dark:text-white dark:focus:border-brand-blue/50 dark:focus:bg-black disabled:opacity-50"
+            className="w-full resize-none rounded-xl border border-black/15 bg-white/60 p-4 font-mono text-sm text-zinc-900 transition-[border-color,background-color,box-shadow] duration-200 focus:border-brand-blue/50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-blue/10 dark:border-white/15 dark:bg-black/40 dark:text-white dark:focus:border-[#00D2FF]/50 dark:focus:bg-black/70 disabled:opacity-50"
             disabled={isSubmitting}
             aria-invalid={fieldErrors.message ? 'true' : undefined}
             aria-describedby={fieldErrors.message ? 'message-error' : undefined}
@@ -189,16 +189,16 @@ export default function ContactForm() {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <p className="font-mono text-[10px] text-zinc-400 dark:text-zinc-500" role="status" aria-live="polite">
+          <p className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400" role="status" aria-live="polite">
             STATUS: <span className={`font-bold ${
               submitStatus === 'success' ? 'text-emerald-500' :
               submitStatus === 'error' ? 'text-red-500' :
               isSubmitting ? 'text-amber-500 animate-pulse' :
-              'text-zinc-900 dark:text-zinc-300'
+              'text-zinc-900 dark:text-zinc-200'
             }`}>
               {submitStatus === 'success' ? 'DELIVERED_SUCCESSFULLY' :
                submitStatus === 'error' ? 'TRANSMISSION_FAILED' :
-               isSubmitting ? 'TRANSMITTING...' : 'AWAITING_INPUT'}
+               isSubmitting ? 'TRANSMITTING...' : 'READY'}
             </span>
           </p>
           
@@ -206,12 +206,12 @@ export default function ContactForm() {
             <button 
               type="submit"
               disabled={isSubmitting || submitStatus === 'success'}
-              className={`group relative flex items-center gap-3 overflow-hidden rounded-lg px-6 py-3 font-semibold transition-all focus:outline-none focus:ring-4 ${
+              className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-6 py-3.5 font-semibold active:scale-[0.98] transition-[transform,background-color,box-shadow] duration-200 focus:outline-none focus:ring-4 ${
                 submitStatus === 'success' 
                 ? 'bg-emerald-500 text-white focus:ring-emerald-500/20' 
                 : submitStatus === 'error'
                 ? 'bg-red-500 text-white focus:ring-red-500/20'
-                : 'bg-zinc-900 text-white hover:bg-zinc-800 focus:ring-zinc-900/20 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus:ring-white/20'
+                : 'bg-zinc-900 text-white hover:bg-zinc-800 focus:ring-zinc-900/20 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:focus:ring-white/20'
               }`}
             >
               <span className="relative z-10 font-mono tracking-widest text-xs uppercase">
@@ -220,9 +220,9 @@ export default function ContactForm() {
                  isSubmitting ? t('contact.form.submit.sending') : t('contact.form.submit')}
               </span>
               {submitStatus === 'success' ? (
-                <CheckCircle2 className="relative z-10 h-3.5 w-3.5" />
+                <CheckCircle2 className="relative z-10 h-3.5 w-3.5" aria-hidden="true" />
               ) : (
-                <Send className={`relative z-10 h-3.5 w-3.5 transition-transform ${isSubmitting ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} />
+                <Send className={`relative z-10 h-3.5 w-3.5 transition-transform duration-200 ${isSubmitting ? 'animate-bounce' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'}`} aria-hidden="true" />
               )}
             </button>
           </Magnetic>

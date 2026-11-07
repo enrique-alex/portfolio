@@ -4,15 +4,22 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Notre palette de couleurs personnalisée */
+  /* Palette Signature : Obsidian, Cobalt & Télémétrie Industrielle */
   --color-brand-dark: #050505;
+  --color-brand-surface: #0A0C10;
+  --color-brand-elevated: #11141C;
   --color-brand-light: #F8F9FA;
   --color-brand-textDark: #EDEDED;
+  --color-brand-textMuted: #9CA3AF;
   --color-brand-textLight: #111827;
-  --color-brand-blue: #4285F4;
+  --color-brand-blue: #3B82F6;
+  --color-brand-cyan: #00D2FF;
+  --color-brand-amber: #F59E0B;
   --color-brand-red: #EA4335;
   --color-brand-yellow: #FBBC05;
-  --color-brand-green: #34A853;   
+  --color-brand-green: #10B981;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-tactile: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes marquee-left {

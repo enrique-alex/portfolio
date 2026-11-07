@@ -56,7 +56,7 @@ export default function ProfileSection() {
             <EarthGlobe3D className="w-full max-w-[340px] lg:max-w-none mx-auto" />
           </motion.div>
 
-          {/* RIGHT COLUMN: Bio-Data Readout */}
+          {/* RIGHT COLUMN: Architectural Readout */}
           <div className="flex flex-1 flex-col gap-8">
             
             <motion.div 
@@ -64,19 +64,24 @@ export default function ProfileSection() {
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : 0.2 }}
+              transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28, delay: shouldReduceMotion ? 0 : 0.1 }}
             >
-              
-              <div className="border-l-2 border-brand-blue pl-6">
-                <div className="mb-2 flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
-                  <Terminal className="h-4 w-4" />
-                  <span className="font-mono text-xs font-bold uppercase tracking-widest">{t('profile.mission.label')}</span>
+              <div className="rounded-2xl border border-black/10 bg-white/70 p-6 backdrop-blur-md dark:border-white/10 dark:bg-[#0A0C10]/80 sm:p-8">
+                <div className="mb-4 flex items-center justify-between border-b border-black/10 pb-3 dark:border-white/10">
+                  <div className="flex items-center gap-2 text-brand-blue dark:text-[#00D2FF]">
+                    <Terminal className="h-4 w-4" aria-hidden="true" />
+                    <span className="font-mono text-xs font-bold uppercase tracking-widest">{t('profile.mission.label')}</span>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                    {t('profile.card.id')}
+                  </span>
                 </div>
                 <p className="text-base leading-relaxed text-zinc-700 dark:text-zinc-300 md:text-lg">
-                  {t('profile.mission.text')} <strong className="text-zinc-900 dark:text-white">{t('profile.mission.bold')}</strong> {t('profile.mission.text2')}
+                  {t('profile.mission.text')}{' '}
+                  <strong className="font-semibold text-zinc-900 dark:text-white">{t('profile.mission.bold')}</strong>{' '}
+                  {t('profile.mission.text2')}
                 </p>
               </div>
-
             </motion.div>
 
             {/* Technical Parameters Grid */}
@@ -85,24 +90,28 @@ export default function ProfileSection() {
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: shouldReduceMotion ? 0 : undefined, delay: shouldReduceMotion ? 0 : 0.4 }}
+              transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28, delay: shouldReduceMotion ? 0 : 0.2 }}
             >
-              
               {[
-                { label: t('profile.param.base'), value: t('profile.param.base.value'), icon: MapPin },
-                { label: t('profile.param.status'), value: t('profile.param.status.value'), icon: Zap },
-                { label: t('profile.param.spec'), value: t('profile.param.spec.value'), icon: Code2 },
-                { label: t('profile.param.goal'), value: t('profile.param.goal.value'), icon: Crosshair },
+                { code: 'P.01', label: t('profile.param.base'), value: t('profile.param.base.value'), icon: MapPin },
+                { code: 'P.02', label: t('profile.param.status'), value: t('profile.param.status.value'), icon: Zap },
+                { code: 'P.03', label: t('profile.param.spec'), value: t('profile.param.spec.value'), icon: Code2 },
+                { code: 'P.04', label: t('profile.param.goal'), value: t('profile.param.goal.value'), icon: Crosshair },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col gap-1 rounded-lg border border-black/5 bg-black/[0.02] p-4 dark:border-white/5 dark:bg-white/[0.02]">
-                  <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
-                    <item.icon className="h-3.5 w-3.5" />
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-widest">{item.label}</span>
+                <div
+                  key={i}
+                  className="group flex flex-col justify-between gap-2 rounded-xl border border-black/10 bg-white/60 p-4 backdrop-blur-sm transition-[border-color,background-color] duration-200 hover:border-brand-blue/40 dark:border-white/10 dark:bg-[#0A0C10]/70 dark:hover:border-[#00D2FF]/40"
+                >
+                  <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                    <div className="flex items-center gap-2">
+                      <item.icon className="h-3.5 w-3.5 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
+                    </div>
+                    <span className="font-mono text-[10px] tabular-nums text-zinc-400 dark:text-zinc-500">{item.code}</span>
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">{item.value}</span>
+                  <span className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100">{item.value}</span>
                 </div>
               ))}
-
             </motion.div>
 
           </div>

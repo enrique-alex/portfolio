@@ -45,81 +45,102 @@ export default function HeroSection() {
             </div>
           </h1>
           
-          {/* Badge "Hardware Status" */}
+          {/* Badge "Telemetry Status" */}
           <div className="mt-6 mb-2">
             <Magnetic intensity={0.2}>
-              <div className="group relative inline-flex cursor-pointer items-center gap-3 rounded-full border border-black/10 bg-black/5 px-5 py-2 text-sm font-medium text-zinc-900 backdrop-blur-md dark:border-white/5 dark:bg-[#050505]/60 dark:text-zinc-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden">
-                
+              <div className="group relative inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/80 px-4 py-2 text-xs font-mono uppercase tracking-widest text-zinc-800 backdrop-blur-md dark:border-white/10 dark:bg-[#0A0C10]/85 dark:text-zinc-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)]"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
                 </span>
-                <span className="relative tracking-widest uppercase text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('hero.badge')} <span className="mx-1">•</span> {t('hero.badge.company')}</span>
+                <span className="font-semibold text-zinc-900 dark:text-white">{t('hero.badge')}</span>
+                <span className="text-zinc-400 dark:text-zinc-600" aria-hidden="true">/</span>
+                <span className="text-brand-blue dark:text-[#00D2FF] font-semibold">{t('hero.badge.company')}</span>
               </div>
             </Magnetic>
           </div>
 
-          <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-zinc-600 md:text-xl dark:text-white/50">
-            <span className="font-semibold text-zinc-900 dark:text-white/80">{t('hero.subtitle.line1')}</span><br/>
-            {t('hero.subtitle.line2')} <span className="font-medium text-brand-blue dark:text-[#8AB4F8]">{t('hero.subtitle.company')}</span>{t('hero.subtitle.line3')}
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-zinc-600 md:text-lg dark:text-zinc-400">
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">{t('hero.subtitle.line1')}</span><br/>
+            {t('hero.subtitle.line2')}{' '}
+            <span className="font-semibold text-brand-blue dark:text-[#00D2FF]">{t('hero.subtitle.company')}</span>
+            {t('hero.subtitle.line3')}
           </p>
 
-          {/* CTAs d'Exploration */}
-          <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-            <Magnetic intensity={0.25}>
+          {/* CTAs d'Exploration Tactiles */}
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+            <Magnetic intensity={0.22}>
               <button 
                 onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="group relative flex items-center gap-4 overflow-hidden rounded-full bg-zinc-900 px-8 py-4 font-semibold text-white active:scale-95 transition-transform duration-200 dark:bg-white dark:text-zinc-900"
+                className="group relative flex items-center gap-4 rounded-full bg-zinc-900 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-200 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
               >
-                
-                <span className="relative z-10 tracking-wide uppercase text-sm">{t('hero.cta.explore')}</span>
-                <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 dark:bg-black/10 transition-transform duration-300 group-hover:translate-x-1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
+                <span>{t('hero.cta.explore')}</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 dark:bg-black/10 transition-transform duration-200 group-hover:translate-y-0.5">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </span>
               </button>
             </Magnetic>
 
-            <Magnetic intensity={0.2}>
+            <Magnetic intensity={0.18}>
               <a 
                 href="/cv-enrique-ndjakou.pdf"
                 download="CV_Enrique_Ndjakou.pdf"
-                className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-black/10 bg-black/5 px-8 py-4 font-semibold text-zinc-900 active:scale-95 transition-transform duration-200 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                className="group relative flex items-center gap-3 rounded-full border border-black/15 bg-white/70 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-zinc-900 backdrop-blur-md active:scale-[0.97] transition-[transform,border-color,background-color] duration-200 hover:border-black/30 hover:bg-white dark:border-white/15 dark:bg-[#0A0C10]/80 dark:text-zinc-100 dark:hover:border-white/30 dark:hover:bg-white/10"
               >
-                
-                <Download className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:-translate-y-1" aria-hidden="true" />
-                <span className="relative z-10 font-mono text-xs uppercase tracking-widest">{t('hero.cta.cv')}</span>
+                <Download className="h-4 w-4 text-brand-blue dark:text-[#00D2FF] transition-transform duration-200 group-hover:-translate-y-0.5" aria-hidden="true" />
+                <span>{t('hero.cta.cv')}</span>
               </a>
             </Magnetic>
           </div>
+
+          {/* Télémétrie & Indicateurs Clés d'Ingénierie */}
+          <div className="mt-12 grid w-full max-w-xl grid-cols-3 gap-4 border-t border-black/10 pt-6 text-left dark:border-white/10">
+            <div>
+              <div className="font-mono text-lg font-bold tabular-nums text-zinc-900 dark:text-white sm:text-xl">15</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.systems')}</div>
+            </div>
+            <div className="border-l border-black/10 pl-4 dark:border-white/10">
+              <div className="font-mono text-lg font-bold tabular-nums text-brand-blue dark:text-[#00D2FF] sm:text-xl">ISA-18.2</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.scada')}</div>
+            </div>
+            <div className="border-l border-black/10 pl-4 dark:border-white/10">
+              <div className="font-mono text-lg font-bold tabular-nums text-zinc-900 dark:text-white sm:text-xl">1 kHz</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.hil')}</div>
+            </div>
+          </div>
         </div>
 
-        {/* COLONNE DROITE : Emplacement Photo (Avatar de Haute Technologie) */}
+        {/* COLONNE DROITE : Cadre Optique de Précision & Télémétrie */}
         <div className="relative flex w-full max-w-[280px] sm:max-w-[320px] lg:max-w-md flex-1 items-center justify-center z-10">
-          
-          {/* L'Anneau Scientifique (Orbital Rings) - Isolés sur calques GPU */}
-          <div aria-hidden="true" className="orbital-ring orbital-ring-clockwise pointer-events-none absolute inset-0 z-0 rounded-full border-[0.5px] border-black/10 border-t-brand-blue/40 dark:border-white/5 dark:border-t-brand-blue/60"></div>
-          <div aria-hidden="true" className="orbital-ring orbital-ring-counter pointer-events-none absolute -inset-4 sm:-inset-6 z-0 rounded-full border-[0.5px] border-black/5 border-b-brand-red/30 dark:border-white/[0.03] dark:border-b-brand-red/40"></div>
-          
-          {/* Conteneur Capsule / Portrait */}
-          <Magnetic intensity={0.1}>
-            <div className="relative aspect-[3/4] w-full min-h-[350px] max-w-[300px] overflow-hidden rounded-[2.5rem] border border-black/5 bg-white/10 p-2 shadow-2xl backdrop-blur-md dark:border-white/10 dark:bg-black/20 ring-1 ring-black/5 dark:ring-white/10">
-              <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group">
-                
-                {/* Overlay Cyberpunk */}
-                <div className="absolute inset-0 bg-brand-blue/10 mix-blend-overlay z-30 pointer-events-none transition-opacity duration-500 group-hover:opacity-0"></div>
-                
-                {/* Photo de Profil */}
+          <Magnetic intensity={0.08}>
+            <div className="relative aspect-[3/4] w-full min-h-[360px] max-w-[310px] rounded-2xl border border-black/15 bg-white/80 p-2.5 shadow-2xl backdrop-blur-md dark:border-white/15 dark:bg-[#0A0C10]/90">
+              {/* Repères d'alignement optique (Fiducials) */}
+              <span aria-hidden="true" className="pointer-events-none absolute -left-1.5 -top-1.5 h-3 w-3 border-l-2 border-t-2 border-brand-blue dark:border-[#00D2FF]" />
+              <span aria-hidden="true" className="pointer-events-none absolute -right-1.5 -top-1.5 h-3 w-3 border-r-2 border-t-2 border-brand-blue dark:border-[#00D2FF]" />
+              <span aria-hidden="true" className="pointer-events-none absolute -bottom-1.5 -left-1.5 h-3 w-3 border-b-2 border-l-2 border-brand-blue dark:border-[#00D2FF]" />
+              <span aria-hidden="true" className="pointer-events-none absolute -bottom-1.5 -right-1.5 h-3 w-3 border-b-2 border-r-2 border-brand-blue dark:border-[#00D2FF]" />
+
+              <div className="relative h-full w-full overflow-hidden rounded-xl border border-black/10 bg-zinc-900 dark:border-white/10 group">
                 <Image 
                   src="/photo.webp" 
                   alt="Enrique Alex NDJAKOU KEMAYOU" 
                   fill 
-                  className="object-cover z-20 grayscale hover:grayscale-0 transition-transform duration-700 hover:scale-105"
-                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 300px"
+                  className="object-cover z-10 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 310px"
                   priority
                   fetchPriority="high"
                   decoding="sync"
                 />
 
+                {/* Bandeau de télémétrie inférieur */}
+                <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between border-t border-white/10 bg-black/75 px-3.5 py-2.5 backdrop-blur-md">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-200">
+                    ENG // GEM · SCADA
+                  </span>
+                  <span className="font-mono text-[10px] tabular-nums text-[#00D2FF]">
+                    51.03°N 02.37°E
+                  </span>
+                </div>
               </div>
             </div>
           </Magnetic>

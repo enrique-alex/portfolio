@@ -25,18 +25,18 @@ export default function ContactSection() {
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
+          transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28 }}
         >
           <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-            <Send className="h-4 w-4" />
-            <span className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
-              Contact & Collaboration
+            <Send className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
+            <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
+              {t('contact.header.tag')}
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
             {t('contact.header.title')}
           </h2>
-          <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-4 font-mono text-sm text-zinc-600 dark:text-zinc-400">
             {t('contact.header.subtitle')}
           </p>
         </motion.div>
@@ -46,10 +46,10 @@ export default function ContactSection() {
           {/* LEFT COLUMN: Terminal Form */}
           <motion.div 
             className="lg:col-span-3 w-full"
-            initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -30 }}
+            initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.7 }}
+            transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 260, damping: 28 }}
           >
             <ContactForm />
           </motion.div>
@@ -57,10 +57,10 @@ export default function ContactSection() {
           {/* RIGHT COLUMN: Comms Array */}
           <motion.div 
             className="lg:col-span-2 flex flex-col gap-8"
-            initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 30 }}
+            initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.7, delay: shouldReduceMotion ? 0 : 0.2 }}
+            transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 260, damping: 28, delay: shouldReduceMotion ? 0 : 0.1 }}
           >
             <SocialLinks />
             <CopyEmail />
