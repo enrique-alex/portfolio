@@ -34,7 +34,7 @@ type WebGLFluidFn = (canvas: HTMLCanvasElement, options: WebGLFluidOptions) => W
 
 declare global {
     interface Window {
-        __webglResonanceColor: string | null;
+        __webglResonanceColor: { r: number; g: number; b: number } | string | null;
     }
 }
 
@@ -94,11 +94,11 @@ export default function CursorFluid() {
                         VELOCITY_DISSIPATION: 2.0,
                         PRESSURE: 0.2,
                         PRESSURE_ITERATIONS: isTouch ? 10 : 20,
-                        SPLAT_RADIUS: 0.2,
-                        SHADING: false,
-                        COLORFUL: false,
-                        COLOR_UPDATE_SPEED: 4,
-                        BACK_COLOR: { r: 5, g: 5, b: 5 },
+                        SPLAT_RADIUS: 0.25,
+                        SHADING: true,
+                        COLORFUL: true,
+                        COLOR_UPDATE_SPEED: 8,
+                        BACK_COLOR: { r: 0, g: 0, b: 0 },
                         TRANSPARENT: true,
                         BLOOM: false,
                         BLOOM_ITERATIONS: 4,

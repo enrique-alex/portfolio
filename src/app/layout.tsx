@@ -34,12 +34,12 @@ export const metadata = {
   },
   title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
   description:
-    "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Automatisme, SCADA, C/C++, Python, Électronique.",
+    "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Systèmes embarqués, robotique, commande temps réel, C/C++, Python et architecture industrielle & logicielle.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev"),
   openGraph: {
     title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
     description:
-      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Apprenti Automatisme & Informatique Industrielle chez Minakem Dunkerque.",
+      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Systèmes Embarqués, Robotique, Commande Temps Réel & Architecture Logicielle / Industrielle (Minakem).",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev",
     siteName: "Portfolio · Enrique Alex Ndjakou",
     locale: "fr_FR",
@@ -57,7 +57,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
     description:
-      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Automatisme & Informatique Industrielle.",
+      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Systèmes Embarqués, Robotique, Commande Temps Réel & R&D.",
     images: ["/og-image.png"],
   },
   keywords: [
@@ -66,10 +66,13 @@ export const metadata = {
     "Génie Électrique",
     "Mécatronique",
     "Polytech Lille",
+    "Systèmes Embarqués",
+    "Robotique",
+    "Commande Temps Réel",
+    "R&D",
+    "Stage International",
     "Automatisme",
-    "Automatisme Industriel",
     "SCADA",
-    "Ignition",
     "C++",
     "Python",
     "Portfolio",

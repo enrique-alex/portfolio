@@ -15,7 +15,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Temps de réponse divisé par 4 en boucle fermée, erreur statique annulée et robustesse de régulation validée sur banc d'essai matériel.",
       technologies: ['Matlab/Simulink', 'Régulation P/PI/PID/Cascade', 'HIL Speedgoat'],
       isFeatured: true,
-      themeColor: { r: 99, g: 102, b: 241 },
+      themeColor: { r: 0, g: 210, b: 255 },
       coverImage: '/image/projects/controle-hydraulique-cover.webp',
       gallery: [
         '/image/projects/controle-hydraulique-cover.webp',
@@ -170,7 +170,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Moteur de jeu s'exécutant dans un espace mémoire strictement borné, sans dépassement ni fuite, validé sur l'ensemble des scénarios de partie cyclique.",
       technologies: ['C', 'Logique de Jeu', 'Pointeurs C', 'Arithmétique Modulaire'],
       isFeatured: false,
-      themeColor: { r: 196, g: 87, b: 76 },
+      themeColor: { r: 217, g: 119, b: 6 },
     },
     {
       id: 'pygroove',
@@ -184,7 +184,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Application stable en usage prolongé : lecture audio, reconnaissance vocale et interface graphique tournent simultanément sans blocage ni conflit d'accès matériel.",
       technologies: ['Python', 'Tkinter', 'Pygame', 'Speech-Recognition', 'Pydub', 'Mutagen'],
       isFeatured: false,
-      themeColor: { r: 196, g: 150, b: 74 },
+      themeColor: { r: 245, g: 158, b: 11 },
       coverImage: '/image/projects/pygroove-cover.webp',
     },
     {
@@ -199,7 +199,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Shell capable d'exécuter des chaînes de commandes complexes (pipes, redirections) de façon stable, sans fuite de processus ni instabilité liée aux signaux système.",
       technologies: ['C', 'Processus Posix', 'Linux Kernel', 'Signaux ASync', 'Mémoire'],
       isFeatured: false,
-      themeColor: { r: 85, g: 98, b: 115 },
+      themeColor: { r: 45, g: 212, b: 191 },
     },
     {
       id: 'ferme-poo',
@@ -213,7 +213,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Architecture 100% exempte de fuite mémoire malgré une topologie d'objets fortement circulaire, grâce à une gestion du cycle de vie par pointeurs intelligents.",
       technologies: ['C++', 'POO', 'Polymorphisme', 'Héritage ISO', 'Smart Pointers'],
       isFeatured: false,
-      themeColor: { r: 58, g: 148, b: 137 },
+      themeColor: { r: 20, g: 184, b: 166 },
     },
     {
       id: 'snake',
@@ -227,7 +227,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Boucle de jeu maintenant une fréquence stable et une détection de collision fiable, indépendamment de la puissance du processeur cible.",
       technologies: ['C++', 'Architecture Objet', 'Algorithmique Matérielle', 'Game Loop'],
       isFeatured: false,
-      themeColor: { r: 140, g: 95, b: 168 },
+      themeColor: { r: 34, g: 197, b: 94 },
     },
     {
       id: 'budget',
@@ -241,7 +241,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Temps de traitement des cohortes de données mensuelles réduit significativement grâce à la vectorisation, avec restitution graphique quasi instantanée.",
       technologies: ['Python', 'Analytique Data', 'Scripts', 'Vectorisation', 'Graphes ML'],
       isFeatured: false,
-      themeColor: { r: 122, g: 140, b: 74 },
+      themeColor: { r: 132, g: 204, b: 22 },
     },
     {
       id: 'voiture-bluetooth',
@@ -255,7 +255,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: "Robot livré et fonctionnel en conditions réelles, avec chaîne motrice stabilisée contre les micro-coupures de tension et liaison Bluetooth bidirectionnelle fiable.",
       technologies: ['C/C++', 'Arduino µC', 'CATIA V5', 'Bluetooth RF', 'Mécanique 3D'],
       isFeatured: false,
-      themeColor: { r: 93, g: 101, b: 168 },
+      themeColor: { r: 56, g: 189, b: 248 },
     },
   ],
   en: [
@@ -271,7 +271,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Closed-loop response time divided by 4, with zero steady-state error and validated robustness against perturbations on hardware target.',
       technologies: ['Matlab/Simulink', 'Régulation P/PI/PID/Cascade', 'HIL Speedgoat'],
       isFeatured: true,
-      themeColor: { r: 99, g: 102, b: 241 },
+      themeColor: { r: 0, g: 210, b: 255 },
       coverImage: '/image/projects/controle-hydraulique-cover.webp',
       gallery: [
         '/image/projects/controle-hydraulique-cover.webp',
@@ -426,7 +426,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Game engine running within a strictly bounded memory space, without overflow or leaks, validated across all cyclic game scenarios.',
       technologies: ['C', 'Logique de Jeu', 'Pointeurs C', 'Arithmétique Modulaire'],
       isFeatured: false,
-      themeColor: { r: 196, g: 87, b: 76 },
+      themeColor: { r: 217, g: 119, b: 6 },
     },
     {
       id: 'pygroove',
@@ -440,7 +440,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Stable application under extended use: audio playback, voice recognition, and the GUI all run simultaneously without freezing or hardware access conflicts.',
       technologies: ['Python', 'Tkinter', 'Pygame', 'Speech-Recognition', 'Pydub', 'Mutagen'],
       isFeatured: false,
-      themeColor: { r: 196, g: 150, b: 74 },
+      themeColor: { r: 245, g: 158, b: 11 },
       coverImage: '/image/projects/pygroove-cover.webp',
     },
     {
@@ -455,7 +455,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Shell able to execute complex command chains (pipes, redirections) reliably, without process leaks or signal-related instability.',
       technologies: ['C', 'Processus Posix', 'Linux Kernel', 'Signaux ASync', 'Mémoire'],
       isFeatured: false,
-      themeColor: { r: 85, g: 98, b: 115 },
+      themeColor: { r: 45, g: 212, b: 191 },
     },
     {
       id: 'ferme-poo',
@@ -469,7 +469,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Fully leak-free architecture despite a strongly circular object topology, thanks to lifecycle management via smart pointers.',
       technologies: ['C++', 'POO', 'Polymorphisme', 'Héritage ISO', 'Smart Pointers'],
       isFeatured: false,
-      themeColor: { r: 58, g: 148, b: 137 },
+      themeColor: { r: 20, g: 184, b: 166 },
     },
     {
       id: 'snake',
@@ -483,7 +483,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Game loop maintaining a stable frame rate and reliable collision detection, independent of the target processor’s power.',
       technologies: ['C++', 'Architecture Objet', 'Algorithmique Matérielle', 'Game Loop'],
       isFeatured: false,
-      themeColor: { r: 140, g: 95, b: 168 },
+      themeColor: { r: 34, g: 197, b: 94 },
     },
     {
       id: 'budget',
@@ -497,7 +497,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Processing time for monthly data cohorts significantly reduced through vectorization, with near-instant chart rendering.',
       technologies: ['Python', 'Analytique Data', 'Scripts', 'Vectorisation', 'Graphes ML'],
       isFeatured: false,
-      themeColor: { r: 122, g: 140, b: 74 },
+      themeColor: { r: 132, g: 204, b: 22 },
     },
     {
       id: 'voiture-bluetooth',
@@ -511,7 +511,7 @@ export const FALLBACK_PROJECTS: Record<Locale, Project[]> = {
       impact: 'Robot delivered and functional under real conditions, with a motor chain stabilized against voltage brownouts and a reliable bidirectional Bluetooth link.',
       technologies: ['C/C++', 'Arduino µC', 'CATIA V5', 'Bluetooth RF', 'Mécanique 3D'],
       isFeatured: false,
-      themeColor: { r: 93, g: 101, b: 168 },
+      themeColor: { r: 56, g: 189, b: 248 },
     },
   ],
 };

@@ -130,7 +130,7 @@ export default function MobileHudDrawer({
       id: 'skills',
       name: t('nav.skills'),
       href: '/#skills',
-      desc: locale === 'fr' ? 'SCADA, PLCs & Logiciel' : 'SCADA, PLCs & Software',
+      desc: locale === 'fr' ? 'Embarqué, Robotique & Logiciel' : 'Embedded, Robotics & Software',
       icon: Cpu,
     },
   ];
@@ -212,7 +212,7 @@ export default function MobileHudDrawer({
                   type="button"
                   onClick={onClose}
                   aria-label={locale === 'fr' ? 'Fermer le menu' : 'Close menu'}
-                  className="group relative flex h-12 w-12 min-h-[48px] min-w-[48px] items-center justify-center rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 transition-all hover:bg-black/10 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  className="group relative flex h-12 w-12 min-h-[48px] min-w-[48px] items-center justify-center rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 transition-[transform,background-color,color] duration-150 ease-[var(--ease-out)] hover:bg-black/10 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                 >
                   <X className="h-5 w-5 transition-transform duration-300 text-zinc-600 dark:text-zinc-300" />
                 </button>
@@ -232,7 +232,7 @@ export default function MobileHudDrawer({
                         key={item.id}
                         href={item.href}
                         onClick={() => handleLinkClick(item.name, item.id)}
-                        className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl border p-2.5 text-center transition-all active:scale-95 ${
+                        className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl border p-2.5 text-center transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] active:scale-95 ${
                           isActive
                             ? 'border-brand-blue/40 bg-brand-blue/10 text-zinc-900 dark:text-white font-semibold'
                             : 'border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-black/15 dark:hover:border-white/20 hover:text-zinc-900 dark:hover:text-white'
@@ -260,7 +260,7 @@ export default function MobileHudDrawer({
                         key={link.id}
                         href={link.href}
                         onClick={() => handleLinkClick(link.name, link.id)}
-                        className={`group relative flex min-h-[52px] items-center justify-between rounded-xl border px-3.5 py-2.5 transition-all active:scale-[0.98] ${
+                        className={`group relative flex min-h-[52px] items-center justify-between rounded-xl border px-3.5 py-2.5 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] active:scale-[0.98] ${
                           isActive
                             ? 'border-brand-blue/40 bg-brand-blue/10 text-zinc-900 dark:text-white'
                             : 'border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-black/15 dark:hover:border-white/15 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white'
@@ -306,7 +306,7 @@ export default function MobileHudDrawer({
                   <button
                     type="button"
                     onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                    className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-all hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
+                    className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
                     aria-label={isDark ? t('nav.themeDay') : t('nav.themeNight')}
                   >
                     {isDark ? (
@@ -323,7 +323,7 @@ export default function MobileHudDrawer({
                   <button
                     type="button"
                     onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
-                    className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-all hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
+                    className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
                     aria-label={locale === 'fr' ? 'Switch to English (EN)' : 'Passer en Français (FR)'}
                   >
                     <Languages className="h-4 w-4 text-brand-blue mb-1" />
@@ -336,7 +336,7 @@ export default function MobileHudDrawer({
                   <Link
                     href="/admin/login"
                     onClick={onClose}
-                    className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-all hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
+                    className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
                     aria-label="Accès administrateur"
                   >
                     <Lock className="h-4 w-4 text-zinc-500 dark:text-zinc-400 mb-1" />
@@ -350,7 +350,7 @@ export default function MobileHudDrawer({
                 <a
                   href="#contact"
                   onClick={() => handleLinkClick(t('nav.contact'), 'contact')}
-                  className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-zinc-900 dark:bg-white px-5 py-3 font-semibold text-sm text-white dark:text-zinc-900 transition-all active:scale-[0.98] hover:opacity-95"
+                  className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-zinc-900 dark:bg-white px-5 py-3 font-semibold text-sm text-white dark:text-zinc-900 transition-[transform,opacity] duration-150 ease-[var(--ease-out)] active:scale-[0.98] hover:opacity-95"
                 >
                   <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   <span>{t('nav.contact')}</span>

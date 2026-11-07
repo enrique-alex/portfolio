@@ -60,7 +60,7 @@ export default function HeroSection() {
             </Magnetic>
           </div>
 
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-zinc-600 md:text-lg dark:text-zinc-400">
+          <p className="mt-6 max-w-[65ch] text-base leading-relaxed text-zinc-600 md:text-lg dark:text-zinc-400">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">{t('hero.subtitle.line1')}</span><br/>
             {t('hero.subtitle.line2')}{' '}
             <span className="font-semibold text-brand-blue dark:text-[#00D2FF]">{t('hero.subtitle.company')}</span>
@@ -72,10 +72,10 @@ export default function HeroSection() {
             <Magnetic intensity={0.22}>
               <button 
                 onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="group relative flex items-center gap-4 rounded-full bg-zinc-900 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-200 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                className="group relative flex items-center gap-4 rounded-full bg-zinc-900 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-200 ease-[var(--ease-out)] hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
               >
                 <span>{t('hero.cta.explore')}</span>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 dark:bg-black/10 transition-transform duration-200 group-hover:translate-y-0.5">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 dark:bg-black/10 transition-transform duration-200 ease-[var(--ease-out)] group-hover:translate-y-0.5">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </span>
               </button>
@@ -85,27 +85,27 @@ export default function HeroSection() {
               <a 
                 href="/cv-enrique-ndjakou.pdf"
                 download="CV_Enrique_Ndjakou.pdf"
-                className="group relative flex items-center gap-3 rounded-full border border-black/15 bg-white/70 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-zinc-900 backdrop-blur-md active:scale-[0.97] transition-[transform,border-color,background-color] duration-200 hover:border-black/30 hover:bg-white dark:border-white/15 dark:bg-[#0A0C10]/80 dark:text-zinc-100 dark:hover:border-white/30 dark:hover:bg-white/10"
+                className="group relative flex items-center gap-3 rounded-full border border-black/15 bg-white/70 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-zinc-900 backdrop-blur-md active:scale-[0.97] transition-[transform,border-color,background-color] duration-200 ease-[var(--ease-out)] hover:border-black/30 hover:bg-white dark:border-white/15 dark:bg-[#0A0C10]/80 dark:text-zinc-100 dark:hover:border-white/30 dark:hover:bg-white/10"
               >
-                <Download className="h-4 w-4 text-brand-blue dark:text-[#00D2FF] transition-transform duration-200 group-hover:-translate-y-0.5" aria-hidden="true" />
+                <Download className="h-4 w-4 text-brand-blue dark:text-[#00D2FF] transition-transform duration-200 ease-[var(--ease-out)] group-hover:-translate-y-0.5" aria-hidden="true" />
                 <span>{t('hero.cta.cv')}</span>
               </a>
             </Magnetic>
           </div>
 
-          {/* Télémétrie & Indicateurs Clés d'Ingénierie */}
+          {/* Télémétrie & Indicateurs Clés d'Ingénierie Multidisciplinaire */}
           <div className="mt-12 grid w-full max-w-xl grid-cols-3 gap-4 border-t border-black/10 pt-6 text-left dark:border-white/10">
             <div>
               <div className="font-mono text-lg font-bold tabular-nums text-zinc-900 dark:text-white sm:text-xl">15</div>
               <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.systems')}</div>
             </div>
             <div className="border-l border-black/10 pl-4 dark:border-white/10">
-              <div className="font-mono text-lg font-bold tabular-nums text-brand-blue dark:text-[#00D2FF] sm:text-xl">ISA-18.2</div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.scada')}</div>
+              <div className="font-mono text-lg font-bold tabular-nums text-brand-blue dark:text-[#00D2FF] sm:text-xl">4 Axes</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.domains')}</div>
             </div>
             <div className="border-l border-black/10 pl-4 dark:border-white/10">
-              <div className="font-mono text-lg font-bold tabular-nums text-zinc-900 dark:text-white sm:text-xl">1 kHz</div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.hil')}</div>
+              <div className="font-mono text-lg font-bold tabular-nums text-zinc-900 dark:text-white sm:text-xl">R&D · Intl</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{t('hero.kpi.mobility')}</div>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function HeroSection() {
                   src="/photo.webp" 
                   alt="Enrique Alex NDJAKOU KEMAYOU" 
                   fill 
-                  className="object-cover z-10 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  className="object-cover z-10 transition-transform duration-500 ease-[var(--ease-out)] group-hover:scale-[1.03]"
                   sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 310px"
                   priority
                   fetchPriority="high"
@@ -135,7 +135,7 @@ export default function HeroSection() {
                 {/* Bandeau de télémétrie inférieur */}
                 <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between border-t border-white/10 bg-black/75 px-3.5 py-2.5 backdrop-blur-md">
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-200">
-                    ENG // GEM · SCADA
+                    POLYTECH // GEM · R&D
                   </span>
                   <span className="font-mono text-[10px] tabular-nums text-[#00D2FF]">
                     51.03°N 02.37°E

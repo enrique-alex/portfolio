@@ -6,10 +6,10 @@ export default function ProjectCardSkeleton({
   return (
     <div
       aria-hidden="true"
-      className={`relative flex h-full w-full flex-col justify-between overflow-hidden rounded-[2rem] border ${
+      className={`relative flex h-full w-full flex-col justify-between overflow-hidden rounded-2xl border ${
         isFeatured 
-        ? "border-zinc-300 dark:border-white/10 bg-zinc-100/60 dark:bg-zinc-900/50 p-8 lg:p-12" 
-        : "border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-8 md:p-10"
+        ? "border-zinc-300 dark:border-white/10 bg-zinc-100/60 dark:bg-zinc-900/50 p-5 sm:p-7 lg:p-9" 
+        : "border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-5 sm:p-6 md:p-7"
       }`}
     >
       <div className="relative z-10 flex h-full flex-col justify-between">

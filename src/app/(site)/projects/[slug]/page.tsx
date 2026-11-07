@@ -65,7 +65,7 @@ export default function ProjectDetail() {
             <div className="w-full max-w-4xl flex items-center justify-between mb-6 relative z-50">
                 <Link 
                     href="/#projects"
-                    className="flex items-center gap-2 rounded-full border border-black/15 bg-white/80 px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-800 backdrop-blur-md transition-[border-color,background-color] duration-200 hover:border-black/30 hover:bg-white dark:border-white/15 dark:bg-[#0A0C10]/85 dark:text-zinc-200 dark:hover:border-white/30"
+                    className="flex items-center gap-2 rounded-full border border-black/15 bg-white/80 px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-800 backdrop-blur-md active:scale-[0.97] transition-[transform,border-color,background-color] duration-200 ease-[var(--ease-out)] hover:border-black/30 hover:bg-white dark:border-white/15 dark:bg-[#0A0C10]/85 dark:text-zinc-200 dark:hover:border-white/30"
                 >
                     <ArrowLeft size={14} aria-hidden="true" />
                     {t('projects.detail.back')}
@@ -75,9 +75,8 @@ export default function ProjectDetail() {
                 </span>
             </div>
 
-            {/* Conteneur principal avec le layoutId partagé pour la transition de Morphing Spatial */}
-            <motion.div 
-                layoutId={`project-${project.id}`}
+            {/* Conteneur principal */}
+            <div 
                 className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-black/15 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0A0C10]/95 md:p-12"
             >
                 {/* Ligne de calibration supérieure */}
@@ -91,7 +90,7 @@ export default function ProjectDetail() {
                     <motion.div 
                         initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: [0.23, 1, 0.32, 1] }}
                         className="group relative mb-10 w-full overflow-hidden rounded-xl aspect-video border border-black/10 dark:border-white/10 bg-zinc-950 shadow-lg"
                     >
                         {/* Conteneur d'image swipeable */}
@@ -128,14 +127,14 @@ export default function ProjectDetail() {
                                 <button 
                                     onClick={(e) => { e.preventDefault(); setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1)); }}
                                     aria-label={t('projects.detail.prevImage')}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white opacity-80 backdrop-blur-md transition-[transform,opacity,background-color] duration-200 active:scale-95 md:opacity-0 md:group-hover:opacity-100 md:hover:bg-black/80"
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white opacity-80 backdrop-blur-md transition-[transform,opacity,background-color] duration-200 ease-[var(--ease-out)] active:scale-95 md:opacity-0 md:group-hover:opacity-100 md:hover:bg-black/80"
                                 >
                                     <ChevronLeft size={20} aria-hidden="true" />
                                 </button>
                                 <button 
                                     onClick={(e) => { e.preventDefault(); setImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1)); }}
                                     aria-label={t('projects.detail.nextImage')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white opacity-80 backdrop-blur-md transition-[transform,opacity,background-color] duration-200 active:scale-95 md:opacity-0 md:group-hover:opacity-100 md:hover:bg-black/80"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white opacity-80 backdrop-blur-md transition-[transform,opacity,background-color] duration-200 ease-[var(--ease-out)] active:scale-95 md:opacity-0 md:group-hover:opacity-100 md:hover:bg-black/80"
                                 >
                                     <ChevronRight size={20} aria-hidden="true" />
                                 </button>
@@ -170,26 +169,20 @@ export default function ProjectDetail() {
                         >
                             {project.category}
                         </span>
-                        <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                        <span className="font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
                             • {project.technologies.length} {t('projects.detail.modules')}
                         </span>
                     </div>
 
-                    <motion.h1 
-                        layoutId={`project-title-${project.id}`}
-                        className="text-3xl font-black tracking-tight text-zinc-900 md:text-4xl lg:text-5xl dark:text-white"
-                    >
+                    <h1 className="text-3xl font-black tracking-tight text-zinc-900 md:text-4xl lg:text-5xl dark:text-white">
                         {project.title}
-                    </motion.h1>
+                    </h1>
                     
-                    <motion.p 
-                        layoutId={`project-desc-${project.id}`}
-                        className="mt-6 text-base leading-relaxed text-zinc-700 dark:text-zinc-300 md:text-lg"
-                    >
+                    <p className="mt-6 max-w-[65ch] text-base leading-relaxed text-zinc-700 dark:text-zinc-300 md:text-lg">
                         {project.detailedDescription}
-                    </motion.p>
+                    </p>
 
-                    <motion.div layoutId={`project-techs-${project.id}`} className="mt-6 flex flex-wrap gap-2">
+                    <div className="mt-6 flex flex-wrap gap-2">
                         {project.technologies.map((tech) => (
                             <span 
                                 key={tech}
@@ -198,7 +191,7 @@ export default function ProjectDetail() {
                                 {tech}
                             </span>
                         ))}
-                    </motion.div>
+                    </div>
                 </header>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -214,7 +207,7 @@ export default function ProjectDetail() {
                                 </span>
                                 {t('projects.detail.analysis')}
                             </h3>
-                            <p className="text-sm md:text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
+                            <p className="max-w-[65ch] text-sm md:text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
                                 {project.technicalChallenges}
                             </p>
                         </motion.div>
@@ -235,7 +228,7 @@ export default function ProjectDetail() {
                                 </span>
                                 {t('projects.detail.impact')}
                             </h3>
-                            <p className="text-sm md:text-base leading-relaxed text-zinc-700 dark:text-zinc-300 font-medium">
+                            <p className="max-w-[65ch] text-sm md:text-base leading-relaxed text-zinc-700 dark:text-zinc-300 font-medium">
                                 {project.impact}
                             </p>
                         </motion.div>
@@ -251,12 +244,12 @@ export default function ProjectDetail() {
                          <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{t('projects.detail.private')}</span>
                     )}
                 </footer>
-            </motion.div>
+            </div>
 
             {/* Navigation inter-projets */}
             <div className="mt-6 flex w-full max-w-4xl flex-col sm:flex-row gap-4 relative z-10">
                 {prevProject ? (
-                    <Link href={`/projects/${prevProject.slug}`} className="group flex flex-1 flex-col items-start justify-center gap-1.5 rounded-2xl border border-black/10 bg-white/80 p-5 backdrop-blur-md transition-[border-color,background-color] duration-200 hover:border-black/25 hover:bg-white dark:border-white/10 dark:bg-[#0A0C10]/80 dark:hover:border-white/25 dark:hover:bg-[#0A0C10]">
+                    <Link href={`/projects/${prevProject.slug}`} className="group flex flex-1 flex-col items-start justify-center gap-1.5 rounded-2xl border border-black/10 bg-white/80 p-5 backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.985] transition-[transform,border-color,background-color] duration-200 ease-[var(--ease-out)] hover:border-black/25 hover:bg-white dark:border-white/10 dark:bg-[#0A0C10]/80 dark:hover:border-white/25 dark:hover:bg-[#0A0C10]">
                         <span className="flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors group-hover:text-brand-blue dark:text-zinc-400 dark:group-hover:text-[#00D2FF]">
                             <ChevronLeft size={14} aria-hidden="true" /> {t('projects.detail.prev')}
                         </span>
@@ -267,7 +260,7 @@ export default function ProjectDetail() {
                 ) : <div className="hidden sm:block flex-1" />}
 
                 {nextProject ? (
-                    <Link href={`/projects/${nextProject.slug}`} className="group flex flex-1 flex-col items-end justify-center gap-1.5 rounded-2xl border border-black/10 bg-white/80 p-5 backdrop-blur-md transition-[border-color,background-color] duration-200 hover:border-black/25 hover:bg-white dark:border-white/10 dark:bg-[#0A0C10]/80 dark:hover:border-white/25 dark:hover:bg-[#0A0C10] text-right">
+                    <Link href={`/projects/${nextProject.slug}`} className="group flex flex-1 flex-col items-end justify-center gap-1.5 rounded-2xl border border-black/10 bg-white/80 p-5 backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.985] transition-[transform,border-color,background-color] duration-200 ease-[var(--ease-out)] hover:border-black/25 hover:bg-white dark:border-white/10 dark:bg-[#0A0C10]/80 dark:hover:border-white/25 dark:hover:bg-[#0A0C10] text-right">
                         <span className="flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors group-hover:text-brand-blue dark:text-zinc-400 dark:group-hover:text-[#00D2FF]">
                             {t('projects.detail.next')} <ChevronRight size={14} aria-hidden="true" />
                         </span>

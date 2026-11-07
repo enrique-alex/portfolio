@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import { Project } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
@@ -14,6 +14,7 @@ export default function ProjectCard({
     onClick: (p: Project) => void;
 }) {
     const cardRef = useRef<HTMLDivElement>(null);
+    const isHoveredRef = useRef(false);
     const { resolvedTheme } = useTheme();
     const [isHovered, setIsHovered] = useState(false);
 
@@ -27,6 +28,11 @@ export default function ProjectCard({
     useEffect(() => {
         setMounted(true);
         setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
+        return () => {
+            if (isHoveredRef.current) {
+                window.dispatchEvent(new CustomEvent('webgl-resonance', { detail: { color: null } }));
+            }
+        };
     }, []);
 
     function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -36,56 +42,29 @@ export default function ProjectCard({
         mouseY.set(e.clientY - rect.top);
     }
 
-    // --- COUCHE 2 : PHYSIQUE MAGNÉTIQUE 3D (Tilt) ---
-    // Les springs donnent un effet "rebond" organique et pèsent la carte.
-    const springConfig = { damping: 20, stiffness: 200, mass: 0.5 };
-    const xSpring = useSpring(mouseX, springConfig);
-    const ySpring = useSpring(mouseY, springConfig);
-
-    // Transformation de la position de la souris en angles de rotation 3D limités à +- 8 degrés
-    const rotateX = useTransform(ySpring, [0, 500], [8, -8]);
-    const rotateY = useTransform(xSpring, [0, 500], [-8, 8]);
-
     // Format du spotlight (masque radial)
     const spotlightColor = resolvedTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
     const backgroundTemplate = useMotionTemplate`
         radial-gradient(400px circle at ${mouseX}px ${mouseY}px, ${spotlightColor}, transparent 80%)
     `;
 
-    // --- COUCHE 3 : RÉSONANCE WEBGL ---
-    // On envoie un évènement global quand la carte est survolée
-    useEffect(() => {
-        if (isHovered) {
-             const event = new CustomEvent('webgl-resonance', { detail: { color: project.themeColor } });
-             window.dispatchEvent(event);
-        } else {
-             const event = new CustomEvent('webgl-resonance', { detail: { color: null } });
-             window.dispatchEvent(event);
-        }
-    }, [isHovered, project.themeColor]);
-
     return (
-        <motion.div
+        <div
             ref={cardRef}
-            layoutId={`project-${project.id}`}
             onClick={() => onClick(project)}
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => setIsHovered(true)}
-            whileTap={{ scale: 0.98 }}
-            onMouseLeave={() => {
-                setIsHovered(false);
-                // Reset du tilt quand on quitte la carte
-                mouseX.set(250); 
-                mouseY.set(250);
+            onMouseEnter={() => {
+                isHoveredRef.current = true;
+                setIsHovered(true);
+                window.dispatchEvent(new CustomEvent('webgl-resonance', { detail: { color: project.themeColor } }));
             }}
-            style={{
-                // Appliquer la rotation 3D seulement au survol pour plus de contrôle
-                rotateX: isHovered ? rotateX : 0,
-                rotateY: isHovered ? rotateY : 0,
-                transformStyle: "preserve-3d",
+            onMouseLeave={() => {
+                isHoveredRef.current = false;
+                setIsHovered(false);
+                window.dispatchEvent(new CustomEvent('webgl-resonance', { detail: { color: null } }));
             }}
             className={cn(
-                "group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-zinc-200/50 bg-white/40 p-8 shadow-sm backdrop-blur-md transition-all duration-500 will-change-transform dark:border-white/10 dark:bg-white/5",
+                "group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-zinc-200/50 bg-white/40 p-8 shadow-sm backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.985] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-[var(--ease-out)] dark:border-white/10 dark:bg-white/5",
                 isHovered && "shadow-xl border-zinc-300 dark:border-white/20"
             )}
         >
@@ -97,22 +76,16 @@ export default function ProjectCard({
                 />
             )}
 
-            {/* Contenu textuel avec translation sur Z (Effet Parallaxe 3D) */}
-            <div className="relative z-10 flex h-full flex-col justify-between" style={{ transform: "translateZ(30px)" }}>
+            {/* Contenu textuel */}
+            <div className="relative z-10 flex h-full flex-col justify-between">
                 <div>
-                    <motion.h3 
-                        layoutId={`project-title-${project.id}`}
-                        className="text-2xl font-bold tracking-tight text-zinc-900 md:text-3xl dark:text-white"
-                    >
+                    <h3 className="text-2xl font-bold tracking-tight text-zinc-900 md:text-3xl dark:text-white">
                         {project.title}
-                    </motion.h3>
+                    </h3>
                     
-                    <motion.p
-                        layoutId={`project-desc-${project.id}`}
-                        className="mt-4 max-w-sm text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-                    >
+                    <p className="mt-4 max-w-[65ch] text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                         {project.shortDescription}
-                    </motion.p>
+                    </p>
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-2">
@@ -128,12 +101,12 @@ export default function ProjectCard({
             </div>
 
             {/* Accent d'Ingénierie : Ligne brillante dynamique */}
-            <motion.div 
-                className={`absolute bottom-0 left-0 h-1 w-full transition-opacity duration-500 ${isTouchDevice ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'}`}
+            <div 
+                className={`absolute bottom-0 left-0 h-1 w-full transition-opacity duration-300 ${isTouchDevice ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'}`}
                 style={{ 
                     background: `linear-gradient(90deg, transparent, rgb(${project.themeColor.r},${project.themeColor.g},${project.themeColor.b}), transparent)`
                 }}
             />
-        </motion.div>
+        </div>
     );
 }

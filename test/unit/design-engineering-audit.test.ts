@@ -54,9 +54,23 @@ import { ThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
 import siteLayoutContent from '@/app/(site)/layout.tsx?raw';
 // @ts-expect-error Vite raw query import
 import rootLayoutContent from '@/app/layout.tsx?raw';
+// @ts-expect-error Vite raw query import
+import cursorFluidContent from '@/components/animations/CursorFluid.tsx?raw';
+// @ts-expect-error Vite raw query import
+import magneticCardContent from '@/components/ui/MagneticProjectCard.tsx?raw';
+// @ts-expect-error Vite raw query import
+import projectsGridContent from '@/components/ui/ProjectsGrid.tsx?raw';
+// @ts-expect-error Vite raw query import
+import webglFluidContent from '@/components/animations/webgl-fluid.js?raw';
+// @ts-expect-error Vite raw query import
+import skillsSectionContent from '@/components/ui/SkillsSection.tsx?raw';
+// @ts-expect-error Vite raw query import
+import mobileHudDrawerContent from '@/components/layout/MobileHudDrawer.tsx?raw';
+// @ts-expect-error Vite raw query import
+import projectCardContent from '@/components/ui/ProjectCard.tsx?raw';
 
 describe('Principal Design Engineering Audit Invariants', () => {
-  it('1. should eradicate generic AI copywriting clichés ("passionné par", "Waiting for incoming signals", "Séquence d\'Amorçage") in both FR and EN', () => {
+  it('1. should eradicate generic AI copywriting clichés ("passionné par", "Waiting for incoming signals", "Séquence d\'Amorçage") in both FR and EN while highlighting multidisciplinary engineering & international mobility', () => {
     currentTestLocale = 'fr';
     const allFrValues = Object.values(translations.fr).join(' ');
     const allEnValues = Object.values(translations.en).join(' ');
@@ -73,26 +87,45 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(allEnValues).not.toContain('Boot Sequence');
     expect(allEnValues).not.toContain('Extract.Resume_Data');
 
-    // Concrete industrial engineering metrics and domain terms must be present
+    // Multidisciplinary positioning + international internship projection + Minakem experience metrics
+    expect(allFrValues).toContain('stage à l\'étranger');
+    expect(allFrValues).toContain('systèmes embarqués');
+    expect(allFrValues).toContain('robotique');
     expect(allFrValues).toContain('ISA-18.2');
-    expect(allFrValues).toContain('SCADA');
+    expect(allEnValues).toContain('international internship');
+    expect(allEnValues).toContain('embedded systems');
+    expect(allEnValues).toContain('robotics');
     expect(allEnValues).toContain('ISA-18.2');
-    expect(allEnValues).toContain('SCADA');
+
+    // Verify RootLayout metadata and MobileHudDrawer reflect multidisciplinary scope
+    expect(rootLayoutContent).toContain('Systèmes Embarqués');
+    expect(rootLayoutContent).toContain('Robotique');
+    expect(rootLayoutContent).toContain('Stage International');
+    expect(mobileHudDrawerContent).toContain('Embarqué, Robotique & Logiciel');
+    expect(mobileHudDrawerContent).toContain('Embedded, Robotics & Software');
+    expect(mobileHudDrawerContent).not.toContain('SCADA, PLCs & Logiciel');
+    expect(mobileHudDrawerContent).not.toContain('transition-all');
   });
 
-  it('2. should mount KineticCanvas instead of CursorFluid in SiteLayout and avoid full-DOM transition-colors on body', () => {
-    expect(siteLayoutContent).toContain('import KineticCanvas from "@/components/animations/KineticCanvas"');
-    expect(siteLayoutContent).toContain('<KineticCanvas />');
-    expect(siteLayoutContent).not.toContain('<CursorFluid />');
+  it('2. should mount CursorFluid in SiteLayout with natural fluid dynamics (SHADING: true, COLORFUL: true) and avoid full-DOM transition-colors on body', () => {
+    expect(siteLayoutContent).toContain('import CursorFluid from "@/components/animations/CursorFluid"');
+    expect(siteLayoutContent).toContain('<CursorFluid />');
+    expect(siteLayoutContent).not.toContain('<KineticCanvas />');
+    expect(cursorFluidContent).toContain('SHADING: true');
+    expect(cursorFluidContent).toContain('COLORFUL: true');
+    expect(cursorFluidContent).toContain('SPLAT_RADIUS: 0.25');
+    expect(cursorFluidContent).toContain('COLOR_UPDATE_SPEED: 8');
     expect(rootLayoutContent).not.toContain('transition-colors duration-700');
   });
 
-  it('3. should render HeroSection with precision telemetry frame, fiducials, and engineering KPIs without cyberpunk overlay', () => {
+  it('3. should render HeroSection with precision telemetry frame, fiducials, multidisciplinary KPIs (15, 4 Axes, R&D · Intl), and 65ch measure', () => {
     currentTestLocale = 'fr';
     const html = renderToString(React.createElement(HeroSection));
     expect(html).toContain('51.03°N 02.37°E');
-    expect(html).toContain('ISA-18.2');
-    expect(html).toContain('1 kHz');
+    expect(html).toContain('POLYTECH // GEM · R&amp;D');
+    expect(html).toContain('4 Axes');
+    expect(html).toContain('R&amp;D · Intl');
+    expect(html).toContain('max-w-[65ch]');
     expect(html).toContain('Explorer les Systèmes');
     expect(html).toContain('Télécharger le CV [PDF]');
     expect(html).not.toContain('mix-blend-overlay');
@@ -139,10 +172,10 @@ describe('Principal Design Engineering Audit Invariants', () => {
     const expEn = renderToString(React.createElement(ExperienceSection));
     const footerEn = renderToString(React.createElement(Footer));
 
-    expect(heroEn).toContain('Systems &amp; Testbeds');
-    expect(heroEn).toContain('SCADA Supervision');
-    expect(heroEn).toContain('HIL &amp; Real-Time');
-    expect(heroEn).not.toContain('Systèmes &amp; Bancs');
+    expect(heroEn).toContain('Engineered Systems');
+    expect(heroEn).toContain('Embedded · Robotics · Control');
+    expect(heroEn).toContain('Intl. Internship &amp; R&amp;D');
+    expect(heroEn).not.toContain('Systèmes &amp; Projets');
 
     expect(academicEn).toContain('02 // ACADEMIC FOUNDATIONS');
 
@@ -157,11 +190,14 @@ describe('Principal Design Engineering Audit Invariants', () => {
     currentTestLocale = 'fr';
   });
 
-  it('7. should render calibrated SkillsSection tier badges, readable SocialLinks without transition-all, and keyboard-accessible project cards with canonical SYS.01..SYS.15 badges', () => {
+  it('7. should render calibrated SkillsSection tier badges, zero purple/violet accents, readable SocialLinks without transition-all, and keyboard-accessible project cards with canonical SYS.01..SYS.15 badges', () => {
     currentTestLocale = 'fr';
     const skillsHtml = renderToString(React.createElement(SkillsSection));
     expect(skillsHtml).toContain('IND. / PROD');
     expect(skillsHtml).toContain('92%');
+    expect(skillsSectionContent).not.toContain('#8B5CF6');
+    expect(skillsSectionContent).not.toContain('#660066');
+    expect(skillsSectionContent).not.toContain('168, g: 85, b: 247');
 
     const socialHtml = renderToString(React.createElement(SocialLinks));
     expect(socialHtml).not.toContain('transition-all');
@@ -208,4 +244,53 @@ describe('Principal Design Engineering Audit Invariants', () => {
 
     scene.destroy();
   });
+
+  it('9. should enforce emilkowalski/skills, pbakaus/impeccable, and Leonxlnx/taste-skill rules (custom --ease-out curve, no 3D card tilt, 2px hover lift, tactile press, and RGB object WebGL resonance)', () => {
+    expect(magneticCardContent).toContain('hover:-translate-y-0.5');
+    expect(magneticCardContent).toContain('active:scale-[0.985]');
+    expect(magneticCardContent).toContain('group-hover:scale-[1.03]');
+    expect(magneticCardContent).toContain('ease-[var(--ease-out)]');
+    expect(magneticCardContent).not.toContain('rotateX(');
+    expect(magneticCardContent).not.toContain('rotateY(');
+
+    expect(projectCardContent).toContain('hover:-translate-y-0.5');
+    expect(projectCardContent).toContain('ease-[var(--ease-out)]');
+    expect(projectCardContent).not.toContain('rotateX');
+    expect(projectCardContent).not.toContain('transition-all');
+
+    expect(projectsGridContent).toContain('active:scale-[0.97]');
+    expect(projectsGridContent).toContain('ease-[var(--ease-out)]');
+
+    expect(webglFluidContent).toContain('window.__webglResonanceColor');
+    expect(webglFluidContent).toContain('typeof c.r==="number"');
+    expect(webglFluidContent).toContain('window.addEventListener("webgl-resonance"');
+  });
+
+  it('10. should give every single one of the 15 projects a unique bespoke SVG schematic, telemetry spec, zero-violet themeColor, and hole-free responsive Bento grid across mobile/tablet/desktop', () => {
+    for (const locale of ['fr', 'en'] as const) {
+      for (const proj of FALLBACK_PROJECTS[locale]) {
+        const { r, g, b } = proj.themeColor;
+        // Zero Violet / Purple / Indigo Rule: blue channel cannot dominate red and green simultaneously with high red+blue purple mix
+        const isBannedVioletOrIndigo =
+          (r === 99 && g === 102 && b === 241) ||
+          (r === 140 && g === 95 && b === 168) ||
+          (r === 93 && g === 101 && b === 168) ||
+          (b > 150 && r > 80 && g < 110);
+        expect(isBannedVioletOrIndigo, `Banned violet/indigo themeColor on ${proj.id} (${locale})`).toBe(false);
+
+        // Every project ID must have its own dedicated schematic switch case and telemetry spec in MagneticProjectCard.tsx
+        expect(magneticCardContent).toContain(`case '${proj.id}':`);
+        expect(magneticCardContent).toContain(`'${proj.id}':`);
+      }
+    }
+
+    // Verify adaptive multi-viewport grid in ProjectsGrid.tsx
+    expect(projectsGridContent).toContain('grid-cols-1');
+    expect(projectsGridContent).toContain('md:grid-cols-2');
+    expect(projectsGridContent).toContain('lg:grid-cols-3');
+    expect(projectsGridContent).toContain('grid-flow-row-dense');
+    expect(projectsGridContent).toContain('auto-rows-[minmax(360px,auto)]');
+    expect(projectsGridContent).toContain('getAdaptiveBentoSpan');
+  });
 });
+

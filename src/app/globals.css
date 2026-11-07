@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Palette Signature : Obsidian, Cobalt & Télémétrie Industrielle */
+  /* Palette Signature : Obsidian, Cobalt & Télémétrie Cyber-Physique (Zéro Violet — Leonxlnx/taste-skill) */
   --color-brand-dark: #050505;
   --color-brand-surface: #0A0C10;
   --color-brand-elevated: #11141C;
@@ -18,8 +18,33 @@
   --color-brand-red: #EA4335;
   --color-brand-yellow: #FBBC05;
   --color-brand-green: #10B981;
+  /* Courbes cinématiques personnalisées (emilkowalski/skills) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-tactile: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Surfaces Navigateur Thématisées (pbakaus/impeccable craft-floor) */
+::selection {
+  background-color: rgba(0, 210, 255, 0.22);
+  color: #EDEDED;
+}
+
+input,
+textarea {
+  caret-color: var(--color-brand-cyan);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-cyan);
+  outline-offset: 2px;
+}
+
+a {
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
 }
 
 @keyframes marquee-left {
