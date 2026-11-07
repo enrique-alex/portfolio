@@ -9,26 +9,27 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#050505',
 };
 
 export const metadata = {
   icons: {
     icon: [
-      { url: '/favicon.ico?v=6', sizes: 'any' },
-      { url: '/icon.svg?v=6', type: 'image/svg+xml' },
-      { url: '/favicon-32x32.png?v=6', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png?v=6', sizes: '16x16', type: 'image/png' },
-      { url: '/icon-192.png?v=6', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512.png?v=6', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico?v=7', sizes: 'any' },
+      { url: '/icon.svg?v=7', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png?v=7', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png?v=7', sizes: '16x16', type: 'image/png' },
+      { url: '/icon-192.png?v=7', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png?v=7', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico?v=6',
+    shortcut: '/favicon.ico?v=7',
     apple: [
-      { url: '/apple-touch-icon.png?v=6', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-touch-icon.png?v=7', sizes: '180x180', type: 'image/png' },
     ],
     other: [
       {
         rel: 'apple-touch-icon-precomposed',
-        url: '/apple-touch-icon-precomposed.png?v=6',
+        url: '/apple-touch-icon-precomposed.png?v=7',
       },
     ],
   },
@@ -36,29 +37,41 @@ export const metadata = {
   description:
     "Portfolio d'Enrique Alex Ndjakou Kemayou, Élève Ingénieur en Génie Électrique et Mécatronique à Polytech Lille, Apprenti chez Minakem. Systèmes embarqués, robotique, commande temps réel, C/C++, Python et architecture industrielle & logicielle.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
+    title: "Enrique Alex Ndjakou · Ingénieur en Génie Électrique, Mécatronique & Systèmes Embarqués",
     description:
-      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Systèmes Embarqués, Robotique, Commande Temps Réel & Architecture Logicielle / Industrielle (Minakem).",
+      "Élève Ingénieur à Polytech Lille & Apprenti chez Minakem · 15 Systèmes & Architectures : Systèmes Embarqués (C/C++, AVR8), Robotique, Commande Temps Réel, SCADA & R&D Internationale.",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://portfolio.enriquekemayou.workers.dev",
-    siteName: "Portfolio · Enrique Alex Ndjakou",
+    siteName: "Enrique.Ndjakou · Engineering Portfolio",
     locale: "fr_FR",
+    alternateLocale: ["en_US"],
     type: "website",
     images: [
       {
-        url: "/og-image.png",
-        width: 1376,
-        height: 768,
-        alt: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
+        url: "/og-image.png?v=7",
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: "Enrique Alex Ndjakou Kemayou — Ingénieur en Génie Électrique, Mécatronique & Systèmes Embarqués (Polytech Lille · Minakem)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Enrique Alex Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
+    title: "Enrique Alex Ndjakou · Ingénieur en Génie Électrique, Mécatronique & Systèmes Embarqués",
     description:
-      "Élève Ingénieur en Génie Électrique et Mécatronique (Polytech Lille) · Systèmes Embarqués, Robotique, Commande Temps Réel & R&D.",
-    images: ["/og-image.png"],
+      "Élève Ingénieur (Polytech Lille · Minakem) · Systèmes Embarqués, Robotique, Commande Temps Réel, Architecture Logicielle/SCADA & Mobilité R&D Internationale.",
+    images: [
+      {
+        url: "/og-image.png?v=7",
+        width: 1200,
+        height: 630,
+        alt: "Enrique Alex Ndjakou Kemayou — Engineering Portfolio",
+      },
+    ],
   },
   keywords: [
     "Enrique Alex Ndjakou",
@@ -88,16 +101,16 @@ export default function RootLayout({
     // suppressHydrationWarning est indispensable avec next-themes pour éviter le flash au chargement
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
       <head>
-        <link rel="shortcut icon" href="/favicon.ico?v=6" />
-        <link rel="icon" href="/favicon.ico?v=6" sizes="any" />
-        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=6" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=6" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=6" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=6" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=6" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=6" />
-        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png?v=6" />
-        <link rel="manifest" href="/manifest.webmanifest?v=6" />
+        <link rel="shortcut icon" href="/favicon.ico?v=7" />
+        <link rel="icon" href="/favicon.ico?v=7" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=7" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=7" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=7" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=7" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=7" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=7" />
+        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png?v=7" />
+        <link rel="manifest" href="/manifest.webmanifest?v=7" />
         <script
           dangerouslySetInnerHTML={{
             __html:

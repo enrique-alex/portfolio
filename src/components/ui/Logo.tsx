@@ -8,15 +8,20 @@ export interface LogoProps extends SVGProps<SVGSVGElement> {
 }
 
 /**
- * Official Personal Brand Logo - Concept 1: The Feedback Core / La Boucle Fermée
+ * Official Personal Brand Logo — The Isometric EN Monolith / Le Prisme Architectural EN
  *
- * Closed-Loop PID Control & Mechatronic Engineering Symbology:
- * - 24x24 strict geometric grid with pixel-grid alignment (zero sub-pixel blur).
- * - Central Feedback Core: Controlled plant & PID summing nucleus (circle r=3 at 12,12).
- * - Symmetrical Closed-Loop Circulation: Feedforward direct transfer arc & Feedback return loop.
- * - Directional feedback vector terminals entering the summing junction.
- * - Uniform stroke with round linecaps and filleted linejoins (Lucide vector standard).
- * - Dynamic theming via `currentColor`.
+ * Synthesized from GitHub's top-starred logo design frameworks:
+ * - `kaankiziltug/logo-design-skill`: Zero eye pareidolia (no concentric circles),
+ *   open counterforms at 16px, and architectural monogram taxonomy.
+ * - `op7418/logo-generator-skill`: 3D isometric hexagonal prism construction
+ *   and disciplined negative-space channels.
+ * - `neonwatty/logo-designer-skill`: Adaptive multi-scale clarity and dynamic `currentColor` theming.
+ *
+ * Geometric Construction (24x24 grid):
+ * - Left Isometric Face (`E`): Outer contour (`M12 2.5L3.5 7v10L12 21.5`),
+ *   upper isometric ridge (`M3.5 7L12 11.5`), and middle cantilever (`M3.5 12L9 15`).
+ * - Right Isometric Face (`N`): Upper-right crown (`M12 2.5L20.5 7`) and
+ *   interlocking N face (`M12 21.5v-10L20.5 17V7`).
  */
 export function Logo({
   className = 'h-8 w-8',
@@ -28,7 +33,7 @@ export function Logo({
 }: LogoProps): JSX.Element {
   // If title is provided, the SVG is semantic and accessible; otherwise, it is decorative.
   const isAriaHidden = ariaHidden !== undefined ? ariaHidden : title ? undefined : true;
-  const titleId = title ? 'feedback-core-title' : undefined;
+  const titleId = title ? 'en-monolith-title' : undefined;
 
   return (
     <svg
@@ -48,20 +53,16 @@ export function Logo({
       {...props}
     >
       {title ? <title id={titleId}>{title}</title> : null}
-      {/* Central Feedback Core: PID Controller / Summing Plant Nucleus */}
-      <circle cx="12" cy="12" r="3" />
-      {/* Setpoint Reference Vector: input -> summing junction -> core */}
-      <path d="M2 12h7" />
-      {/* Controlled Output Vector: core -> branch node -> system output */}
-      <path d="M15 12h7" />
-      {/* Feedforward Upper Arc (Direct Transfer Function G(s)) */}
-      <path d="M5 12a7 7 0 0 1 14 0" />
-      {/* Feedforward Terminal Direction Arrow */}
-      <path d="m17 10 2 2 2-2" />
-      {/* Feedback Lower Arc (Sensor Return Loop H(s)) */}
-      <path d="M19 12a7 7 0 0 1-14 0" />
-      {/* Feedback Return Direction Arrow entering Summing Junction */}
-      <path d="m3 14 2-2 2 2" />
+      {/* Left Isometric Face (E): Top-left ridge, left vertical pillar, bottom-left base */}
+      <path d="M12 2.5L3.5 7v10L12 21.5" />
+      {/* Left Isometric Face (E): Upper isometric crossbar / front-left roof ridge */}
+      <path d="M3.5 7L12 11.5" />
+      {/* Left Isometric Face (E): Middle cantilevered crossbar */}
+      <path d="M3.5 12L9 15" />
+      {/* Right Isometric Face (N): Upper-right crown ridge */}
+      <path d="M12 2.5L20.5 7" />
+      {/* Right Isometric Face (N): Central vertical spine, diagonal bridge, right vertical pillar */}
+      <path d="M12 21.5v-10L20.5 17V7" />
     </svg>
   );
 }

@@ -48,3 +48,14 @@ This skill adapts three industry-reference frontend design and engineering metho
 - **Zero Violet Rule:** Never introduce purple, violet, or indigo accents (`#8B5CF6`, `#7C3AED`). Stick strictly to Obsidian (`#050505`, `#0A0C10`), Telemetry Cyan (`#00D2FF`), Cobalt (`#3B82F6`), Emerald (`#10B981`), and Amber (`#F59E0B`).
 - **Measure & Numerals:** Constrain narrative paragraphs to `max-w-[65ch]`. Apply `tabular-nums` to all numeric KPIs, coordinates, years, and system indices (`SYS.01`–`SYS.15`).
 - **Browser Surfaces:** Maintain custom `::selection`, `caret-color`, `:focus-visible`, and `text-underline-offset` rules in `src/app/globals.css`.
+
+---
+
+## 5. Brand Identity & Link Preview (`kaankiziltug/logo-design-skill` + `op7418` + `neonwatty`)
+- **The Isometric `EN` Monolith (`src/components/ui/Logo.tsx`, `src/app/icon.svg`, `public/icon.svg`):**
+  - Never use concentric circles or literal school/work diagrams (PID loops, circuits, gears) that look like an eye at `16×16`px.
+  - Use the 5-path **Isometric `EN` Monolith** (3D hexagonal prism uniting an `E` left face in `#00D2FF` and an `N` right face in `#FFFFFF`).
+- **Browser Tab & OpenGraph Social Card (`public/og-image.png`):**
+  - Browser favicons (`16×16`, `32×32`, `favicon.ico`, `icon.svg`) sit inside an Obsidian squircle badge (`#050505` with radial cyan glow and specular rim border) for high contrast on both dark and light browser tab bars.
+  - `public/og-image.png` follows the universal **`1200×630` (`1.91:1`)** OpenGraph standard (`< 250 KB`), featuring the Isometric `EN` Monolith and all 4 multidisciplinary pillars.
+

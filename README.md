@@ -19,7 +19,7 @@
   <a href="#-profil-industriel--positionnement">Profil</a> •
   <a href="#-projets-dingénierie-phares">Projets Clés</a> •
   <a href="#-architecture-technique--innovations">Architecture Web</a> •
-  <a href="#-identit%C3%A9-de-marque--the-feedback-core">Identité Visuelle</a> •
+  <a href="#-identit%C3%A9-de-marque--the-isometric-en-monolith">Identité Visuelle</a> •
   <a href="#-installation--d%C3%A9veloppement-local">Développement Local</a> •
   <a href="#-contact--coordonn%C3%A9es">Contact</a>
 </p>
@@ -106,25 +106,24 @@ Le portfolio n'est pas une vitrine statique : c'est une application d'ingénieri
 
 ---
 
-## 💎 Identité de Marque : The Feedback Core
+## 💎 Identité de Marque : The Isometric EN Monolith
 
-L'identité visuelle du portfolio repose sur le **Concept 1 : The Feedback Core / La Boucle Fermée**, conçu pour matérialiser les principes de l'automatique et de la mécatronique :
+L'identité visuelle du portfolio repose sur **Le Prisme Architectural `EN` (`The Isometric EN Monolith`)**, conçu selon les référentiels open-source **`kaankiziltug/logo-design-skill`**, **`op7418/logo-generator-skill`** et **`neonwatty/logo-designer-skill`** :
 
 <div align="center">
-  <img src="public/icon-192.png" width="96" height="96" alt="The Feedback Core Logo" />
+  <img src="public/icon-192.png" width="96" height="96" alt="The Isometric EN Monolith Logo" />
 </div>
 
-- **Le Noyau Central (`cx=12, cy=12, r=3`)** : Représente le procédé physique (la plante) et le nœud sommateur du régulateur PID.
-- **Vecteur de Consigne ($w(t)$)** : Tracé horizontal gauche orienté vers le nœud sommateur.
-- **Vecteur de Sortie Asservie ($y(t)$)** : Tracé horizontal droit propageant la grandeur réglée vers le système aval.
-- **Branche Directe Supérieure ($G(s)$)** : Arc de transfert direct orienté vers la sortie avec flèche terminale.
-- **Boucle de Retour Inférieure ($H(s)$)** : Arc de rétroaction du capteur ramenant l'information vers le comparateur d'entrée.
+- **Monogramme Architectural 3D Isométrique (`EN`)** : Un prisme hexagonal en perspective isométrique unifiant l'initiale **`E`** (Enrique) sur sa face gauche et l'initiale **`N`** (Ndjakou) sur sa face droite autour d'un pilier vertical central commun.
+- **Face Gauche (`E` — Cyan Télémétrie `#00D2FF`)** : Formée par l'arête sommitale gauche (`M12 2.5L3.5 7v10L12 21.5`), la traverse supérieure (`M3.5 7L12 11.5`) et la traverse médiane en porte-à-faux (`M3.5 12L9 15`) avec contre-formes ouvertes garantissant une lisibilité parfaite à `16×16` px.
+- **Face Droite (`N` — Blanc Pur `#FFFFFF`)** : Formée par l'arête de couronne droite (`M12 2.5L20.5 7`) et la structure en `N` (`M12 21.5v-10L20.5 17V7`), créant un contraste directionnel net sans aucune paréidolie oculaire ni cliché scolaire/industriel.
 
-### Suite Multi-Résolution & PWA Mobile
-Pour garantir une netteté absolue et éradiquer tout résidu d'icône par défaut sur les navigateurs mobiles et desktop :
-- **iOS Safari / iPadOS** : `public/apple-touch-icon.png` (180x180 px PNG plein fond obsidienne `#050505`, zone de sécurité adaptée au masque squircle d'Apple).
-- **Android Chrome & PWA** : `public/icon-192.png` et `public/icon-512.png` accompagnés de versions maskables (`icon-maskable-192.png`, `icon-maskable-512.png`) garantissant la conformité avec la safe-zone circulaire de 80%.
-- **Navigateurs Desktop** : `favicon.ico` multi-résolution encapsulant des calques 16x16, 32x32 et 48x48 px, couplé à `icon.svg` vectoriel.
+### Suite Multi-Résolution, Onglets Navigateur & Carte de Partage OpenGraph
+Pour garantir une mise en valeur optimale dans les navigateurs (thèmes sombres comme clairs) et lors du partage de lien :
+- **Navigateurs Desktop (`16×16`, `32×32`, `48×48`)** : `favicon.ico` multi-résolution et `icon.svg` vectoriel encapsulés dans un badge squircle Obsidienne (`#050505`) doté d'une lueur radiale (`#0A1926`) et d'un liseré spéculaire (`#00D2FF` / `#FFFFFF`).
+- **iOS Safari / iPadOS** : `public/apple-touch-icon.png` (180×180 px PNG plein fond obsidienne `#050505`, zone de sécurité adaptée au masque squircle d'Apple).
+- **Android Chrome & PWA** : `public/icon-192.png` et `public/icon-512.png` accompagnés de versions maskables (`icon-maskable-192.png`, `icon-maskable-512.png`) respectant la safe-zone circulaire de 80 %.
+- **Prévisualisation Sociale OpenGraph & Twitter Card (`public/og-image.png`)** : Carte `1200×630` px (`1.91:1`, optimisée `< 100 Ko`) mettant en scène le Monolithe `EN`, les 4 piliers d'ingénierie multidisciplinaires et l'ambition R&D internationale.
 
 ---
 

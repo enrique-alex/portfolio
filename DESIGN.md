@@ -45,3 +45,13 @@ Ce document formalise le système de design du portfolio d'Enrique Alex NDJAKOU 
 - **Mesure de lecture :** Tous les blocs de texte narratif sont bornés à `max-w-[65ch]` pour un confort de lecture optimal.
 - **Données & Télémétrie :** Alignement tabulaire systématique (`tabular-nums`) sur tous les compteurs, coordonnées GPS (`51.03°N 02.37°E`), années et séquences (`SYS.01` à `SYS.15`).
 - **Surfaces Navigateur :** Sélection de texte (`::selection`), curseur de saisie (`caret-color`), anneaux de focus clavier (`:focus-visible`) et barres de défilement internes teintés en `#00D2FF`.
+
+---
+
+## 5. Identité de Marque & Prévisualisation Sociale (`kaankiziltug/logo-design-skill` · `op7418` · `neonwatty`)
+- **Emblème Officiel — Le Prisme Architectural `EN` (`The Isometric EN Monolith`) :**
+  - Conçu selon les principes des skills GitHub `kaankiziltug/logo-design-skill`, `op7418/logo-generator-skill` et `neonwatty/logo-designer-skill` : zéro paréidolie oculaire (aucun cercle concentrique), zéro schéma scolaire/industriel littéral, et lisibilité optimale au test `16×16` px.
+  - Monogramme architectural 3D isométrique où la face gauche forme un **`E`** (`#00D2FF`) et la face droite forme un **`N`** (`#FFFFFF`) partageant une arête centrale de `10` unités sur une grille `24×24`.
+- **Mise en valeur dans les navigateurs :** Badge squircle Obsidienne (`#050505`) enrichi d'une lueur radiale (`#0A1926`) et d'un liseré spéculaire (`#00D2FF` / `#FFFFFF`) garantissant un détachement net sur les barres d'onglets sombres comme claires.
+- **Carte de Partage OpenGraph (`public/og-image.png`, `1200×630` px) :** Format standard universel `1.91:1` (`< 250 Ko`) intégrant le monolithe `EN`, les 4 piliers multidisciplinaires et le positionnement R&D international.
+
