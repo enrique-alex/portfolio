@@ -11,14 +11,20 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const FALLBACK_CONTEXT: LanguageContextType = {
+  locale: 'fr',
+  setLocale: () => {},
+  t: (key: string) => translations.fr[key] || key,
+};
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('fr');
 
   useEffect(() => {
     const stored = localStorage.getItem('portfolio-locale') as Locale | null;
     if (stored && (stored === 'fr' || stored === 'en')) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture de localStorage (indisponible côté serveur) : ce setState post-montage est nécessaire pour éviter un mismatch d'hydratation, ne pas remplacer par une initialisation lazy de useState.
       setLocaleState(stored);
+      document.documentElement.lang = stored;
     } else if (typeof navigator !== 'undefined' && navigator.language) {
       const browserLang = navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
       setLocaleState(browserLang);
@@ -29,7 +35,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
     localStorage.setItem('portfolio-locale', newLocale);
-    // Update the html lang attribute
     document.documentElement.lang = newLocale;
   };
 
@@ -50,4 +55,8 @@ export function useLanguage() {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
+}
+
+export function useOptionalLanguage(): LanguageContextType {
+  return useContext(LanguageContext) ?? FALLBACK_CONTEXT;
 }

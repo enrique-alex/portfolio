@@ -7,9 +7,9 @@ import type { MetadataRoute } from 'next';
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Enrique Ndjakou | Ingénieur',
+    name: 'Enrique Ndjakou | Élève Ingénieur',
     short_name: 'EN',
-    description: "Portfolio d'Enrique Ndjakou, Ingénieur en Génie Électrique et Mécatronique",
+    description: "Portfolio d'Enrique Ndjakou, Élève Ingénieur en Génie Électrique et Mécatronique",
     start_url: '/',
     display: 'standalone',
     background_color: '#050505',

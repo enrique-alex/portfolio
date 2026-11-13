@@ -413,7 +413,7 @@ describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
       expect(html).not.toContain('[04/PRF]');
 
       expect(html).toContain('href="/admin/login"');
-      expect(html).toContain('aria-label="Accès administrateur"');
+      expect(html).toContain('aria-label="Administration"');
       expect(html).toContain('Switch to English (EN)');
       expect(html).toContain('Jour');
       expect(html).toContain('href="#contact"');

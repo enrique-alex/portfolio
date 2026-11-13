@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Project } from '@/lib/data';
 
 import { useLanguage } from '@/components/theme/LanguageProvider';
@@ -20,7 +21,7 @@ const PROJECT_SPECS: Record<Locale, Record<string, string>> = {
         'lyngk': 'Bitmask 64b · O(1)',
         'microprocesseurs': 'AVR8 Bare-Metal',
         'awale': 'Anneau Z/12Z · C99',
-        'pygroove': 'Multi-Thread DMA',
+        'pygroove': 'Multi-Thread Audio',
         'terminal-c': 'POSIX · fork/pipe',
         'ferme-poo': 'RAII · Smart Ptr',
         'snake': 'Delta-Time · 2D',
@@ -37,7 +38,7 @@ const PROJECT_SPECS: Record<Locale, Record<string, string>> = {
         'lyngk': '64b Bitmask · O(1)',
         'microprocesseurs': 'AVR8 Bare-Metal',
         'awale': 'Z/12Z Ring · C99',
-        'pygroove': 'Multi-Thread DMA',
+        'pygroove': 'Multi-Thread Audio',
         'terminal-c': 'POSIX · fork/pipe',
         'ferme-poo': 'RAII · Smart Ptr',
         'snake': 'Delta-Time · 2D',
@@ -258,10 +259,10 @@ export default function MagneticProjectCard({
     project: Project;
     isFeatured?: boolean;
     sequenceNumber?: string;
-    onClick: (p: Project) => void;
+    onClick?: (p: Project) => void;
 }) {
-    const { locale } = useLanguage();
-    const cardRef = useRef<HTMLDivElement>(null);
+    const { locale, t } = useLanguage();
+    const cardRef = useRef<HTMLAnchorElement>(null);
     const rectRef = useRef<DOMRect | null>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -284,7 +285,7 @@ export default function MagneticProjectCard({
         window.dispatchEvent(new CustomEvent('webgl-resonance', { detail: { color: project.themeColor } }));
     }
 
-    function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
         if (!cardRef.current || isTouchDevice) return;
         if (!rectRef.current) {
             rectRef.current = cardRef.current.getBoundingClientRect();
@@ -320,14 +321,13 @@ export default function MagneticProjectCard({
     const extraTechCount = Math.max(0, project.technologies.length - visibleTechLimit);
 
     return (
-        <div
+        <article className="h-full w-full">
+        <Link
             ref={cardRef}
-            role="link"
-            tabIndex={0}
-            aria-label={project.title}
-            onClick={() => onClick(project)}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+            href={`/projects/${project.slug}`}
+            aria-label={`${t('projects.card.open')} ${project.title}`}
+            onClick={(e) => {
+                if (onClick && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
                     e.preventDefault();
                     onClick(project);
                 }
@@ -335,11 +335,11 @@ export default function MagneticProjectCard({
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className={`group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-2xl border outline-none hover:-translate-y-0.5 active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-brand-blue dark:focus-visible:ring-[#00D2FF] ${
+            className={`group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-2xl border outline-none hover:-translate-y-0.5 active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505] ${
                 isFeatured 
                 ? "border-black/15 dark:border-white/15 bg-white/95 dark:bg-[#0A0C10]/95 hover:border-black/30 dark:hover:border-white/25 p-5 sm:p-7 lg:p-9" 
-                : "border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#080A0E]/95 hover:border-black/25 dark:hover:border-white/20 p-5 sm:p-6 md:p-7"
-            } shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-[var(--ease-out)]`}
+                : "border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0A0C10]/90 hover:border-black/25 dark:hover:border-white/20 p-5 sm:p-6 md:p-7"
+            } dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-[var(--ease-out)]`}
         >
             {/* COVER IMAGE (conditional) */}
             {hasCover ? (
@@ -428,19 +428,19 @@ export default function MagneticProjectCard({
                             <span
                                 className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border p-1 ${
                                     hasCover
-                                        ? 'border-white/20 bg-black/45 backdrop-blur-sm'
-                                        : 'border-black/10 bg-black/[0.03] dark:border-white/10 dark:bg-white/[0.04]'
+                                        ? 'border-white/20 bg-black/65 text-white'
+                                        : 'border-black/10 bg-black/[0.03] text-zinc-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-[rgb(var(--proj-rgb))]'
                                 }`}
-                                style={{ color: hasCover ? '#ffffff' : `rgb(${rgbStr})` }}
+                                style={!hasCover ? ({ '--proj-rgb': rgbStr } as React.CSSProperties) : undefined}
                             >
                                 <ProjectSchematic projectId={project.id} category={project.category} />
                             </span>
 
                             {sequenceNumber && (
                                 <span
-                                    className={`font-mono text-[10px] font-bold tabular-nums uppercase tracking-widest px-2 py-0.5 rounded border ${
+                                    className={`font-mono text-[11px] font-bold tabular-nums uppercase tracking-widest px-2 py-0.5 rounded border ${
                                         hasCover
-                                            ? 'border-white/25 bg-black/45 text-white backdrop-blur-sm'
+                                            ? 'border-white/25 bg-black/65 text-white'
                                             : 'border-black/15 bg-black/[0.04] text-zinc-900 dark:border-white/15 dark:bg-white/[0.06] dark:text-zinc-100'
                                     }`}
                                 >
@@ -448,16 +448,16 @@ export default function MagneticProjectCard({
                                 </span>
                             )}
 
-                            <span className={`font-mono text-xs font-bold tabular-nums tracking-wider ${hasCover ? 'text-white/85' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                            <span className={`font-mono text-xs font-bold tabular-nums tracking-wider ${hasCover ? 'text-white/90' : 'text-zinc-600 dark:text-zinc-400'}`}>
                                 {project.year}
                             </span>
 
                             {specLabel && (
                                 <span
-                                    className={`hidden sm:inline-block font-mono text-[10px] font-semibold tabular-nums tracking-wider px-2 py-0.5 rounded border ${
+                                    className={`hidden sm:inline-block font-mono text-[11px] font-semibold tabular-nums tracking-wider px-2 py-0.5 rounded border ${
                                         hasCover
-                                            ? 'border-white/15 bg-black/40 text-zinc-200 backdrop-blur-sm'
-                                            : 'border-black/10 bg-black/[0.02] text-zinc-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300'
+                                            ? 'border-white/15 bg-black/65 text-zinc-200'
+                                            : 'border-black/10 bg-black/[0.03] text-zinc-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300'
                                     }`}
                                 >
                                     {specLabel}
@@ -465,9 +465,9 @@ export default function MagneticProjectCard({
                             )}
                         </div>
 
-                        <span className={`max-w-[210px] sm:max-w-[260px] truncate rounded-md border px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider ${
+                        <span className={`max-w-[210px] sm:max-w-[260px] truncate rounded-md border px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider ${
                             hasCover 
-                                ? 'border-white/20 bg-black/50 text-white/95 backdrop-blur-sm' 
+                                ? 'border-white/20 bg-black/65 text-white' 
                                 : 'border-black/10 bg-black/[0.03] text-zinc-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300'
                         }`}>
                             {project.category}
@@ -505,15 +505,15 @@ export default function MagneticProjectCard({
 
                 {/* BAS : Technologies + Compteur de modules + Flèche CTA */}
                 <div className={`mt-auto pt-4 flex items-end justify-between gap-3 border-t ${
-                    hasCover ? 'border-white/15' : 'border-black/5 dark:border-white/5'
+                    hasCover ? 'border-white/15' : 'border-black/10 dark:border-white/10'
                 }`}>
                     <div className="flex flex-wrap items-center gap-1.5">
                         {visibleTechs.map((tech) => (
                             <span 
                                 key={tech}
-                                className={`rounded border px-2 py-0.5 font-mono text-[10px] sm:text-[11px] font-medium ${
+                                className={`rounded border px-2 py-0.5 font-mono text-[11px] font-medium ${
                                     hasCover
-                                        ? 'border-white/20 bg-black/50 text-white/95 backdrop-blur-sm'
+                                        ? 'border-white/20 bg-black/65 text-white'
                                         : 'border-black/10 bg-black/[0.03] text-zinc-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-200'
                                 }`}
                             >
@@ -522,10 +522,10 @@ export default function MagneticProjectCard({
                         ))}
                         {extraTechCount > 0 && (
                             <span
-                                className={`rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums ${
+                                className={`rounded border px-1.5 py-0.5 font-mono text-[11px] font-bold tabular-nums ${
                                     hasCover
-                                        ? 'border-white/25 bg-white/15 text-white backdrop-blur-sm'
-                                        : 'border-black/15 bg-black/[0.05] text-zinc-700 dark:border-white/15 dark:bg-white/[0.08] dark:text-zinc-300'
+                                        ? 'border-white/25 bg-black/65 text-white'
+                                        : 'border-black/15 bg-black/[0.05] text-zinc-800 dark:border-white/15 dark:bg-white/[0.08] dark:text-zinc-200'
                                 }`}
                             >
                                 {`+${extraTechCount}`}
@@ -537,7 +537,7 @@ export default function MagneticProjectCard({
                     <motion.div 
                         className={`flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full border transition-colors duration-200 ${
                             hasCover
-                                ? 'border-white/25 bg-white/10 group-hover:border-white/45 group-hover:bg-white/20'
+                                ? 'border-white/25 bg-black/50 group-hover:border-white/45 group-hover:bg-black/70'
                                 : 'border-black/10 bg-black/[0.03] group-hover:border-black/25 dark:border-white/15 dark:bg-white/[0.04] dark:group-hover:border-white/30'
                         }`}
                         animate={{ 
@@ -553,7 +553,8 @@ export default function MagneticProjectCard({
                     </motion.div>
                 </div>
             </div>
-        </div>
+        </Link>
+        </article>
     );
 }
 

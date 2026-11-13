@@ -15,18 +15,18 @@ export function ProjectsAdminTable({ projects }: ProjectsAdminTableProps) {
       <div className="flex justify-end">
         <Link
           href="/admin/projects/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 transition-colors dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white dark:focus-visible:ring-[#00D2FF]"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Nouveau projet
         </Link>
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-zinc-200/50 bg-white/50 backdrop-blur-md shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]/50">
+      <div className="overflow-x-auto rounded-2xl border border-black/10 bg-white/85 backdrop-blur-md shadow-xl dark:border-white/10 dark:bg-[#0A0C10]/85">
         <table
           className="w-full text-left text-sm text-zinc-600 dark:text-zinc-400"
           aria-label="Liste des projets du portfolio"
         >
-          <thead className="border-b border-zinc-200/50 bg-zinc-50/50 text-xs font-semibold uppercase text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200">
+          <thead className="border-b border-black/10 bg-zinc-50/80 text-xs font-semibold uppercase text-zinc-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200">
             <tr>
               <th scope="col" className="px-6 py-4">Ordre</th>
               <th scope="col" className="px-6 py-4">Titre (FR / EN)</th>
@@ -42,19 +42,19 @@ export function ProjectsAdminTable({ projects }: ProjectsAdminTableProps) {
                 key={project.id}
                 className="hover:bg-zinc-50 dark:hover:bg-zinc-800/25 transition-colors"
               >
-                <td className="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
+                <td className="px-6 py-4 font-medium tabular-nums text-zinc-900 dark:text-zinc-100">
                   {project.sortOrder}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-zinc-900 dark:text-zinc-100">{project.titleFr}</span>
                     {project.isFeatured && (
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-label="Mis en avant" />
+                      <Star className="h-4 w-4 fill-amber-500 text-amber-600 dark:fill-amber-400 dark:text-amber-400" aria-label="Mis en avant" />
                     )}
                   </div>
-                  <div className="text-xs text-zinc-500 mt-1">{project.titleEn}</div>
+                  <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">{project.titleEn}</div>
                 </td>
-                <td className="px-6 py-4">{project.year}</td>
+                <td className="px-6 py-4 tabular-nums">{project.year}</td>
                 <td className="px-6 py-4">{project.category}</td>
                 <td className="px-6 py-4">
                   <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300">
@@ -65,9 +65,9 @@ export function ProjectsAdminTable({ projects }: ProjectsAdminTableProps) {
                   <div className="flex items-center justify-end gap-2">
                     <Link
                       href={`/admin/projects/${project.id}/edit`}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-200 transition-colors dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 dark:focus-visible:ring-[#00D2FF]"
                     >
-                      <Edit className="h-3.5 w-3.5" />
+                      <Edit className="h-3.5 w-3.5" aria-hidden="true" />
                       Modifier
                     </Link>
                     <DeleteProjectButton projectId={project.id} projectTitle={project.titleFr} />
@@ -77,7 +77,7 @@ export function ProjectsAdminTable({ projects }: ProjectsAdminTableProps) {
             ))}
             {projects.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-zinc-500">
+                <td colSpan={6} className="px-6 py-8 text-center text-zinc-600 dark:text-zinc-400">
                   Aucun projet trouvé.
                 </td>
               </tr>

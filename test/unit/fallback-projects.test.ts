@@ -41,7 +41,7 @@ describe("Fallback Projects and Local Dev Resilience", () => {
 
     const enProjects = await getProjects("en");
     expect(enProjects.length).toBe(15);
-    expect(enProjects[0].title).toBe("Real-Time Control, Dual-Tank Hydraulic Process");
+    expect(enProjects[0].title).toBe("Real-Time Control: Dual-Tank Hydraulic Process");
   });
 
   it("should find academic projects by slug in French via getProjectBySlug when D1 is unattached", async () => {

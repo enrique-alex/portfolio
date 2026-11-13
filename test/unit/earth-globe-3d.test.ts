@@ -3,7 +3,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import EarthGlobe3D from '@/components/ui/EarthGlobe3D';
 import { generateEarthCloud } from '@/lib/graphics/earthCloud';
-import { DUAL_AXIS_LAT, DUAL_AXIS_LON } from '@/lib/geoData';
+import { DUAL_AXIS_LON } from '@/lib/geoData';
 
 describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
   let originalWindow: typeof globalThis.window;
@@ -19,10 +19,10 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
 
   it('should render correctly in SSR without crashing with Dual-Hub engineering telemetry', () => {
     const html = renderToString(React.createElement(EarthGlobe3D));
-    expect(html).toContain('GEODETIC TELEMETRY');
+    expect(html).toContain('Hauts-de-France');
     expect(html).toContain('YAOUNDÉ');
     expect(html).toContain('LILLE-DUNKERQUE');
-    expect(html).toContain('ALIGN DUAL-AXIS');
+    expect(html).toContain('Centrer sur Lille / Dunkerque');
     expect(html).toContain('canvas');
   });
 

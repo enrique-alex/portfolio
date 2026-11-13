@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { RotateCcw, Crosshair, Activity } from 'lucide-react';
 import { generateEarthCloud } from '@/lib/graphics/earthCloud';
+import { useOptionalLanguage } from '@/components/theme/LanguageProvider';
 import {
   DUAL_AXIS_LAT,
   DUAL_AXIS_LON,
@@ -27,6 +28,7 @@ function computePointSize(pointCount: number): number {
 }
 
 export default function EarthGlobe3D({ className = '', onCoordinatesChange }: EarthGlobe3DProps) {
+  const { locale, t } = useOptionalLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -147,7 +149,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           uScale: { value: initialScale },
           uPointSize: { value: computePointSize(pointCount) },
           uMotion: { value: 1.0 },
-          uBaseColor: { value: new THREE.Color(isDark ? 0xe5e3c0 : 0x524b38) },
+          uBaseColor: { value: new THREE.Color(isDark ? 0xd4dce8 : 0x475569) },
         },
         vertexShader: `
         uniform float uTime;
@@ -222,8 +224,8 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           if (d > 0.5) discard;
           float disc = 1.0 - smoothstep(0.20, 0.50, d);
 
-          vec3 colCameroon = vec3(1.0, 0.72, 0.14); // or ambré #FFB724
-          vec3 colFrance = vec3(0.22, 0.74, 0.97);   // cyan / cobalt #38BDF8
+          vec3 colCameroon = vec3(0.96, 0.62, 0.04); // ambre #F59E0B
+          vec3 colFrance = vec3(0.0, 0.82, 1.0);     // cyan électrique #00D2FF
           vec3 colBase = uBaseColor;
 
           vec3 col;
@@ -245,7 +247,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           } else {
             // Terres continentales globales
             col = colBase;
-            alphaMult = 0.75;
+            alphaMult = 0.78;
           }
 
           float a = disc * alphaMult * vFade;
@@ -292,7 +294,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       const updateTheme = () => {
         if (typeof document === 'undefined' || !materialRef.current) return;
         const isD = document.documentElement.classList.contains('dark');
-        materialRef.current.uniforms.uBaseColor.value.setHex(isD ? 0xe5e3c0 : 0x524b38);
+        materialRef.current.uniforms.uBaseColor.value.setHex(isD ? 0xd4dce8 : 0x475569);
       };
 
       if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
@@ -447,7 +449,8 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
         scene.remove(pointsMesh);
         pointsMeshRef.current = null;
       }
-    };  }, [onCoordinatesChange]);
+    };
+  }, [onCoordinatesChange]);
 
   // 8. Interaction Drag-to-Rotate (ZÉRO répulsion particulaire)
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -517,29 +520,28 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
   return (
     <div
       ref={containerRef}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-black/5 p-4 shadow-2xl backdrop-blur-sm dark:border-white/10 dark:bg-white/5 ${className}`}
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-white/80 p-4 shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-[#0A0C10]/85 ${className}`}
       style={{ touchAction: 'pan-y' }}
     >
-      {/* HUD Header d'Ingénierie Télémétrique */}
-      <div className="mb-3 flex items-center justify-between border-b border-black/5 pb-3 dark:border-white/5">
+      {/* HUD Header */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-black/10 pb-3 dark:border-white/10">
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 text-brand-blue">
-            <Activity className="h-3.5 w-3.5" />
-            <span className="font-mono text-[9px] font-bold tracking-widest uppercase">
-              GEODETIC TELEMETRY // WGS-84 DUAL-HUB
+          <div className="flex items-center gap-1.5 text-blue-600 dark:text-[#00D2FF]">
+            <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="font-mono text-[11px] font-bold tracking-wider uppercase">
+              {t('globe.region')}
             </span>
           </div>
-          <span className="font-mono text-[8px] tracking-wider text-zinc-500 dark:text-zinc-400">
-            GREAT-CIRCLE ORBITAL TRAJECTORY · {GEODESIC_DISTANCE_KM.toLocaleString()} KM · RESOLUTION 0.05°
+          <span className="font-mono text-[11px] tabular-nums tracking-wider text-zinc-600 dark:text-zinc-400">
+            {`${GEODESIC_DISTANCE_KM.toLocaleString()} KM · ${t('globe.coordinates')}`}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          <span className="relative flex h-2 w-2" aria-hidden="true">
+            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
           </span>
-          <span className="font-mono text-[8px] font-bold text-emerald-500 uppercase tracking-wider">
-            SYS_ONLINE
+          <span className="font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+            {t('globe.status')}
           </span>
         </div>
       </div>
@@ -547,7 +549,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
       {/* 3D Canvas Container (ratio carré 1:1 strict) */}
       <div
         ref={canvasContainerRef}
-        className="relative aspect-square w-full overflow-hidden rounded-xl border border-black/10 bg-zinc-950/20 dark:border-white/10 dark:bg-zinc-900/40"
+        className="relative aspect-square w-full overflow-hidden rounded-xl border border-black/10 bg-slate-200/70 dark:border-white/10 dark:bg-[#050505]/75"
       >
         <canvas
           ref={canvasRef}
@@ -557,27 +559,27 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
           onPointerCancel={handlePointerUp}
           className="h-full w-full cursor-grab active:cursor-grabbing select-none"
           style={{ touchAction: 'pan-y' }}
-          aria-label="Globe 3D interactif géodésique reliant le Cameroun et la France"
+          aria-label={t('globe.canvasAria')}
         />
 
         {/* Repère de visée discret */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
-          <Crosshair className="h-10 w-10 text-brand-blue/60 stroke-[1]" />
+          <Crosshair className="h-10 w-10 text-blue-600/45 dark:text-[#00D2FF]/50 stroke-[1]" aria-hidden="true" />
         </div>
 
-        {/* Badge Télémétrie Dual-Hub (Cameroun & France) */}
-        <div className="pointer-events-none absolute bottom-2 left-2 flex flex-col gap-1 rounded bg-black/70 px-2.5 py-1.5 font-mono text-[8px] text-zinc-300 backdrop-blur-md border border-white/10 shadow-lg">
+        {/* Badge Dual-Hub (Cameroun & France) */}
+        <div className="pointer-events-none absolute bottom-2 left-2 flex flex-col gap-1 rounded bg-black/80 px-2.5 py-1.5 font-mono text-[11px] tabular-nums text-zinc-200 border border-white/15 shadow-lg">
           <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-            <span>NODE 01 : YAOUNDÉ [CM] · 03°50&apos;N 11°30&apos;E</span>
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden="true"></span>
+            <span>YAOUNDÉ [CM] · 03°50&apos;N 11°30&apos;E</span>
           </div>
-          <div className="flex items-center gap-1.5 text-sky-400 font-semibold">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400"></span>
-            <span>NODE 02 : LILLE-DUNKERQUE [FR] · 50°38&apos;N 03°03&apos;E</span>
+          <div className="flex items-center gap-1.5 text-[#00D2FF] font-semibold">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#00D2FF]" aria-hidden="true"></span>
+            <span>LILLE-DUNKERQUE [FR] · 50°38&apos;N 03°03&apos;E</span>
           </div>
-          <div className="mt-0.5 border-t border-white/10 pt-1 text-[7.5px] text-zinc-400 flex items-center justify-between gap-3">
-            <span>ORTHODROMIE : {GEODESIC_DISTANCE_KM.toLocaleString()} KM</span>
-            <span className="text-zinc-500">Δσ = 47.3°</span>
+          <div className="mt-0.5 border-t border-white/10 pt-1 text-[11px] text-zinc-300 flex items-center justify-between gap-3">
+            <span>{GEODESIC_DISTANCE_KM.toLocaleString()} KM</span>
+            <span className="text-zinc-400">Δσ = 47.3°</span>
           </div>
         </div>
 
@@ -585,23 +587,25 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
         <button
           type="button"
           onClick={handleRecenter}
-          title="Aligner sur l'axe Cameroun - France"
-          className="absolute top-2 right-2 flex items-center gap-1 rounded-md border border-black/10 bg-white/80 px-2 py-1 text-[9px] font-mono font-medium text-zinc-700 shadow-sm backdrop-blur hover:bg-white hover:text-black dark:border-white/10 dark:bg-black/60 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+          title={t('globe.reset')}
+          aria-label={t('globe.reset')}
+          className="absolute top-2 right-2 flex items-center gap-1.5 rounded-md border border-black/15 bg-white/90 px-2.5 py-1 text-[11px] font-mono font-medium text-zinc-800 shadow-sm hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:border-white/15 dark:bg-[#0A0C10]/85 dark:text-zinc-200 dark:hover:bg-[#11141C] dark:hover:text-white dark:focus-visible:ring-[#00D2FF] transition-colors"
         >
-          <RotateCcw className="h-2.5 w-2.5 text-brand-blue" />
-          <span>ALIGN DUAL-AXIS</span>
+          <RotateCcw className="h-3 w-3 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+          <span>{t('globe.reset')}</span>
         </button>
       </div>
 
       {/* HUD Footer */}
-      <div className="mt-3 flex items-center justify-between font-mono text-[9px] text-zinc-600 dark:text-zinc-400">
-        <span className="flex items-center gap-1 text-[8px] tracking-wide text-zinc-500">
-          <span className="text-brand-blue">✦</span>
-          {isInteracting ? 'Contrôle orbital actif...' : 'Maintenir & glisser pour pivoter'}
+      <div className="mt-3 flex items-center justify-between font-mono text-[11px] text-zinc-600 dark:text-zinc-400">
+        <span className="tracking-wide">
+          {locale === 'en'
+            ? (isInteracting ? 'Orbit control active...' : 'Drag to rotate')
+            : (isInteracting ? 'Contrôle orbital actif...' : 'Glisser pour pivoter')}
         </span>
         <span
           ref={coordsSpanRef}
-          className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/5 text-[9px] font-bold"
+          className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/5 text-[11px] font-bold tabular-nums text-zinc-800 dark:text-zinc-200"
         >
           27.3°N, 8.2°E
         </span>

@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/',
+}));
+
 import DualBodyCursor from '@/components/animations/DualBodyCursor';
 import { frameManager } from '@/lib/graphics/FrameManager';
 

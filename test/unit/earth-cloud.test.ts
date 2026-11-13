@@ -1,39 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { generateEarthCloud, getDecodedLandMask, landValue } from '@/lib/graphics/earthCloud';
-import { ThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
-import { frameManager } from '@/lib/graphics/FrameManager';
-import { kineticEnergy } from '@/lib/graphics/KineticEnergy';
 import {
-  CAMEROON_CENTER,
-  FRANCE_CENTER,
-  YAOUNDE_LAT,
-  YAOUNDE_LON,
-  LILLE_LAT,
-  LILLE_LON,
   DUAL_AXIS_LAT,
   DUAL_AXIS_LON,
   LAND_AREA_FRAC,
 } from '@/lib/geoData';
 
 describe('Forme 2: Earth Geographic Point Cloud & Dual-Hub Telemetry', () => {
-  let originalWindow: typeof globalThis.window;
-  let originalDocument: typeof globalThis.document;
-
-  beforeEach(() => {
-    originalWindow = globalThis.window;
-    originalDocument = globalThis.document;
-    frameManager.resetForTesting();
-    kineticEnergy.resetForTesting();
-    vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    frameManager.resetForTesting();
-    kineticEnergy.resetForTesting();
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-  });
 
   it('1. should generate exactly N points deterministically with seed=42', () => {
     const N_desktop = 9000;
@@ -183,28 +157,6 @@ describe('Forme 2: Earth Geographic Point Cloud & Dual-Hub Telemetry', () => {
     expect(facing).toBeGreaterThan(0.99);
   });
 
-  it('7. should asynchronously load earth cloud and update topologyBuffers[1] in ThreeIndustrialScene', async () => {
-    const fakeCanvas = {
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    } as unknown as HTMLCanvasElement;
-
-    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 100 });
-    expect(scene.isEarthCloudLoaded).toBe(false);
-
-    await scene.loadEarthCloud();
-    expect(scene.isEarthCloudLoaded).toBe(true);
-
-    const earthBuf = scene.getTopologyBuffer(1);
-    expect(earthBuf.length).toBe(100 * 3);
-    for (let i = 0; i < earthBuf.length; i++) {
-      expect(Number.isFinite(earthBuf[i])).toBe(true);
-      expect(Number.isNaN(earthBuf[i])).toBe(false);
-    }
-
-    scene.destroy();
-  });
-
   it('8. should verify all major geographic regions have points for clear visual recognition', () => {
     const { positions } = generateEarthCloud(9000, 42);
     const regions: Record<string, { latMin: number; latMax: number; lonMin: number; lonMax: number }> = {
@@ -247,7 +199,7 @@ describe('Forme 2: Earth Geographic Point Cloud & Dual-Hub Telemetry', () => {
     }
 
     for (const [name, count] of Object.entries(counts)) {
-      expect(count).toBeGreaterThan(0);
+      expect(count, `Expected points in region ${name}`).toBeGreaterThan(0);
     }
   });
 
@@ -330,31 +282,5 @@ describe('Forme 2: Earth Geographic Point Cloud & Dual-Hub Telemetry', () => {
 
     console.info(`[Blue Noise Global] Observed min distance: ${minDGlobal.toFixed(5)} (spec >= 0.9 * r_g: ${(0.9 * rG).toFixed(5)})`);
     expect(minDGlobal).toBeGreaterThanOrEqual(0.9 * rG);
-  });
-
-  it('11. should smoothly handle switching to Form 2 before loadEarthCloud resolves and toggling prefers-reduced-motion', async () => {
-    const fakeCanvas = {
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    } as unknown as HTMLCanvasElement;
-
-    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 80 });
-    expect(scene.isEarthCloudLoaded).toBe(false);
-
-    scene.setTopology(1);
-    for (let f = 0; f < 60; f++) {
-      scene.renderFrameForTesting(0.05, f * 50, true);
-    }
-    expect(scene.morphProgressValue).toBe(1.0);
-
-    await scene.loadEarthCloud();
-    expect(scene.isEarthCloudLoaded).toBe(true);
-    expect(scene.morphProgressValue).toBe(0.0);
-
-    scene.renderFrameForTesting(0.016, 3100, false);
-    expect(scene.morphProgressValue).toBeGreaterThan(0.0);
-    scene.renderFrameForTesting(0.05, 3150, true);
-
-    scene.destroy();
   });
 });

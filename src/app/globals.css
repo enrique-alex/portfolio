@@ -13,10 +13,10 @@
   --color-brand-textMuted: #9CA3AF;
   --color-brand-textLight: #111827;
   --color-brand-blue: #3B82F6;
+  --color-brand-blue-light: #2563EB;
+  --color-brand-blue-text: #1D4ED8;
   --color-brand-cyan: #00D2FF;
   --color-brand-amber: #F59E0B;
-  --color-brand-red: #EA4335;
-  --color-brand-yellow: #FBBC05;
   --color-brand-green: #10B981;
   /* Courbes cinématiques personnalisées (emilkowalski/skills) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -26,18 +26,33 @@
   --ease-tactile: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Surfaces Navigateur Thématisées (pbakaus/impeccable craft-floor) */
+/* Surfaces Navigateur Thématisées */
 ::selection {
+  background-color: rgba(37, 99, 235, 0.18);
+  color: #111827;
+}
+
+.dark ::selection {
   background-color: rgba(0, 210, 255, 0.22);
   color: #EDEDED;
 }
 
 input,
 textarea {
+  caret-color: var(--color-brand-blue-light);
+}
+
+.dark input,
+.dark textarea {
   caret-color: var(--color-brand-cyan);
 }
 
 :focus-visible {
+  outline: 2px solid var(--color-brand-blue-light);
+  outline-offset: 2px;
+}
+
+.dark :focus-visible {
   outline: 2px solid var(--color-brand-cyan);
   outline-offset: 2px;
 }
@@ -108,8 +123,10 @@ a {
 
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
 }
@@ -120,6 +137,43 @@ a {
 
   [role="button"], input, select, textarea, *, *::before, *::after {
     cursor: none !important;
+  }
+
+  /* Restauration explicite des curseurs natifs pour les zones de saisie, /admin et les éléments interactifs spécifiques */
+  [data-native-cursor],
+  [data-native-cursor] * {
+    cursor: auto !important;
+  }
+
+  [data-native-cursor] input,
+  [data-native-cursor] textarea,
+  [data-native-cursor] select,
+  [data-native-cursor] [contenteditable="true"],
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+  textarea,
+  select,
+  [contenteditable="true"] {
+    cursor: text !important;
+  }
+
+  [data-native-cursor] a,
+  [data-native-cursor] button,
+  [data-native-cursor] [role="button"],
+  [data-native-cursor] label[for] {
+    cursor: pointer !important;
+  }
+
+  .cursor-grab {
+    cursor: grab !important;
+  }
+
+  .cursor-grabbing {
+    cursor: grabbing !important;
+  }
+
+  [disabled],
+  [aria-disabled="true"] {
+    cursor: not-allowed !important;
   }
 
   /* Masquage de la scrollbar native sur Desktop pour supprimer la gouttière grise OS
@@ -149,20 +203,32 @@ a {
   height: 0 !important;
 }
 
-/* Fallback de scrollbar DA Obsidian / Cyan pour les conteneurs défilables internes uniquement (hors scrollbar-hide) */
+/* Fallback de scrollbar DA pour les conteneurs défilables internes uniquement (hors scrollbar-hide) */
 :not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 :not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-track {
-  background: #050505;
+  background: #E2E8F0;
 }
 :not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.35);
+  border-radius: 9999px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+:not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb:hover {
+  background: rgba(29, 78, 216, 0.65);
+}
+
+.dark :not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-track {
+  background: #050505;
+}
+.dark :not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb {
   background: rgba(0, 210, 255, 0.3);
   border-radius: 9999px;
   border: 1px solid rgba(0, 210, 255, 0.2);
 }
-:not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb:hover {
+.dark :not(html):not(body):not(.scrollbar-hide):not([class*="scrollbar-hide"])::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 210, 255, 0.7);
 }
 

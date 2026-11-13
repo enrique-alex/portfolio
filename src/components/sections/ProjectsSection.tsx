@@ -10,7 +10,7 @@ export default function ProjectsSection() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-      <section id="projects" className="section-contain relative w-full overflow-hidden pb-32 pt-32 scroll-mt-32">
+      <section id="projects" className="section-contain relative w-full overflow-x-clip py-24 lg:py-32 scroll-mt-32">
         
         {/* Trame topographique subtile */}
         <div className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_100%_at_50%_0%,#000_10%,transparent_110%)] md:bg-[size:96px_96px]" />
@@ -25,16 +25,16 @@ export default function ProjectsSection() {
             viewport={{ once: true }}
             transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28 }}
           >
-            <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-              <Database className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
-              <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
+            <div className="flex items-center gap-3 mb-3 text-zinc-600 dark:text-zinc-400">
+              <Database className="h-4 w-4 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+              <span className="font-mono text-[11px] font-semibold tracking-[0.3em] uppercase">
                 {t('projects.header.tag')}
               </span>
             </div>
             <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
               {t('projects.header.title')}
             </h2>
-            <p className="mt-4 max-w-3xl font-mono text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <p className="mt-4 max-w-[65ch] font-mono text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {t('projects.header.subtitle')}
             </p>
           </motion.div>

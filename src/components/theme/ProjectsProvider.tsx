@@ -14,7 +14,7 @@ interface ProjectsContextType {
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       try {
         const response = await fetch(`/api/projects?locale=${locale}`);
         if (!response.ok) {
-          throw new Error(`Erreur réseau: ${response.status}`);
+          throw new Error(`HTTP ${response.status}`);
         }
         
         const data: Project[] = await response.json();
@@ -54,7 +54,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.error('Erreur lors du chargement des projets :', err);
         if (isMounted) {
-          setError('Impossible de charger les projets. Veuillez réessayer plus tard.');
+          setError(t('projects.load.error'));
           setIsLoading(false);
           // On garde les projets actuels en état (au lieu de vider le tableau) 
           // pour éviter de faire disparaître l'écran si un fetch échoue
@@ -67,7 +67,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [locale]);
+  }, [locale, t]);
 
   return (
     <ProjectsContext.Provider value={{ projects, isLoading, error }}>

@@ -72,7 +72,7 @@ export default function ExperienceSection() {
         }}
       />
       
-      <div className="mx-auto flex w-full max-w-6xl flex-col px-4 relative z-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-col px-4 relative z-10">
         
         {/* Header - Field Engineering */}
         <motion.div 
@@ -82,16 +82,16 @@ export default function ExperienceSection() {
           viewport={{ once: true }}
           transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28 }}
         >
-          <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-            <Activity className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
-            <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
+          <div className="flex items-center gap-3 mb-3 text-zinc-600 dark:text-zinc-400">
+            <Activity className="h-4 w-4 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+            <span className="font-mono text-[11px] font-semibold tracking-[0.3em] uppercase">
               {t('experience.header.tag')}
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
             {t('experience.header.title')}
           </h2>
-          <p className="mt-4 font-mono text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-4 max-w-[65ch] font-mono text-sm text-zinc-600 dark:text-zinc-400">
             {t('experience.header.subtitle')}
           </p>
         </motion.div>
@@ -113,12 +113,14 @@ export default function ExperienceSection() {
               >
                 {/* Accordion Header Row */}
                 <button
+                  type="button"
                   onClick={() => toggleExpand(exp.id)}
                   aria-expanded={isExpanded}
                   className={`
-                    relative z-10 flex w-full flex-col items-start gap-4 border-l-[3px] bg-white/60 px-4 py-5 sm:px-6 sm:py-6 
+                    relative z-10 flex w-full flex-col items-start gap-4 border-l-[3px] bg-white/70 px-4 py-5 sm:px-6 sm:py-6 
                     text-left transition-[background-color,border-color] duration-200 hover:bg-black/[0.03] 
-                    dark:bg-[#0A0C10]/70 dark:hover:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA]
+                    dark:bg-[#0A0C10]/80 dark:hover:bg-white/[0.04] dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505] sm:flex-row sm:items-center sm:justify-between
                     ${isExpanded ? 'backdrop-blur-md' : ''}
                     ${isActive ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'}
                   `}
@@ -130,22 +132,21 @@ export default function ExperienceSection() {
 
                   <div className="flex flex-1 flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-4">
-                      <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      <span className="font-mono text-xs font-semibold tabular-nums uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                         [{exp.period}]
                       </span>
                       
                       {/* LED Status Badge */}
                       <div className={`
-                        flex items-center gap-2 rounded border px-2 py-1 font-mono text-[10px] font-bold tracking-widest
+                        flex items-center gap-2 rounded border px-2 py-1 font-mono text-[11px] font-bold tracking-widest
                         ${isActive 
-                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
-                            : 'border-zinc-400/30 bg-zinc-400/10 text-zinc-600 dark:text-zinc-400'}
+                            ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' 
+                            : 'border-zinc-400/35 bg-zinc-400/10 text-zinc-700 dark:text-zinc-300'}
                       `}>
                         {isActive ? (
                           <>
-                            <span className="relative flex h-2 w-2 items-center justify-center">
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span className="relative flex h-2 w-2 items-center justify-center" aria-hidden="true">
+                              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                             </span>
                             {t('experience.status.active')}
                           </>
@@ -159,11 +160,11 @@ export default function ExperienceSection() {
                     </div>
                     
                     <div>
-                      <h3 className="text-xl font-bold tracking-tight text-zinc-900 transition-colors duration-200 group-hover:text-brand-blue dark:text-zinc-100 dark:group-hover:text-[#00D2FF] sm:text-2xl">
+                      <h3 className="text-xl font-bold tracking-tight text-zinc-900 transition-colors duration-200 group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-[#00D2FF] sm:text-2xl">
                         {exp.title}
                       </h3>
                       <div className="mt-1 flex items-center gap-2">
-                        <Network className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
+                        <Network className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" aria-hidden="true" />
                         <p className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
                           @ {exp.company}
                         </p>
@@ -171,7 +172,7 @@ export default function ExperienceSection() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.02] text-zinc-500 transition-[border-color,background-color,color] duration-200 group-hover:border-black/20 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/10 dark:bg-white/[0.02] dark:group-hover:border-white/20 dark:group-hover:bg-white/[0.06] dark:group-hover:text-white sm:mt-0">
+                  <div className="mt-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.02] text-zinc-600 transition-[border-color,background-color,color] duration-200 group-hover:border-black/20 group-hover:bg-black/[0.04] group-hover:text-zinc-900 dark:border-white/10 dark:bg-white/[0.02] dark:text-zinc-400 dark:group-hover:border-white/20 dark:group-hover:bg-white/[0.06] dark:group-hover:text-white sm:mt-0">
                     <motion.div
                       animate={{ rotate: isExpanded ? 180 : 0 }}
                       transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 24 }}
@@ -200,8 +201,8 @@ export default function ExperienceSection() {
                           {/* Missions */}
                           <div className="md:col-span-2">
                             <div className="mb-4 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
-                              <Terminal className="h-4 w-4 text-zinc-500" />
-                              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                              <Terminal className="h-4 w-4 text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+                              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-600 dark:text-zinc-400">
                                 {exp.detailedTitle ? exp.detailedTitle : t('experience.missions.label')}
                               </h4>
                             </div>
@@ -209,7 +210,7 @@ export default function ExperienceSection() {
                               <ul className="space-y-3 border-l-2 border-black/10 pl-4 dark:border-white/10">
                                 {exp.detailedItems.map((item, i) => (
                                   <li key={i} className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                                    <span className="mr-2 text-emerald-500 font-bold">›</span>
+                                    <span className="mr-2 text-emerald-600 dark:text-emerald-400 font-bold" aria-hidden="true">›</span>
                                     {item}
                                   </li>
                                 ))}
@@ -224,8 +225,8 @@ export default function ExperienceSection() {
                           {/* Tech Stack / Skills */}
                           <div>
                             <div className="mb-4 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
-                              <Cpu className="h-4 w-4 text-zinc-500" />
-                              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                              <Cpu className="h-4 w-4 text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+                              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-600 dark:text-zinc-400">
                                 {t('experience.stack.label')}
                               </h4>
                             </div>
@@ -233,7 +234,7 @@ export default function ExperienceSection() {
                               {exp.skills.map((skill) => (
                                 <span
                                   key={skill}
-                                  className="rounded border border-black/5 bg-black/[0.03] px-2.5 py-1 font-mono text-xs font-semibold text-zinc-700 transition-colors hover:bg-black/[0.05] dark:border-white/5 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:bg-white/[0.05]"
+                                  className="rounded border border-black/10 bg-black/[0.03] px-2.5 py-1 font-mono text-xs font-semibold text-zinc-700 transition-colors hover:bg-black/[0.06] dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:bg-white/[0.06]"
                                 >
                                   {skill}
                                 </span>

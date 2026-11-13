@@ -6,7 +6,6 @@ import MagneticProjectCard from './MagneticProjectCard';
 import ProjectCardSkeleton from './ProjectCardSkeleton';
 import { Project } from '@/lib/data';
 import { useProjectsData } from '@/components/theme/ProjectsProvider';
-import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/theme/LanguageProvider';
 
 /**
@@ -89,7 +88,6 @@ export function getAdaptiveBentoSpan(index: number, list: Project[]): { spanClas
 
 export default function ProjectsGrid() {
     const shouldReduceMotion = useReducedMotion();
-    const router = useRouter();
     const { projects: rawProjectsData, isLoading, error } = useProjectsData();
     const projectsData = Array.isArray(rawProjectsData) ? rawProjectsData : [];
     const { t } = useLanguage();
@@ -133,10 +131,6 @@ export default function ProjectsGrid() {
         exit: { opacity: 0, scale: 0.96, transition: { duration: 0.18 } }
     };
 
-    const handleProjectClick = (project: Project) => {
-        router.push(`/projects/${project.slug}`);
-    };
-
     return (
         <div className="flex w-full flex-col gap-8 md:gap-12">
             {/* Système de filtres (Catégories) : défilement horizontal fluide sur mobile, retour à la ligne sur tablette/desktop */}
@@ -149,11 +143,13 @@ export default function ProjectsGrid() {
                 style={{ scrollbarWidth: 'none' }}
             >
                 <button
+                    type="button"
+                    aria-pressed={effectiveCategory === null}
                     onClick={() => setActiveCategory(null)}
-                    className={`relative flex-shrink-0 rounded-full px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider active:scale-[0.97] transition-[transform,color,border-color,background-color] duration-150 ease-[var(--ease-out)] ${
+                    className={`relative flex-shrink-0 rounded-full px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider active:scale-[0.97] transition-[transform,color,border-color,background-color] duration-150 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505] ${
                         effectiveCategory === null
                             ? 'text-white dark:text-zinc-950'
-                            : 'border border-black/10 bg-white/60 text-zinc-700 hover:border-black/25 hover:text-zinc-950 dark:border-white/10 dark:bg-[#0A0C10]/70 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white'
+                            : 'border border-black/10 bg-white/80 text-zinc-700 hover:border-black/25 hover:text-zinc-950 dark:border-white/10 dark:bg-[#0A0C10]/80 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white'
                     }`}
                 >
                     {effectiveCategory === null && (
@@ -165,7 +161,7 @@ export default function ProjectsGrid() {
                     )}
                     <span className="relative z-10 inline-flex items-center gap-1.5">
                         <span>{t('projects.filters.all')}</span>
-                        <span className="text-[10px] opacity-70 tabular-nums">({projectsData.length})</span>
+                        <span className="text-[11px] opacity-80 tabular-nums">({projectsData.length})</span>
                     </span>
                 </button>
                 {categories.map((category) => {
@@ -174,11 +170,13 @@ export default function ProjectsGrid() {
                     return (
                         <button
                             key={category}
+                            type="button"
+                            aria-pressed={isSelected}
                             onClick={() => setActiveCategory(category)}
-                            className={`relative flex-shrink-0 rounded-full px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider active:scale-[0.97] transition-[transform,color,border-color,background-color] duration-150 ease-[var(--ease-out)] ${
+                            className={`relative flex-shrink-0 rounded-full px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider active:scale-[0.97] transition-[transform,color,border-color,background-color] duration-150 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505] ${
                                 isSelected
                                     ? 'text-white dark:text-zinc-950'
-                                    : 'border border-black/10 bg-white/60 text-zinc-700 hover:border-black/25 hover:text-zinc-950 dark:border-white/10 dark:bg-[#0A0C10]/70 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white'
+                                    : 'border border-black/10 bg-white/80 text-zinc-700 hover:border-black/25 hover:text-zinc-950 dark:border-white/10 dark:bg-[#0A0C10]/80 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white'
                             }`}
                         >
                             {isSelected && (
@@ -190,7 +188,7 @@ export default function ProjectsGrid() {
                             )}
                             <span className="relative z-10 inline-flex items-center gap-1.5">
                                 <span>{category}</span>
-                                <span className="text-[10px] opacity-70 tabular-nums">({count})</span>
+                                <span className="text-[11px] opacity-80 tabular-nums">({count})</span>
                             </span>
                         </button>
                     );
@@ -198,14 +196,16 @@ export default function ProjectsGrid() {
             </motion.div>
 
             {/* Grille Bento adaptative : 1 col Mobile, 2 cols Tablette, 3 cols Desktop avec remplissage dense sans trou */}
-            <motion.div 
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: "-80px" }}
-                className="grid w-full grid-cols-1 gap-4 auto-rows-[minmax(360px,auto)] md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:auto-rows-[minmax(405px,auto)] grid-flow-row-dense"
-            >
-                <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={effectiveCategory ?? 'all'}
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="show"
+                    exit={{ opacity: 0, transition: { duration: shouldReduceMotion ? 0 : 0.12 } }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    className="grid w-full grid-cols-1 gap-4 auto-rows-[minmax(360px,auto)] md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:auto-rows-[minmax(405px,auto)] grid-flow-row-dense"
+                >
                     {isLoading ? (
                         Array.from({ length: 5 }).map((_, index) => {
                             const spanClasses =
@@ -219,9 +219,15 @@ export default function ProjectsGrid() {
                             );
                         })
                     ) : error ? (
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3 flex min-h-[360px] items-center justify-center rounded-2xl border border-black/5 bg-black/[0.02] dark:border-white/5 dark:bg-white/[0.02]">
-                            <p className="text-zinc-500 dark:text-zinc-400">
+                        <div className="col-span-1 md:col-span-2 lg:col-span-3 flex min-h-[360px] items-center justify-center rounded-2xl border border-black/10 bg-white/75 p-8 dark:border-white/10 dark:bg-[#0A0C10]/80">
+                            <p className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
                                 {error}
+                            </p>
+                        </div>
+                    ) : filteredProjects.length === 0 ? (
+                        <div className="col-span-1 md:col-span-2 lg:col-span-3 flex min-h-[240px] items-center justify-center rounded-2xl border border-black/10 bg-white/75 p-8 dark:border-white/10 dark:bg-[#0A0C10]/80">
+                            <p className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
+                                {t('projects.empty')}
                             </p>
                         </div>
                     ) : (
@@ -231,26 +237,22 @@ export default function ProjectsGrid() {
                             const seqNum = String((canonicalIdx >= 0 ? canonicalIdx : 0) + 1).padStart(2, '0');
 
                             return (
-                                <motion.div 
-                                    key={project.id} 
-                                    variants={itemVariants} 
-                                    initial="hidden"
-                                    animate="show"
-                                    exit="exit"
+                                <motion.div
+                                    key={project.id}
+                                    variants={itemVariants}
                                     className={spanClasses}
                                 >
-                                    <MagneticProjectCard 
-                                        project={project} 
-                                        isFeatured={isCardWide} 
+                                    <MagneticProjectCard
+                                        project={project}
+                                        isFeatured={isCardWide}
                                         sequenceNumber={seqNum}
-                                        onClick={handleProjectClick} 
                                     />
                                 </motion.div>
                             );
                         })
                     )}
-                </AnimatePresence>
-            </motion.div>
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 }

@@ -64,13 +64,6 @@ async function getActiveProjects(db: D1Database): Promise<ProjectRow[]> {
   return results || [];
 }
 
-async function getAllProjects(db: D1Database): Promise<ProjectRow[]> {
-  const { results } = await db
-    .prepare("SELECT id, slug, sort_order, deleted_at FROM projects ORDER BY sort_order ASC")
-    .all<ProjectRow>();
-  return results || [];
-}
-
 describe("Sort Order and Project Lifecycle Integration Tests", () => {
   beforeEach(async () => {
     // 1. Clean up existing test data

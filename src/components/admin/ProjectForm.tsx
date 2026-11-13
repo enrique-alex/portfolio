@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { ProjectFormInput } from "@/lib/validation/project";
-import { Loader2 } from "lucide-react";
+import { Loader2, Globe, X } from "lucide-react";
 
 interface ProjectFormProps {
   mode: "create" | "edit";
@@ -28,8 +28,9 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
   // Revoke object URLs on unmount to avoid memory leaks
   const objectUrlsRef = useRef<string[]>([]);
   useEffect(() => {
+    const objectUrls = objectUrlsRef.current;
     return () => {
-      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
 
@@ -59,7 +60,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
       }
       const data = (await res.json()) as { url: string };
       setCoverImageUrl(data.url);
-    } catch (err) {
+    } catch {
       alert("Erreur réseau inattendue lors de l'upload.");
       setCoverImagePreview(null);
     } finally {
@@ -105,7 +106,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
           setGalleryItems((prev) => prev.filter((_, idx) => idx !== startIndex + i));
         }
       }
-    } catch (err) {
+    } catch {
       alert("Erreur réseau inattendue lors de l'upload.");
     } finally {
       setIsUploadingGallery(false);
@@ -180,7 +181,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
     }
   };
 
-  const inputClass = "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-400";
+  const inputClass = "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-white/15 dark:bg-[#050505]/80 dark:text-zinc-100 dark:focus:border-[#00D2FF] dark:focus:ring-[#00D2FF]";
   const labelClass = "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1";
 
   return (
@@ -201,7 +202,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
       )}
 
       {/* SECTION COMMUNE */}
-      <div className="rounded-2xl border border-zinc-200/50 bg-white/50 backdrop-blur-md p-6 shadow-sm dark:border-white/10 dark:bg-[#0a0a0a]/50">
+      <div className="rounded-2xl border border-black/10 bg-white/85 backdrop-blur-md p-6 shadow-sm dark:border-white/10 dark:bg-[#0A0C10]/85">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Informations Générales</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
@@ -212,13 +213,13 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                 name="isFeatured"
                 id="isFeatured"
                 defaultChecked={initialData?.isFeatured ?? false}
-                className="h-5 w-5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600"
+                className="h-5 w-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-600 dark:border-white/20 dark:text-[#00D2FF] dark:focus:ring-[#00D2FF]"
               />
               <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Mettre en avant (carte plus grande sur l&apos;accueil)
               </span>
             </label>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
               Conseil : Ne pas dépasser 2 à 4 projets mis en avant simultanément pour garder une grille harmonieuse.
             </p>
           </div>
@@ -237,8 +238,8 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
               aria-label="Slug du projet"
             />
             {slugWarning && (
-              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400 font-medium">
-                ⚠️ Attention : Modifier le slug cassera les liens existants vers ce projet.
+              <p className="mt-2 text-sm text-amber-700 dark:text-amber-400 font-medium">
+                Attention : Modifier le slug cassera les liens existants vers ce projet.
               </p>
             )}
           </div>
@@ -291,11 +292,11 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label htmlFor="themeColorR" className="sr-only">Rouge</label>
-                <input type="number" name="themeColorR" id="themeColorR" required min="0" max="255" defaultValue={initialData?.themeColorR ?? 255} className={inputClass} placeholder="R" aria-label="Composante rouge" />
+                <input type="number" name="themeColorR" id="themeColorR" required min="0" max="255" defaultValue={initialData?.themeColorR ?? 0} className={inputClass} placeholder="R" aria-label="Composante rouge" />
               </div>
               <div>
                 <label htmlFor="themeColorG" className="sr-only">Vert</label>
-                <input type="number" name="themeColorG" id="themeColorG" required min="0" max="255" defaultValue={initialData?.themeColorG ?? 255} className={inputClass} placeholder="G" aria-label="Composante verte" />
+                <input type="number" name="themeColorG" id="themeColorG" required min="0" max="255" defaultValue={initialData?.themeColorG ?? 210} className={inputClass} placeholder="G" aria-label="Composante verte" />
               </div>
               <div>
                 <label htmlFor="themeColorB" className="sr-only">Bleu</label>
@@ -328,7 +329,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                 className={inputClass}
                 aria-label="Upload de l'image de couverture"
               />
-              {isUploadingCover && <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Upload en cours...</p>}
+              {isUploadingCover && <p className="text-sm text-blue-600 dark:text-[#00D2FF] font-medium flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Upload en cours...</p>}
               {coverImagePreview && (
                 <div className="relative inline-block">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -336,11 +337,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                   <button
                     type="button"
                     onClick={() => { setCoverImageUrl(null); setCoverImagePreview(null); }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
+                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 shadow-sm hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 transition-colors"
                     aria-label="Supprimer l'image de couverture"
                   >
-                    <span className="sr-only">Supprimer</span>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <X className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
               )}
@@ -360,7 +360,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                 className={inputClass}
                 aria-label="Upload d'images pour la galerie"
               />
-              {isUploadingGallery && <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Upload en cours...</p>}
+              {isUploadingGallery && <p className="text-sm text-blue-600 dark:text-[#00D2FF] font-medium flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Upload en cours...</p>}
               {galleryItems.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {galleryItems.map((item, i) => (
@@ -370,11 +370,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                       <button
                         type="button"
                         onClick={() => removeGalleryItem(item.url)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 shadow-sm hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 transition-colors"
                         aria-label={`Supprimer l'image ${i + 1} de la galerie`}
                       >
-                        <span className="sr-only">Supprimer</span>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        <X className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   ))}
@@ -389,9 +388,11 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* SECTION FR */}
-        <div className="rounded-2xl border border-blue-200/50 bg-blue-50/50 backdrop-blur-md p-6 shadow-sm dark:border-blue-900/30 dark:bg-blue-900/10">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6 flex items-center gap-2">
-            <span className="text-xl">🇫🇷</span> Version Française
+        <div className="rounded-2xl border border-blue-600/20 bg-blue-50/40 backdrop-blur-md p-6 shadow-sm dark:border-[#00D2FF]/20 dark:bg-[#0A0C10]/85">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6 flex items-center gap-2.5">
+            <Globe className="h-4 w-4 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded border border-blue-600/30 bg-blue-600/10 text-blue-700 dark:border-[#00D2FF]/30 dark:bg-[#00D2FF]/10 dark:text-[#00D2FF]">FR</span>
+            <span>Version Française</span>
           </h2>
           <div className="space-y-4">
             <div>
@@ -422,9 +423,11 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
         </div>
 
         {/* SECTION EN */}
-        <div className="rounded-2xl border border-red-200/50 bg-red-50/50 backdrop-blur-md p-6 shadow-sm dark:border-red-900/30 dark:bg-red-900/10">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6 flex items-center gap-2">
-            <span className="text-xl">🇬🇧</span> Version Anglaise
+        <div className="rounded-2xl border border-emerald-600/20 bg-emerald-50/35 backdrop-blur-md p-6 shadow-sm dark:border-emerald-500/20 dark:bg-[#0A0C10]/85">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6 flex items-center gap-2.5">
+            <Globe className="h-4 w-4 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
+            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400">EN</span>
+            <span>Version Anglaise</span>
           </h2>
           <div className="space-y-4">
             <div>

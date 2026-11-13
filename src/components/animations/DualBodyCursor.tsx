@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { frameManager } from '@/lib/graphics/FrameManager';
 import { magneticManager } from '@/lib/graphics/MagneticManager';
 
-const LERP_SPEED = 18; // Vitesse de convergence exponentielle continue
+const LERP_SPEED = 18;
 
 interface LegacyMediaQueryList {
   addListener?: (listener: (e: MediaQueryListEvent) => void) => void;
@@ -12,12 +13,13 @@ interface LegacyMediaQueryList {
 }
 
 export default function DualBodyCursor() {
-  const [isFinePointer, setIsFinePointer] = useState(false);
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin') ?? false;
+  const [isActive, setIsActive] = useState(false);
 
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
 
-  // Coordonnées et statuts mutables haute fréquence - AUCUN useState dans la boucle
   const targetX = useRef(-100);
   const targetY = useRef(-100);
   const currentRingX = useRef(-100);
@@ -27,42 +29,57 @@ export default function DualBodyCursor() {
   const unsubscribeFrameRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    // Conditionner l'activation exclusivement à window.matchMedia('(pointer: fine)').matches
+    if (isAdminRoute) {
+      setIsActive(false);
+      return;
+    }
+
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
       return;
     }
 
-    const mediaQuery = window.matchMedia('(pointer: fine)');
-    if (!mediaQuery.matches) {
-      // Sur mobile/tactile, le composant retourne null et n'attache aucun écouteur
-      return;
-    }
+    const pointerQuery = window.matchMedia('(pointer: fine)');
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    setIsFinePointer(true);
-
-    const handlePointerChange = (e: MediaQueryListEvent) => {
-      setIsFinePointer(e.matches);
+    const syncCursorEligibility = () => {
+      setIsActive(pointerQuery.matches && !motionQuery.matches);
     };
 
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handlePointerChange);
+    syncCursorEligibility();
+
+    if (typeof pointerQuery.addEventListener === 'function') {
+      pointerQuery.addEventListener('change', syncCursorEligibility);
     } else {
-      const legacy = mediaQuery as unknown as LegacyMediaQueryList;
-      legacy.addListener?.(handlePointerChange);
+      const legacy = pointerQuery as unknown as LegacyMediaQueryList;
+      legacy.addListener?.(syncCursorEligibility);
+    }
+
+    if (typeof motionQuery.addEventListener === 'function') {
+      motionQuery.addEventListener('change', syncCursorEligibility);
+    } else {
+      const legacyMotion = motionQuery as unknown as LegacyMediaQueryList;
+      legacyMotion.addListener?.(syncCursorEligibility);
     }
 
     return () => {
-      if (typeof mediaQuery.removeEventListener === 'function') {
-        mediaQuery.removeEventListener('change', handlePointerChange);
+      if (typeof pointerQuery.removeEventListener === 'function') {
+        pointerQuery.removeEventListener('change', syncCursorEligibility);
       } else {
-        const legacy = mediaQuery as unknown as LegacyMediaQueryList;
-        legacy.removeListener?.(handlePointerChange);
+        const legacy = pointerQuery as unknown as LegacyMediaQueryList;
+        legacy.removeListener?.(syncCursorEligibility);
+      }
+
+      if (typeof motionQuery.removeEventListener === 'function') {
+        motionQuery.removeEventListener('change', syncCursorEligibility);
+      } else {
+        const legacyMotion = motionQuery as unknown as LegacyMediaQueryList;
+        legacyMotion.removeListener?.(syncCursorEligibility);
       }
     };
-  }, []);
+  }, [isAdminRoute]);
 
   useEffect(() => {
-    if (!isFinePointer) return;
+    if (!isActive) return;
 
     const stopFrameLoop = () => {
       if (unsubscribeFrameRef.current) {
@@ -91,7 +108,6 @@ export default function DualBodyCursor() {
         const dy = targetY.current - currentRingY.current;
         const dist = Math.hypot(dx, dy);
 
-        // Stabilisation : si la distance est inférieure à 0.1px, alignement direct et extinction de la boucle
         if (dist < 0.1) {
           currentRingX.current = targetX.current;
           currentRingY.current = targetY.current;
@@ -100,7 +116,6 @@ export default function DualBodyCursor() {
           return;
         }
 
-        // Damping inertiel exponentiel 1 - exp(-k * dt) dans la boucle FrameManager
         const clampedDt = Math.min(Math.max(dt || 0.0117, 0.001), 0.1);
         const lerpFactor = 1.0 - Math.exp(-LERP_SPEED * clampedDt);
         currentRingX.current += dx * lerpFactor;
@@ -110,7 +125,6 @@ export default function DualBodyCursor() {
       });
     };
 
-    // Écouteur passif pour le déplacement souris
     const onMouseMove = (e: MouseEvent) => {
       const x = e.clientX;
       const y = e.clientY;
@@ -124,7 +138,6 @@ export default function DualBodyCursor() {
         currentRingX.current = x;
         currentRingY.current = y;
 
-        // Positionnement immédiat avant d'afficher pour éviter tout flash ou swoop
         if (dotRef.current) {
           dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
           dotRef.current.style.opacity = '1';
@@ -136,7 +149,6 @@ export default function DualBodyCursor() {
         return;
       }
 
-      // 1. Rendu DOM direct instantané sur #cur
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         if (dotRef.current.style.opacity !== '1') {
@@ -148,7 +160,6 @@ export default function DualBodyCursor() {
         ringRef.current.style.opacity = '1';
       }
 
-      // Si l'utilisateur préfère réduire les mouvements, le ring s'aligne directement sans Lerp
       if (frameManager.isReducedMotion) {
         currentRingX.current = x;
         currentRingY.current = y;
@@ -186,32 +197,29 @@ export default function DualBodyCursor() {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       stopFrameLoop();
     };
-  }, [isFinePointer]);
+  }, [isActive]);
 
-  // Si sur mobile / tactile ou sans pointeur fin : aucun DOM rendu et aucun listener attaché
-  if (!isFinePointer) {
+  if (!isActive) {
     return null;
   }
 
   return (
     <>
-      {/* #cur-dot : Point direct instantané */}
       <div
         id="cur-dot"
         ref={dotRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[9999] h-2 w-2 -ml-1 -mt-1 rounded-full bg-white opacity-0 transition-opacity duration-150"
+        className="pointer-events-none fixed top-0 left-0 z-[9999] -ml-1 -mt-1 h-2 w-2 rounded-full bg-white opacity-0 transition-opacity duration-150"
         style={{
           mixBlendMode: 'difference',
           willChange: 'transform',
         }}
       />
-      {/* #ring : Anneau suiveur lissé */}
       <div
         id="ring"
         ref={ringRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[9999] h-8 w-8 -ml-4 -mt-4 rounded-full border border-white opacity-0 transition-opacity duration-150"
+        className="pointer-events-none fixed top-0 left-0 z-[9999] -ml-4 -mt-4 h-8 w-8 rounded-full border border-white opacity-0 transition-opacity duration-150"
         style={{
           mixBlendMode: 'difference',
           willChange: 'transform',

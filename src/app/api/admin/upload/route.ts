@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       { url: remoteUrl, previewUrl: previewUrl },
       { status: 201 }
     );
-  } catch (err) {
+  } catch {
     console.error("Erreur d'upload vers R2");
     return NextResponse.json(
       { error: "Une erreur inattendue est survenue lors de l'upload" },

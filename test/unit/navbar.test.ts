@@ -124,7 +124,7 @@ describe('Navbar Accessibility, Scroll Synchronization & WCAG 2.5.3 (Label in Na
 
   it('should render dedicated contact CTA', () => {
     const html = renderToString(React.createElement(Navbar));
-    expect(html).toContain('href="#contact"');
+    expect(html).toContain('href="/#contact"');
     expect(html).toContain('Me contacter');
   });
 

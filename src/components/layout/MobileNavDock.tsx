@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Home, User, GraduationCap, Briefcase, FolderGit2, Cpu, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '../theme/LanguageProvider';
 import { useTheme } from 'next-themes';
+import { getScrollBehavior } from '@/lib/scroll';
 
 export interface DockNavItem {
   id: string;
@@ -291,14 +292,19 @@ export default function MobileNavDock({
     [t]
   );
 
-  // Défilement doux automatique du dock si nécessaire sur écrans très étroits (< 340px)
+  // Défilement horizontal doux dans le dock sans impacter le scroll vertical de la page
   useEffect(() => {
     if (!navRef.current || isScrubbingRef.current) return;
     const activeEl = navRef.current.querySelector<HTMLElement>('[aria-current="page"]');
-    if (activeEl && typeof activeEl.scrollIntoView === 'function') {
-      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    if (activeEl && typeof navRef.current.scrollTo === 'function') {
+      const nav = navRef.current;
+      const targetLeft = activeEl.offsetLeft - (nav.clientWidth - activeEl.clientWidth) / 2;
+      nav.scrollTo({
+        left: Math.max(0, targetLeft),
+        behavior: shouldReduceMotion ? 'auto' : 'smooth',
+      });
     }
-  }, [activeSegment]);
+  }, [activeSegment, shouldReduceMotion]);
 
   const scrollToSection = useCallback(
     (sectionId: string, immediate = false) => {
@@ -312,7 +318,7 @@ export default function MobileNavDock({
 
       const performScroll = () => {
         el.scrollIntoView({
-          behavior: shouldReduceMotion || immediate ? 'auto' : 'smooth',
+          behavior: shouldReduceMotion || immediate ? 'auto' : getScrollBehavior(),
           block: 'start',
         });
         if (typeof window !== 'undefined' && window.history?.replaceState) {
@@ -488,11 +494,11 @@ export default function MobileNavDock({
   return (
     <aside
       data-mobile-dock="true"
-      aria-label="Navigation flottante mobile"
+      aria-label={t('nav.mobileDock')}
       style={{
         transform: `translate3d(0, ${dynamicBottomTranslateY}px, 0)`,
       }}
-      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 md:hidden flex flex-col items-center justify-center pointer-events-none px-2.5 transition-all duration-300 ease-out ${
+      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 md:hidden flex flex-col items-center justify-center pointer-events-none px-2.5 transition-[transform,opacity] duration-300 ease-out ${
         isInputFocused ? 'opacity-0' : 'opacity-100'
       }`}
     >
@@ -509,9 +515,9 @@ export default function MobileNavDock({
             className="mb-2.5 flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-tight text-zinc-900 dark:text-white shadow-lg"
             style={{
               transform: `translate3d(${scrubLoupeOffsetX}px, 0, 0)`,
-              backgroundColor: isDark ? 'rgba(18, 18, 22, 0.88)' : 'rgba(255, 255, 255, 0.92)',
-              backdropFilter: 'blur(20px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+              backgroundColor: isDark ? 'rgba(10, 12, 16, 0.90)' : 'rgba(255, 255, 255, 0.92)',
+              backdropFilter: 'blur(16px) saturate(1.6)',
+              WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
               border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
               boxShadow: isDark
                 ? '0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18)'
@@ -519,7 +525,7 @@ export default function MobileNavDock({
             }}
           >
             {React.createElement(activeScrubItem.icon, {
-              className: 'h-3.5 w-3.5 text-brand-blue',
+              className: 'h-3.5 w-3.5 text-blue-600 dark:text-[#00D2FF]',
             })}
             <span>{activeScrubItem.name}</span>
           </motion.div>
@@ -529,7 +535,7 @@ export default function MobileNavDock({
       <nav
         ref={navRef}
         role="navigation"
-        aria-label="Dock de navigation principal"
+        aria-label={locale === 'fr' ? 'Dock de navigation principal' : 'Primary navigation dock'}
         onPointerDown={handleDockPointerDown}
         onPointerMove={handleDockPointerMove}
         onPointerUp={handleDockPointerUpOrCancel}
@@ -593,13 +599,13 @@ export default function MobileNavDock({
                 WebkitUserSelect: 'none',
                 userSelect: 'none',
               }}
-              className={`group relative flex h-12 min-h-[48px] items-center justify-center rounded-full flex-shrink-0 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:scale-95 ${
+              className={`group relative flex h-12 min-h-[48px] items-center justify-center rounded-full flex-shrink-0 transition-[padding,color,background-color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF] active:scale-95 ${
                 isActive
                   ? 'px-3 sm:px-3.5 text-zinc-900 dark:text-white font-semibold'
-                  : 'min-w-[40px] sm:min-w-[44px] px-2.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  : 'min-w-[40px] sm:min-w-[44px] px-2.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
-              {/* CAPSULE ACTIVE DYNAMIQUE STYLE iOS LIQUID GLASS */}
+              {/* CAPSULE ACTIVE DYNAMIQUE */}
               {isActive && (
                 <motion.div
                   layoutId="mobile-dock-active-pill"
@@ -620,7 +626,6 @@ export default function MobileNavDock({
                     boxShadow: isDark
                       ? '0 2px 10px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.18)'
                       : '0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(10px)',
                   }}
                 />
               )}
@@ -636,10 +641,10 @@ export default function MobileNavDock({
                 }
               >
                 <Icon
-                  className={`h-4 w-4 flex-shrink-0 transition-colors duration-300 ${
+                  className={`h-4 w-4 flex-shrink-0 transition-colors duration-200 ${
                     isActive
-                      ? 'text-brand-blue dark:text-white'
-                      : 'text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
+                      ? 'text-blue-600 dark:text-white'
+                      : 'text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
                   }`}
                 />
                 <span
@@ -680,16 +685,16 @@ export default function MobileNavDock({
                 ? 'Ouvrir le menu de navigation et réglages'
                 : 'Open navigation and settings menu'
           }
-          className={`group relative flex h-12 min-h-[48px] min-w-[44px] items-center justify-center rounded-full px-2.5 flex-shrink-0 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:scale-95 ${
+          className={`group relative flex h-12 min-h-[48px] min-w-[44px] items-center justify-center rounded-full px-2.5 flex-shrink-0 transition-[color,background-color,border-color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF] active:scale-95 ${
             isHudOpen || isContactActive
               ? 'bg-black/8 dark:bg-white/15 text-zinc-900 dark:text-white border border-black/10 dark:border-white/15'
-              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
           <SlidersHorizontal
             className={`h-4 w-4 transition-transform duration-300 ${
               isHudOpen
-                ? 'rotate-90 text-brand-blue dark:text-white'
+                ? 'rotate-90 text-blue-600 dark:text-white'
                 : 'text-zinc-600 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white'
             }`}
           />

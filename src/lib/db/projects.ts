@@ -28,23 +28,37 @@ interface D1ProjectRow {
   impact: string;
 }
 
+const FR_TO_EN_TECH_MAP: ReadonlyMap<string, string> = (() => {
+  const map = new Map<string, string>([
+    ["Héritage ISO", "Inheritance & RAII"],
+    ["Algorithmique Matérielle", "Collision Detection"],
+    ["Graphes ML", "Data Visualization"],
+    ["Linux Kernel", "Unix Syscalls"],
+    ["Signaux ASync", "Signals"],
+    ["Mémoire", "Memory Management"],
+    ["Processus Posix", "POSIX Processes"],
+  ]);
+
+  for (const frProject of FALLBACK_PROJECTS.fr) {
+    const enProject = FALLBACK_PROJECTS.en.find((p) => p.id === frProject.id);
+    if (!enProject) continue;
+    frProject.technologies.forEach((tech, idx) => {
+      const enTech = enProject.technologies[idx];
+      if (enTech) {
+        map.set(tech, enTech);
+      }
+    });
+  }
+
+  return map;
+})();
+
 function mapRowToProject(row: D1ProjectRow): Project {
   const parsedTechs = JSON.parse(row.technologies) as string[];
-  let localizedTechs = parsedTechs;
-
-  if (row.locale === "en") {
-    const enFallback = FALLBACK_PROJECTS.en.find((p) => p.id === row.id);
-    const frFallback = FALLBACK_PROJECTS.fr.find((p) => p.id === row.id);
-    // Use English technology labels when the D1 row still holds the default French seed array
-    if (
-      enFallback &&
-      frFallback &&
-      parsedTechs.length === frFallback.technologies.length &&
-      parsedTechs.every((t, i) => t === frFallback.technologies[i])
-    ) {
-      localizedTechs = enFallback.technologies;
-    }
-  }
+  const localizedTechs =
+    row.locale === "en"
+      ? parsedTechs.map((t) => FR_TO_EN_TECH_MAP.get(t) ?? t)
+      : parsedTechs;
 
   return {
     id: row.id,
@@ -80,7 +94,7 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
   }
 
   if (!db) {
-    console.warn("⚠️ Base D1 'portfolio_db' non trouvée (mode next dev sans wrangler). Utilisation des projets de secours.");
+    console.warn("[projects] Base D1 'portfolio_db' non trouvée (mode dev local). Utilisation des projets de secours.");
     return FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
   }
 
@@ -96,7 +110,7 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
     const { results } = (await db.prepare(query).bind(locale).all()) as { results: D1ProjectRow[] };
     return results.map(mapRowToProject);
   } catch (error) {
-    console.warn("⚠️ Erreur lors de la requête D1 getProjects. Utilisation des projets de secours:", error);
+    console.warn("[projects] Erreur lors de la requête D1 getProjects. Utilisation des projets de secours:", error);
     return FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
   }
 }
@@ -132,7 +146,7 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
 
     return mapRowToProject(project);
   } catch (error) {
-    console.warn("⚠️ Erreur lors de la requête D1 getProjectBySlug. Utilisation des projets de secours:", error);
+    console.warn("[projects] Erreur lors de la requête D1 getProjectBySlug. Utilisation des projets de secours:", error);
     const list = FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
     return list.find((p) => p.slug === slug) || null;
   }

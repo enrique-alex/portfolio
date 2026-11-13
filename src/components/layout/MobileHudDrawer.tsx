@@ -179,11 +179,11 @@ export default function MobileHudDrawer({
               stiffness: 360,
               mass: 0.8,
             }}
-            className="relative z-10 w-full max-h-[86vh] max-h-[86dvh] overflow-y-auto rounded-t-[28px] border-t border-black/10 dark:border-white/10 bg-white/92 dark:bg-[#0a0a0e]/95 text-zinc-900 dark:text-zinc-100 overscroll-contain backdrop-blur-2xl pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
+            className="relative z-10 w-full max-h-[86vh] max-h-[86dvh] overflow-y-auto rounded-t-[28px] border-t border-black/10 dark:border-white/10 bg-white/95 dark:bg-[#0A0C10]/95 text-zinc-900 dark:text-zinc-100 overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             style={{
               willChange: 'transform, opacity',
-              backdropFilter: 'blur(24px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+              backdropFilter: 'blur(20px) saturate(1.6)',
+              WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
               boxShadow: isDark
                 ? 'inset 0 1px 0 rgba(255,255,255,0.12), 0 -12px 48px rgba(0,0,0,0.6)'
                 : 'inset 0 1px 0 rgba(255,255,255,0.95), 0 -12px 48px rgba(0,0,0,0.12)',
@@ -212,7 +212,7 @@ export default function MobileHudDrawer({
                   type="button"
                   onClick={onClose}
                   aria-label={locale === 'fr' ? 'Fermer le menu' : 'Close menu'}
-                  className="group relative flex h-12 w-12 min-h-[48px] min-w-[48px] items-center justify-center rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 transition-[transform,background-color,color] duration-150 ease-[var(--ease-out)] hover:bg-black/10 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  className="group relative flex h-12 w-12 min-h-[48px] min-w-[48px] items-center justify-center rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 transition-[transform,background-color,color] duration-150 ease-[var(--ease-out)] hover:bg-black/10 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
                 >
                   <X className="h-5 w-5 transition-transform duration-300 text-zinc-600 dark:text-zinc-300" />
                 </button>
@@ -234,11 +234,11 @@ export default function MobileHudDrawer({
                         onClick={() => handleLinkClick(item.name, item.id)}
                         className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl border p-2.5 text-center transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] active:scale-95 ${
                           isActive
-                            ? 'border-brand-blue/40 bg-brand-blue/10 text-zinc-900 dark:text-white font-semibold'
+                            ? 'border-blue-600/40 bg-blue-600/10 text-zinc-900 dark:border-[#00D2FF]/40 dark:bg-[#00D2FF]/10 dark:text-white font-semibold'
                             : 'border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-black/15 dark:hover:border-white/20 hover:text-zinc-900 dark:hover:text-white'
                         }`}
                       >
-                        <Icon className={`h-4 w-4 ${isActive ? 'text-brand-blue' : 'text-zinc-500 dark:text-zinc-400'}`} />
+                        <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600 dark:text-[#00D2FF]' : 'text-zinc-500 dark:text-zinc-400'}`} />
                         <span className="text-xs font-medium tracking-tight">{item.name}</span>
                       </a>
                     );
@@ -262,7 +262,7 @@ export default function MobileHudDrawer({
                         onClick={() => handleLinkClick(link.name, link.id)}
                         className={`group relative flex min-h-[52px] items-center justify-between rounded-xl border px-3.5 py-2.5 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] active:scale-[0.98] ${
                           isActive
-                            ? 'border-brand-blue/40 bg-brand-blue/10 text-zinc-900 dark:text-white'
+                            ? 'border-blue-600/40 bg-blue-600/10 text-zinc-900 dark:border-[#00D2FF]/40 dark:bg-[#00D2FF]/10 dark:text-white'
                             : 'border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 hover:border-black/15 dark:hover:border-white/15 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white'
                         }`}
                       >
@@ -270,7 +270,7 @@ export default function MobileHudDrawer({
                           <div
                             className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
                               isActive
-                                ? 'border-brand-blue/30 bg-brand-blue/15 text-brand-blue dark:text-white'
+                                ? 'border-blue-600/30 bg-blue-600/15 text-blue-600 dark:border-[#00D2FF]/30 dark:bg-[#00D2FF]/15 dark:text-[#00D2FF]'
                                 : 'border-black/8 dark:border-white/10 bg-black/5 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'
                             }`}
                           >
@@ -286,8 +286,9 @@ export default function MobileHudDrawer({
                           </div>
                         </div>
                         <ChevronRight
+                          aria-hidden="true"
                           className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 ${
-                            isActive ? 'text-brand-blue' : 'text-zinc-400 dark:text-zinc-500'
+                            isActive ? 'text-blue-600 dark:text-[#00D2FF]' : 'text-zinc-400 dark:text-zinc-500'
                           }`}
                         />
                       </a>
@@ -312,7 +313,7 @@ export default function MobileHudDrawer({
                     {isDark ? (
                       <Sun className="h-4 w-4 text-amber-400 mb-1" />
                     ) : (
-                      <Moon className="h-4 w-4 text-brand-blue mb-1" />
+                      <Moon className="h-4 w-4 text-blue-600 mb-1" />
                     )}
                     <span className="text-[11px] font-medium">
                       {isDark ? (locale === 'fr' ? 'Jour' : 'Light') : (locale === 'fr' ? 'Nuit' : 'Dark')}
@@ -326,7 +327,7 @@ export default function MobileHudDrawer({
                     className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
                     aria-label={locale === 'fr' ? 'Switch to English (EN)' : 'Passer en Français (FR)'}
                   >
-                    <Languages className="h-4 w-4 text-brand-blue mb-1" />
+                    <Languages className="h-4 w-4 text-blue-600 dark:text-[#00D2FF] mb-1" />
                     <span className="text-[11px] font-semibold">
                       {locale === 'fr' ? 'EN' : 'FR'}
                     </span>
@@ -337,7 +338,7 @@ export default function MobileHudDrawer({
                     href="/admin/login"
                     onClick={onClose}
                     className="flex min-h-[48px] flex-col items-center justify-center rounded-xl border border-black/6 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.03] p-2 text-zinc-700 dark:text-zinc-300 transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-zinc-900 dark:hover:text-white active:scale-95"
-                    aria-label="Accès administrateur"
+                    aria-label={t('nav.admin')}
                   >
                     <Lock className="h-4 w-4 text-zinc-500 dark:text-zinc-400 mb-1" />
                     <span className="text-[11px] font-medium">Admin</span>

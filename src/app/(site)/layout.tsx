@@ -1,3 +1,4 @@
+import { MotionConfig } from "framer-motion";
 import CursorFluid from "@/components/animations/CursorFluid";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -10,7 +11,7 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       {/* Séquence d'initialisation matérielle */}
       <Preloader />
 
@@ -28,6 +29,6 @@ export default function SiteLayout({
 
       {/* Le Pied de page Système */}
       <Footer />
-    </>
+    </MotionConfig>
   );
 }

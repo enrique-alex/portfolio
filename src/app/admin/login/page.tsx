@@ -45,24 +45,24 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+    <main className="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center px-4">
       <div className="mb-8 w-full max-w-sm">
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-100/80 px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm hover:bg-zinc-200 hover:text-zinc-900 transition-colors dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 w-fit"
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-100/90 px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-200 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors dark:bg-[#0A0C10]/85 dark:text-zinc-300 dark:hover:bg-[#11141C] dark:hover:text-white dark:focus-visible:ring-[#00D2FF] w-fit"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Retour au portfolio
         </Link>
       </div>
 
       <div className="w-full max-w-sm">
-        <div className="rounded-3xl border border-zinc-200/50 bg-white/50 p-8 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#0a0a0a]/50">
+        <div className="rounded-3xl border border-black/10 bg-white/85 p-8 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#0A0C10]/90">
           <div className="mb-6 text-center">
             <h1 className="font-mono text-lg font-semibold tracking-tight text-zinc-900 dark:text-white mb-2">
               Administration
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Cette section est réservée à l&apos;administrateur du site.
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
             <div className="mb-4">
               <label
                 htmlFor="admin-password"
-                className="mb-2 block text-sm font-medium text-zinc-600 dark:text-zinc-400"
+                className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
               >
                 Mot de passe
               </label>
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
                 required
                 autoComplete="current-password"
                 aria-label="Mot de passe administrateur"
-                className="w-full rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 outline-none transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 outline-none transition-colors focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 dark:border-white/15 dark:bg-[#050505]/80 dark:text-white dark:focus:border-[#00D2FF] dark:focus:ring-[#00D2FF]/20"
                 placeholder="••••••••••••••••"
               />
             </div>
@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
             {error && (
               <p
                 role="alert"
-                className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400"
               >
                 {error}
               </p>
@@ -100,7 +100,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+              className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 dark:focus-visible:ring-[#00D2FF]"
             >
               {isLoading ? "Connexion..." : "Se connecter"}
             </button>

@@ -12,10 +12,10 @@ export default function ContactSection() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section id="contact" className="section-contain relative w-full pt-24 pb-28 md:py-24 lg:py-32 overflow-hidden scroll-mt-32">
+    <section id="contact" className="section-contain relative w-full pt-24 pb-28 md:py-24 lg:py-32 overflow-x-clip scroll-mt-32">
       
       {/* Background Ambience */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/5 via-transparent to-transparent opacity-50 dark:from-brand-blue/10"></div>
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/5 via-transparent to-transparent opacity-60 dark:from-[#00D2FF]/10"></div>
       
       <div className="mx-auto flex w-full max-w-7xl flex-col px-4 relative z-10">
         
@@ -27,16 +27,16 @@ export default function ContactSection() {
           viewport={{ once: true }}
           transition={{ duration: shouldReduceMotion ? 0 : undefined, type: shouldReduceMotion ? false : 'spring', stiffness: 280, damping: 28 }}
         >
-          <div className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400">
-            <Send className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
-            <span className="font-mono text-[10px] font-semibold tracking-[0.3em] uppercase">
+          <div className="flex items-center gap-3 mb-3 text-zinc-600 dark:text-zinc-400">
+            <Send className="h-4 w-4 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+            <span className="font-mono text-[11px] font-semibold tracking-[0.3em] uppercase">
               {t('contact.header.tag')}
             </span>
           </div>
           <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
             {t('contact.header.title')}
           </h2>
-          <p className="mt-4 font-mono text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-4 max-w-[65ch] font-mono text-sm text-zinc-600 dark:text-zinc-400">
             {t('contact.header.subtitle')}
           </p>
         </motion.div>

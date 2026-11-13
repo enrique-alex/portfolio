@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Terminal, Send, CheckCircle2 } from 'lucide-react';
 import Magnetic from '@/components/ui/Magnetic';
 import { useLanguage } from '../theme/LanguageProvider';
@@ -13,7 +13,17 @@ export default function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '', botcheck: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; message?: string }>({});
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,22 +31,26 @@ export default function ContactForm() {
     // Honeypot: rejet silencieux si coché (un humain ne voit jamais cette case)
     if (formData.botcheck) return;
 
-    if (!formData.name || !formData.email || !formData.message) return;
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedMessage = formData.message.trim();
+
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) return;
 
     // Validation email côté client
-    if (!EMAIL_REGEX.test(formData.email.trim())) {
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
       setFieldErrors(prev => ({ ...prev, email: t('contact.form.email.invalid') }));
       return;
     }
 
     // Validation longueur du message
-    if (formData.message.trim().length < 10) {
+    if (trimmedMessage.length < 10) {
       setFieldErrors(prev => ({ ...prev, message: t('contact.form.message.tooShort') }));
       return;
     }
 
     setFieldErrors({});
-    
+    setErrorMessage('');
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -44,12 +58,12 @@ export default function ContactForm() {
     const endpoint = process.env.NEXT_PUBLIC_CONTACT_FORM_ENDPOINT;
 
     if (!endpoint) {
-      console.error("Endpoint de formulaire manquant dans les variables d'environnement.");
-      // Simule un délai de traitement pour le frontend si aucun endpoint n'existe pour le moment
-      setTimeout(() => {
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      feedbackTimerRef.current = setTimeout(() => {
         setIsSubmitting(false);
         setSubmitStatus('error');
-      }, 1500);
+        setErrorMessage(t('contact.form.error.generic'));
+      }, 600);
       return;
     }
 
@@ -61,9 +75,12 @@ export default function ContactForm() {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          ...formData,
+          name: trimmedName,
+          email: trimmedEmail,
+          message: trimmedMessage,
+          botcheck: formData.botcheck,
           access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY,
-          subject: `Nouveau message de ${formData.name} via le Portfolio`
+          subject: `${t('contact.form.subjectPrefix')} ${trimmedName}`
         })
       });
 
@@ -72,33 +89,35 @@ export default function ContactForm() {
         setFormData({ name: '', email: '', message: '', botcheck: false });
       } else {
         setSubmitStatus('error');
+        setErrorMessage(t('contact.form.error.generic'));
       }
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi:', error);
+    } catch {
       setSubmitStatus('error');
+      setErrorMessage(t('contact.form.error.network'));
     } finally {
       setIsSubmitting(false);
-      
-      // Reset after 5 seconds
-      setTimeout(() => {
+
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = setTimeout(() => {
         setSubmitStatus('idle');
+        setErrorMessage('');
       }, 5000);
     }
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white/80 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0A0C10]/90 dark:shadow-2xl">
+    <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white/85 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0A0C10]/90 dark:shadow-2xl">
       
       {/* Engineering Console Header */}
       <div className="flex items-center justify-between border-b border-black/10 bg-black/[0.03] px-5 py-3.5 dark:border-white/10 dark:bg-white/[0.03]">
         <div className="flex items-center gap-2.5">
-          <Terminal className="h-4 w-4 text-brand-blue dark:text-[#00D2FF]" aria-hidden="true" />
-          <span className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:text-zinc-300">
-            TX // DIRECT_CHANNEL
+          <Terminal className="h-4 w-4 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+          <span className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-800 dark:text-zinc-200">
+            {t('contact.form.channel')}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-          TLS 1.3 · VERIFIED
+        <span className="font-mono text-[11px] uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+          {t('contact.header.tag')}
         </span>
       </div>
 
@@ -109,6 +128,9 @@ export default function ContactForm() {
         <input 
           type="checkbox" 
           name="botcheck" 
+          aria-hidden="true"
+          aria-label={t('contact.form.honeypot')}
+          checked={formData.botcheck}
           className="hidden" 
           style={{ display: 'none' }} 
           tabIndex={-1} 
@@ -117,7 +139,7 @@ export default function ContactForm() {
         />
         
         <div className="group relative">
-          <label htmlFor="name" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue dark:group-focus-within:text-[#00D2FF]">
+          <label htmlFor="name" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:text-zinc-300 transition-colors group-focus-within:text-blue-600 dark:group-focus-within:text-[#00D2FF]">
             {t('contact.form.name.label')}
           </label>
           <input 
@@ -128,13 +150,13 @@ export default function ContactForm() {
             maxLength={100}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             placeholder={t('contact.form.name.placeholder')}
-            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-[#00D2FF] disabled:opacity-50"
+            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 placeholder:text-zinc-500 transition-colors focus:border-b-2 focus:border-blue-600 focus:outline-none dark:border-white/20 dark:text-white dark:placeholder:text-zinc-400 dark:focus:border-[#00D2FF] disabled:opacity-50"
             disabled={isSubmitting}
           />
         </div>
 
         <div className="group relative">
-          <label htmlFor="email" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue dark:group-focus-within:text-[#00D2FF]">
+          <label htmlFor="email" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:text-zinc-300 transition-colors group-focus-within:text-blue-600 dark:group-focus-within:text-[#00D2FF]">
             {t('contact.form.email.label')}
           </label>
           <input 
@@ -148,20 +170,20 @@ export default function ContactForm() {
               if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
             }}
             placeholder={t('contact.form.email.placeholder')}
-            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 transition-colors focus:border-brand-blue focus:outline-none dark:border-white/20 dark:text-white dark:focus:border-[#00D2FF] disabled:opacity-50"
+            className="w-full rounded-none border-b border-black/20 bg-transparent px-0 py-2 font-mono text-sm text-zinc-900 placeholder:text-zinc-500 transition-colors focus:border-b-2 focus:border-blue-600 focus:outline-none dark:border-white/20 dark:text-white dark:placeholder:text-zinc-400 dark:focus:border-[#00D2FF] disabled:opacity-50"
             disabled={isSubmitting}
             aria-invalid={fieldErrors.email ? 'true' : undefined}
             aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
           {fieldErrors.email && (
-            <p id="email-error" role="alert" aria-live="assertive" className="mt-1 font-mono text-[10px] text-red-500">
+            <p id="email-error" role="alert" aria-live="assertive" className="mt-1.5 font-mono text-[11px] font-medium text-red-600 dark:text-red-400">
               {fieldErrors.email}
             </p>
           )}
         </div>
 
         <div className="group relative">
-          <label htmlFor="message" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors group-focus-within:text-brand-blue dark:group-focus-within:text-[#00D2FF]">
+          <label htmlFor="message" className="mb-2 block font-mono text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:text-zinc-300 transition-colors group-focus-within:text-blue-600 dark:group-focus-within:text-[#00D2FF]">
             {t('contact.form.message.label')}
           </label>
           <textarea 
@@ -176,42 +198,45 @@ export default function ContactForm() {
               if (fieldErrors.message) setFieldErrors(prev => ({ ...prev, message: undefined }));
             }}
             placeholder={t('contact.form.message.placeholder')}
-            className="w-full resize-none rounded-xl border border-black/15 bg-white/60 p-4 font-mono text-sm text-zinc-900 transition-[border-color,background-color,box-shadow] duration-200 focus:border-brand-blue/50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-blue/10 dark:border-white/15 dark:bg-black/40 dark:text-white dark:focus:border-[#00D2FF]/50 dark:focus:bg-black/70 disabled:opacity-50"
+            className="w-full resize-none rounded-xl border border-black/15 bg-white/75 p-4 font-mono text-sm text-zinc-900 placeholder:text-zinc-500 transition-[border-color,background-color,box-shadow] duration-200 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 dark:border-white/15 dark:bg-[#050505]/60 dark:text-white dark:placeholder:text-zinc-400 dark:focus:border-[#00D2FF] dark:focus:bg-[#050505]/90 dark:focus:ring-[#00D2FF]/20 disabled:opacity-50"
             disabled={isSubmitting}
             aria-invalid={fieldErrors.message ? 'true' : undefined}
             aria-describedby={fieldErrors.message ? 'message-error' : undefined}
           ></textarea>
           {fieldErrors.message && (
-            <p id="message-error" role="alert" aria-live="assertive" className="mt-1 font-mono text-[10px] text-red-500">
+            <p id="message-error" role="alert" aria-live="assertive" className="mt-1.5 font-mono text-[11px] font-medium text-red-600 dark:text-red-400">
               {fieldErrors.message}
             </p>
           )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400" role="status" aria-live="polite">
-            STATUS: <span className={`font-bold ${
-              submitStatus === 'success' ? 'text-emerald-500' :
-              submitStatus === 'error' ? 'text-red-500' :
-              isSubmitting ? 'text-amber-500 animate-pulse' :
-              'text-zinc-900 dark:text-zinc-200'
-            }`}>
-              {submitStatus === 'success' ? 'DELIVERED_SUCCESSFULLY' :
-               submitStatus === 'error' ? 'TRANSMISSION_FAILED' :
-               isSubmitting ? 'TRANSMITTING...' : 'READY'}
-            </span>
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="min-h-[1.25rem] font-mono text-[11px] text-zinc-600 dark:text-zinc-400" role="status" aria-live="polite">
+            {submitStatus === 'success' ? (
+              <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                {t('contact.form.feedback.sent')}
+              </span>
+            ) : submitStatus === 'error' ? (
+              <span className="font-semibold text-red-600 dark:text-red-400">
+                {errorMessage || t('contact.form.error.generic')}
+              </span>
+            ) : isSubmitting ? (
+              <span className="font-semibold text-amber-700 dark:text-amber-400">
+                {t('contact.form.submit.sending')}
+              </span>
+            ) : null}
           </p>
           
           <Magnetic intensity={0.15}>
             <button 
               type="submit"
               disabled={isSubmitting || submitStatus === 'success'}
-              className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-6 py-3.5 font-semibold active:scale-[0.98] transition-[transform,background-color,box-shadow] duration-200 focus:outline-none focus:ring-4 ${
+              className={`group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl px-6 py-3.5 font-semibold active:scale-[0.98] transition-[transform,background-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:focus-visible:ring-offset-[#050505] ${
                 submitStatus === 'success' 
-                ? 'bg-emerald-500 text-white focus:ring-emerald-500/20' 
+                ? 'bg-emerald-700 text-white focus-visible:ring-emerald-600 dark:bg-emerald-600' 
                 : submitStatus === 'error'
-                ? 'bg-red-500 text-white focus:ring-red-500/20'
-                : 'bg-zinc-900 text-white hover:bg-zinc-800 focus:ring-zinc-900/20 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:focus:ring-white/20'
+                ? 'bg-red-700 text-white focus-visible:ring-red-600 dark:bg-red-600'
+                : 'bg-zinc-900 text-white hover:bg-zinc-800 focus-visible:ring-blue-600 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:focus-visible:ring-[#00D2FF]'
               }`}
             >
               <span className="relative z-10 font-mono tracking-widest text-xs uppercase">
@@ -222,7 +247,7 @@ export default function ContactForm() {
               {submitStatus === 'success' ? (
                 <CheckCircle2 className="relative z-10 h-3.5 w-3.5" aria-hidden="true" />
               ) : (
-                <Send className={`relative z-10 h-3.5 w-3.5 transition-transform duration-200 ${isSubmitting ? 'animate-bounce' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'}`} aria-hidden="true" />
+                <Send className="relative z-10 h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
               )}
             </button>
           </Magnetic>

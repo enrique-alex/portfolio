@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { purgeExpiredProjects, getTrashedProjects } from "@/lib/db/admin-projects-write";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const { env } = getCloudflareContext();
     const db = env.portfolio_db;
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const { env } = getCloudflareContext();
     const db = env.portfolio_db;

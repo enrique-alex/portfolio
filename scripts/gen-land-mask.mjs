@@ -144,5 +144,4 @@ export const LAND_RLE: number[][] = ${JSON.stringify(rows)};
 `;
 
 writeFileSync('src/lib/graphics/landMask.ts', content);
-writeFileSync('src/lib/landMask.ts', `export * from './graphics/landMask';\n`);
 console.log('Fichiers landMask.ts générés avec succès sans artefacts antiméridien.');

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React, { useRef } from 'react';
 import { renderToString } from 'react-dom/server';
-import { useDirectScramble, computeScrambleText, DEFAULT_CHARS } from '@/lib/hooks/useDirectScramble';
+import { useDirectScramble, computeScrambleText } from '@/lib/hooks/useDirectScramble';
 import { frameManager } from '@/lib/graphics/FrameManager';
 
 describe('useDirectScramble - Découplage Texte du Hero (Étape 2)', () => {

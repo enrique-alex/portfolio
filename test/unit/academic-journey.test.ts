@@ -3,31 +3,22 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 
 // Mock framer-motion for Cloudflare worker vitest environment (stripping motion-specific props)
+const MOTION_ONLY_PROPS = new Set(['initial', 'whileInView', 'viewport', 'transition', 'animate', 'exit']);
+function stripMotionProps(props: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(props).filter(([key]) => !MOTION_ONLY_PROPS.has(key)));
+}
+
 vi.mock('framer-motion', () => ({
   motion: {
     div: ({
       children,
       style,
       className,
-      initial,
-      whileInView,
-      viewport,
-      transition,
-      animate,
-      exit,
       ...props
     }: React.ComponentProps<'div'> & Record<string, unknown>) =>
-      React.createElement('div', { className, style, ...props }, children),
-    line: ({
-      initial,
-      whileInView,
-      viewport,
-      transition,
-      animate,
-      exit,
-      ...props
-    }: React.ComponentProps<'line'> & Record<string, unknown>) =>
-      React.createElement('line', props),
+      React.createElement('div', { className, style, ...stripMotionProps(props) }, children),
+    line: (props: React.ComponentProps<'line'> & Record<string, unknown>) =>
+      React.createElement('line', stripMotionProps(props)),
   },
   useScroll: vi.fn(() => ({
     scrollYProgress: { get: () => 0.5 },
@@ -60,7 +51,7 @@ describe('AcademicJourney (Parcours Académique)', () => {
   it('should render the vertical timeline progress bar with GPU-composited scaleY and origin-top', () => {
     const html = renderToString(React.createElement(AcademicJourney));
     // Verify background track and active brand-blue progress track with rounded caps
-    expect(html).toContain('bg-zinc-500/10');
+    expect(html).toContain('bg-zinc-500/15');
     expect(html).toContain('bg-brand-blue');
     expect(html).toContain('origin-top');
     expect(html).toContain('w-[2px]');

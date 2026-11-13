@@ -10,6 +10,7 @@ import { Logo } from '../ui/Logo';
 import Link from 'next/link';
 import MobileNavDock, { type SelectSegmentOptions } from './MobileNavDock';
 import MobileHudDrawer from './MobileHudDrawer';
+import { scrollToElementById } from '@/lib/scroll';
 
 export interface PortfolioSection {
   id: string;
@@ -345,6 +346,12 @@ export default function Navbar() {
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none dark:focus:bg-[#00D2FF] dark:focus:text-[#050505]"
+      >
+        {t('nav.skipToContent')}
+      </a>
       <header
         className={`fixed top-0 left-0 right-0 z-40 w-full transition-[padding] duration-300 ease-out ${
           isScrolled
@@ -363,32 +370,38 @@ export default function Navbar() {
               ? {
                   background: isDark
                     ? 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
-                    : 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 100%)',
-                  backgroundColor: isDark ? 'rgba(10, 10, 14, 0.75)' : 'rgba(255, 255, 255, 0.75)',
-                  backdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(24px) saturate(1.6)',
-                  WebkitBackdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(24px) saturate(1.6)',
+                    : 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+                  backgroundColor: isDark ? 'rgba(10, 12, 16, 0.80)' : 'rgba(255, 255, 255, 0.82)',
+                  backdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(20px) saturate(1.6)',
+                  WebkitBackdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(20px) saturate(1.6)',
                   boxShadow: isDark
                     ? '0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 0.5px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05)'
-                    : '0 8px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 0 0 0.5px rgba(255,255,255,0.6), inset 0 1px 0 rgba(255,255,255,0.8)',
+                    : '0 8px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 0 0 0.5px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
                 }
               : undefined
           }
         >
           {/* LOGO */}
-          <a
-            href="#home"
-            className="group relative z-50 flex items-center gap-2.5 text-xl font-bold tracking-tighter text-zinc-900 transition-opacity hover:opacity-90 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-lg py-1 px-1.5 -ml-1.5"
-            onClick={() => handleSelectSegment(portfolioSections[0]?.name || 'Accueil', { sectionId: 'home' })}
+          <Link
+            href="/#home"
+            className="group relative z-50 flex items-center gap-2.5 text-xl font-bold tracking-tighter text-zinc-900 transition-opacity hover:opacity-90 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF] rounded-lg py-1 px-1.5 -ml-1.5"
+            onClick={(e) => {
+              if (pathname === '/') {
+                e.preventDefault();
+                scrollToElementById('home');
+              }
+              handleSelectSegment(portfolioSections[0]?.name || 'Accueil', { sectionId: 'home' });
+            }}
             aria-label="Enrique.Ndjakou"
           >
-            <Logo className="h-7 w-7 text-zinc-900 transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-blue dark:text-white dark:group-hover:text-brand-blue" />
+            <Logo className="h-7 w-7 text-zinc-900 transition-transform duration-300 group-hover:scale-105 group-hover:text-blue-600 dark:text-white dark:group-hover:text-[#00D2FF]" />
             <span className="relative">
-              Enrique<span className="text-brand-blue">.Ndjakou</span>
-              <span className="absolute -bottom-1 left-0 h-[1px] w-full origin-left scale-x-0 bg-gradient-to-r from-brand-blue to-transparent transition-transform duration-300 group-hover:scale-x-100"></span>
+              Enrique<span className="text-blue-600 dark:text-[#00D2FF]">.Ndjakou</span>
+              <span className="absolute -bottom-1 left-0 h-[1px] w-full origin-left scale-x-0 bg-gradient-to-r from-blue-600 dark:from-[#00D2FF] to-transparent transition-transform duration-300 group-hover:scale-x-100"></span>
             </span>
-          </a>
+          </Link>
 
-          {/* NAVIGATION DESKTOP, Liquid Glass Segmented Control */}
+          {/* NAVIGATION DESKTOP */}
           <nav ref={navRef} className="hidden items-center gap-2 md:flex relative">
             <motion.div
               className="absolute top-0 h-full rounded-full z-0"
@@ -407,8 +420,7 @@ export default function Navbar() {
                 boxShadow: isDark
                   ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 3px rgba(0,0,0,0.2)'
                   : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 3px rgba(0,0,0,0.06)',
-                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.04)',
-                backdropFilter: 'blur(12px)',
+                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
               }}
             />
 
@@ -419,11 +431,17 @@ export default function Navbar() {
                   key={link.name}
                   href={link.href}
                   data-segment={link.name}
-                  onClick={() => handleSelectSegment(link.name, { sectionId: link.id })}
-                  className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 ${
+                  onClick={(e) => {
+                    if (pathname === '/') {
+                      e.preventDefault();
+                      scrollToElementById(link.id);
+                    }
+                    handleSelectSegment(link.name, { sectionId: link.id });
+                  }}
+                  className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF] ${
                     isActive
                       ? 'text-zinc-900 dark:text-white'
-                      : 'text-zinc-500 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white'
+                      : 'text-zinc-600 hover:text-zinc-900 dark:text-white/70 dark:hover:text-white'
                   }`}
                 >
                   {link.name}
@@ -438,20 +456,19 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-colors duration-200 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+                className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-600 transition-colors duration-200 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
                 style={{
                   background: isDark
                     ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
                     : 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%)',
-                  border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-                  backdropFilter: 'blur(12px)',
+                  border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
                 }}
                 aria-label={isDark ? t('nav.themeDay') : t('nav.themeNight')}
               >
                 {isDark ? (
-                  <Sun className="h-4 w-4 transition-transform duration-500 group-hover:rotate-90 group-hover:text-brand-yellow" />
+                  <Sun className="h-4 w-4 transition-transform duration-500 group-hover:rotate-90 group-hover:text-amber-400" />
                 ) : (
-                  <Moon className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-12 group-hover:text-brand-blue" />
+                  <Moon className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-12 group-hover:text-blue-600" />
                 )}
               </button>
             )}
@@ -459,61 +476,61 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
-              className="group relative flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-zinc-500 transition-colors duration-200 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+              className="group relative flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-zinc-600 transition-colors duration-200 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
               style={{
                 background: isDark
                   ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
                   : 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%)',
-                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-                backdropFilter: 'blur(12px)',
+                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
               }}
-              aria-label={locale === 'fr' ? 'Switch to English (EN)' : 'Passer en Français (FR)'}
+              aria-label={t('nav.langToggle')}
             >
               <Languages className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
               <span>{locale === 'fr' ? 'EN' : 'FR'}</span>
             </button>
 
-            <a
-              href="#contact"
-              onClick={() =>
-                handleSelectSegment(portfolioSections[6]?.name || t('nav.contact'), { sectionId: 'contact' })
-              }
-              className="relative group overflow-hidden rounded-full p-[1px] focus:outline-none"
+            <Link
+              href="/#contact"
+              onClick={(e) => {
+                if (pathname === '/') {
+                  e.preventDefault();
+                  scrollToElementById('contact');
+                }
+                handleSelectSegment(portfolioSections[6]?.name || t('nav.contact'), { sectionId: 'contact' });
+              }}
+              className="relative group overflow-hidden rounded-full p-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-brand-blue via-brand-blue/50 to-brand-blue rounded-full opacity-70 group-hover:opacity-100 transition-opacity duration-300"></span>
-              <span className="relative block px-4 py-1.5 rounded-full bg-white dark:bg-[#0a0a0a] text-xs font-semibold text-zinc-900 dark:text-white transition-colors duration-200 group-hover:bg-transparent group-hover:text-white">
+              <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500/60 to-blue-600 dark:from-[#00D2FF] dark:via-[#00D2FF]/50 dark:to-[#00D2FF] rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-200"></span>
+              <span className="relative block px-4 py-1.5 rounded-full bg-white dark:bg-[#0A0C10] text-xs font-semibold text-zinc-900 dark:text-white transition-colors duration-200 group-hover:bg-transparent group-hover:text-white dark:group-hover:text-[#050505]">
                 {t('nav.contact')}
               </span>
-            </a>
+            </Link>
 
             <Link
               href="/admin/login"
-              className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-500 transition-colors duration-200 hover:text-zinc-900 dark:text-white/50 dark:hover:text-white"
+              className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-zinc-600 transition-colors duration-200 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
               style={{
                 background: isDark
                   ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
                   : 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%)',
-                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-                backdropFilter: 'blur(12px)',
+                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
               }}
-              aria-label="Accès administrateur"
+              aria-label={t('nav.admin')}
             >
               <Lock className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          {/* CAPSULE DE SECTION ACTIVE MOBILE (Apple Liquid Glass sobre et synchronisée) */}
+          {/* CAPSULE DE SECTION ACTIVE MOBILE */}
           <div
-            className="flex items-center gap-1.5 rounded-full border border-black/8 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.06] px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-200 md:hidden transition-colors duration-200"
+            className="flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.06] px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-200 md:hidden transition-colors duration-200"
             style={{
-              backdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(20px) saturate(1.8)',
-              WebkitBackdropFilter: isTouch ? 'blur(12px) saturate(1.4)' : 'blur(20px) saturate(1.8)',
               boxShadow: isDark
                 ? 'inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px rgba(0,0,0,0.25)'
                 : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.05)',
             }}
           >
-            <ActiveIcon className="h-3.5 w-3.5 text-brand-blue flex-shrink-0 transition-transform duration-300" />
+            <ActiveIcon className="h-3.5 w-3.5 text-blue-600 dark:text-[#00D2FF] flex-shrink-0 transition-transform duration-300" />
             <span className="tracking-tight font-medium text-[11px] max-w-[115px] truncate">
               {activeSegment}
             </span>

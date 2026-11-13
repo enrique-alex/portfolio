@@ -1,8 +1,8 @@
 <div align="center">
 
-# ⚡ ENRIQUE NDJAKOU
+# ENRIQUE NDJAKOU
 
-### **Élève-Ingénieur en Génie Électrique & Systèmes Embarqués · Polytech Lille (2026)**
+### **Élève-Ingénieur en Génie Électrique & Mécatronique · Polytech Lille (2028)**
 **Apprenti Ingénieur en Automatisme, Supervision SCADA & Informatique Industrielle · Minakem Dunkerque**
 
 [![Live Platform](https://img.shields.io/badge/Live%20Platform-portfolio.enriquekemayou.workers.dev-00D2FF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://portfolio.enriquekemayou.workers.dev)
@@ -16,213 +16,177 @@
 <br />
 
 <p align="center">
-  <a href="#-profil-industriel--positionnement">Profil</a> •
-  <a href="#-projets-dingénierie-phares">Projets Clés</a> •
-  <a href="#-architecture-technique--innovations">Architecture Web</a> •
-  <a href="#-identit%C3%A9-de-marque--the-isometric-en-monolith">Identité Visuelle</a> •
-  <a href="#-installation--d%C3%A9veloppement-local">Développement Local</a> •
-  <a href="#-contact--coordonn%C3%A9es">Contact</a>
+  <a href="#profil-industriel-et-positionnement">Profil</a> •
+  <a href="#projets-dingenierie-et-systemes-15">Projets Clés</a> •
+  <a href="#architecture-technique-du-portfolio">Architecture Web</a> •
+  <a href="#identite-de-marque-the-isometric-en-monolith">Identité Visuelle</a> •
+  <a href="#installation-et-developpement-local">Développement Local</a> •
+  <a href="#contact-et-coordonnees">Contact</a>
 </p>
 
 ---
 
 </div>
 
-## 📌 Profil Industriel & Positionnement
+## Profil Industriel et Positionnement
 
-Élève-ingénieur en dernière année à **Polytech Lille** (cursus Génie Électrique & Informatique Industrielle / Systèmes Embarqués & Mécatronique, Promotion 2026), j'évolue en apprentissage au sein de l'usine chimique pharmaceutique **Minakem Dunkerque**, classée **SEVESO Seuil Haut**.
+Élève-ingénieur à **Polytech Lille** en Génie Électrique et Mécatronique (Promotion 2028, spécialisation Automatisme, Informatique Industrielle et Robotique), j'évolue en apprentissage au sein du site pharmaceutique **Minakem Dunkerque**, classé **SEVESO Seuil Haut**.
 
-Mon activité industrielle et académique s'articule autour de contraintes matérielles sévères : disponibilité critique, temps réel strict, sûreté de fonctionnement et intégrité des communications de terrain.
+Mon parcours couvre quatre axes complémentaires : systèmes embarqués et réseaux cyber-physiques, robotique et commande temps réel, génie électrique et conception CAO/électronique, et architecture logicielle / informatique industrielle. Je prépare également un stage d'ingénieur R&D à l'international.
 
 ### Domaines d'expertise :
-- **Automatisme & Séquencement** : Modélisation Grafcet (CEI 60848, CEI 61131-3), automates programmables industriels (Schneider Electric, Siemens), instrumentation de terrain.
-- **Supervision & SCADA** : Déploiement et migration de plateformes SCADA critiques (Ignition v8.1 Vision/Perspective, Wonderware InTouch), gestion de bases UDT, historisation SQL, alarmes temps réel.
-- **Régulation Avancée & Contrôle-Commande** : Synthèse de correcteurs continus et numériques (P, PI, PID, régulation en cascade), modélisation d'état, Hardware-in-the-Loop (HIL) sur cibles industrielles **Speedgoat** avec **Matlab/Simulink**.
-- **Bus de Terrain & Protocoles Industriels** : Modbus RTU sur liaison RS-485 bifilaire, Modbus TCP sur passerelles industrielles (Moxa MB3170), OPC-UA, CAN, boucles essernet (Honeywell Esser SEI2), USART, Ethernet industriel.
-- **Informatique Embarquée & Bas Niveau** : Programmation en C/C++ ISO, assembleur nu AVR8 sur microcontrôleur ATMEGA2560 (gestion directe des registres matériels, vecteurs d'interruption, timers 16 bits, convertisseur ADC sans aucune abstraction logicielle).
-- **Électronique Active & CAO** : Conception, simulation sous **LTSpice**, routage sous **KiCad** (plans de masse, contraintes CEM, découplage), usinage CNC et soudure de composants CMS (filtres actifs d'ordre 4 Sallen-Key).
+- **Automatisme & Supervision SCADA** : Conception et déploiement sous Ignition Perspective (UDTs, OPC-UA, Audit Trail nominatif 100 %, gestion d'alarmes ISA-18.2, MS SQL Server T-SQL), automates programmables (Schneider, Siemens), Grafcet (CEI 60848 / CEI 61131-3).
+- **Régulation Avancée & Contrôle-Commande** : Synthèse de correcteurs continus et numériques (P, PI, PID, RST, cascade), formalisme REM/SMC (L2EP), modélisation multiphysique Bond Graph (`20-sim`), déploiement Hardware-in-the-Loop (HIL) sur cible **Speedgoat** sous **Matlab/Simulink**.
+- **Robotique & Systèmes Autonomes** : Programmation de cellules industrielles multi-marques (FANUC TP & iRVision 2D, ABB RAPID & RobotStudio, KUKA KRL & calibration TCP), intralogistique mobile (Robotino AMR, ROS2).
+- **Informatique Embarquée & Réseaux IoT** : C/C++ (ISO, RAII, appels système POSIX), assembleur AVR8 sur microcontrôleur ATMEGA2560 (registres, interruptions, CAN/ADC, USART), architecture réseau multi-zones, métrologie Wireshark, LoRaWAN/BLE, sécurité mTLS / X.509.
+- **Électronique Analogique & CAO** : Simulation SPICE (LTSpice), routage PCB sous **KiCad** (CMS, plan de masse, DRC, Gerber), gravure CNC, mesures à l'oscilloscope, CAO mécanique sous CATIA V5.
 
 ---
 
-## 🛠️ Projets d'Ingénierie Phares
+## Projets d'Ingénierie et Systèmes (15)
 
-Ce dépôt héberge le code source du portfolio interactif présentant l'ensemble de mes réalisations techniques vérifiables :
+Ce dépôt héberge le code source du portfolio interactif présentant 15 architectures matérielles et logicielles documentées (stockées sous Cloudflare D1 avec fallback typé FR/EN) :
 
-| Projet | Domaine Technique | Cible / Environnement | Métriques & Réalisations Clés |
+| Projet | Domaine | Environnement | Métriques & Réalisations Clés |
 | :--- | :--- | :--- | :--- |
-| **[Contrôle-Commande Bicuve](https://portfolio.enriquekemayou.workers.dev/projects/controle-hydraulique-bicuve-2026)** | Automatique & Régulation | HIL Speedgoat · Matlab / Simulink | Régulation cascade double boucle. Identification indicielle, discrétisation par transformation bilinéaire ($T_e = 10\text{ ms}$). Temps de réponse divisé par 4, erreur statique rigoureusement nulle sous perturbation. |
-| **[Supervision SSI SEVESO](https://portfolio.enriquekemayou.workers.dev/#experience)** | SCADA & Réseaux Industriels | Ignition v8.1 · Moxa MB3170 · Esser SEI2 | Intégration de 23 centrales incendie Esser FlexES. Conversion essernet vers Modbus RTU (RS-485, 9600 bps, 8N1) et encapsulation Modbus TCP sur VLAN automatisme. Scrutation 500 ms, UDTs structurés, historisation SQL Server. |
-| **[Filtre Actif de Tchebychev](https://portfolio.enriquekemayou.workers.dev/projects/filtre-tchebychev-2026)** | Électronique Analogique | KiCad · LTSpice · Gravure CNC | Filtre passe-bas actif d'ordre 4 (cellules Sallen-Key). Bande passante $4,5\text{ kHz}$, ondulation $\le 1\text{ dB}$, atténuation effective de $35\text{ dB}$ à $13\text{ kHz}$ validée à l'oscilloscope numérique. |
-| **[Robot Mobile Robotino](https://portfolio.enriquekemayou.workers.dev/projects/robotino-hockey-autonome-2026)** | Robotique & Systèmes Embarqués | Robotino 2 · Grafcet · Vision HSV | Match de hockey autonome. Suivi de palet invariant aux variations d'éclairage en espace HSV, odométrie à 2000 impulsions/tour pour anticipation du freinage et détection de ligne par capteur inductif (portée 4 mm). |
-| **[Microprocesseurs ATMEGA2560](https://portfolio.enriquekemayou.workers.dev/projects/microprocesseurs-atmega2560-2026)** | Informatique Bas Niveau | Assembleur AVR8 pur · ATMEGA2560 | 3 systèmes critiques programmés au niveau registres sans runtime C : gestionnaire d'interruption en mode veille profonde (0 polling), thermomètre distant (ADC + port parallèle + USART synchrones), alarme intrusion. |
-| **[Lyngk – Moteur Hexagonal](https://portfolio.enriquekemayou.workers.dev/projects/lyngk-moteur-jeu-c-2026)** | Algorithmique & Systèmes C | C pur · SDL3 · Architecture MVC | Modélisation du plateau hexagonal en coordonnées axiales via bitmasking 64 bits (43 cases traitées en 1 cycle machine). Algorithme DFS pour calcul de trajectoires. 0 fuite mémoire sous `-Wall -Wextra`. |
-| **[Shell Unix Natif](https://portfolio.enriquekemayou.workers.dev/projects/interpreteur-commandes-unix-2025)** | Systèmes d'Exploitation | C POSIX · Linux Kernel API | Émulateur de terminal exploitant directement `fork`, `execvp`, `dup2` et `pipe`. Gestionnaire déterministe de signaux asynchrones pour l'isolation des processus zombies et des flux I/O. |
-| **[Awale – Stratégie Combinatoire](https://portfolio.enriquekemayou.workers.dev/projects/awale-jeu-c-2026)** | Algorithmique & Systèmes | C ISO · Arithmétique Modulaire | Modélisation d'un plateau cyclique sous contrainte mémoire stricte. Arithmétique modulaire, pointeurs de fonctions, structures contiguës, espace mémoire strictement borné. |
-| **[PyGroove – Assistant Audio](https://portfolio.enriquekemayou.workers.dev/projects/pygroove-assistant-audio-2025)** | Génie Logiciel & Audio | Python · Tkinter · Pygame · Speech-Rec | Architecture multi-threadée isolant les flux I/O asynchrones, la reconnaissance vocale et le buffer DMA matériel de la carte son. |
-| **[Simulateur Agricole C++](https://portfolio.enriquekemayou.workers.dev/projects/simulateur-agricole-poo-2024)** | POO & Patrons de Conception | C++ ISO · Smart Pointers · Polymorphisme | Modélisation d'un environnement systémique en graphe circulaire. Élimination des pointeurs orphelins par comptage de références (`std::shared_ptr`/`std::weak_ptr`). |
-| **[Moteur Snake Arcade](https://portfolio.enriquekemayou.workers.dev/projects/moteur-jeu-snake-cpp-2024)** | Algorithmique Temps Réel | C++ ISO · Game Loop Déterministe | Gestion temps réel de la boucle d'affichage 60 FPS, détection collisionnelle discrète sans surcharge processeur. |
+| **[Contrôle-Commande Bicuve](https://portfolio.enriquekemayou.workers.dev/projects/controle-hydraulique-bicuve-2026)** | Automatisme & Régulation | HIL Speedgoat · Matlab/Simulink | Régulation cascade double boucle (`Te = 10 ms`). Temps de réponse divisé par 4, erreur statique annulée sous perturbation. |
+| **[Cellule Robotique Multi-Marques](https://portfolio.enriquekemayou.workers.dev/projects/cellule-robotique-industrielle-2026)** | Robotique & Systèmes Autonomes | FANUC · ABB · KUKA · Robotino AMR | Synchronisation multi-marques, vision 2D iRVision, étalonnage TCP `< 0,2 mm`, transfert sécurisé KUKA / AMR par handshake I/O. |
+| **[Modélisation Prius HSD](https://portfolio.enriquekemayou.workers.dev/projects/toyota-prius-bond-graph-2026)** | Modélisation Multiphysique | `20-sim` · Bond Graph (CRIStAL) | Modélisation causale SCAP du train épicycloïdal e-CVT et supervision énergétique EMS (`2,83 L/100 km` simulés sur cycle NEDC). |
+| **[Commande Véhicule Électrique](https://portfolio.enriquekemayou.workers.dev/projects/commande-vehicule-electrique-rem-2026)** | Automatisme & Régulation | Matlab/Simulink · REM / SMC (L2EP) | Inversion directe/indirecte, boucle de courant `18,57 ms` / boucle de vitesse `1,00 s`, validation cycle ECE-15 (`100 A` max). |
+| **[Architecture Réseau IoT](https://portfolio.enriquekemayou.workers.dev/projects/architecture-reseau-iot-securisee-2026)** | Réseaux Embarqués & Cybersécurité | Wireshark · Filius · mTLS · MQTT | Topologie multi-zones avec relais DHCP, DNS hiérarchique, analyse TCP, bilan LoRaWAN (`1 %` duty cycle) et mTLS X.509. |
+| **[Filtre Actif de Tchebychev](https://portfolio.enriquekemayou.workers.dev/projects/filtre-tchebychev-2026)** | Électronique Analogique | LTSpice · KiCad · Gravure CNC | Filtre passe-bas actif d'ordre 4 (Sallen-Key). Bande passante `4,5 kHz`, ondulation `<= 1 dB`, atténuation `35 dB` à `13 kHz`. |
+| **[Lyngk : Moteur Hexagonal](https://portfolio.enriquekemayou.workers.dev/projects/lyngk-moteur-jeu-c-2026)** | Algorithmique | C · SDL3 · Architecture MVC | Plateau hexagonal de 43 cases encodé en bitmask 64 bits, parcours DFS en coordonnées axiales, compilation `-Wall -Wextra` sans fuite. |
+| **[Microprocesseurs ATMEGA2560](https://portfolio.enriquekemayou.workers.dev/projects/microprocesseurs-atmega2560-2026)** | Informatique Bas Niveau | Assembleur AVR8 · ATMEGA2560 | 3 systèmes sans runtime C : compteur sur interruption en mode veille, capteur de température ADC + USART, détection d'intrusion. |
+| **[Awale : Stratégie en C](https://portfolio.enriquekemayou.workers.dev/projects/awale-jeu-c-2026)** | Algorithmique | C · Arithmétique Modulaire | Plateau circulaire 12 cases sur structures contiguës, pointeurs de fonctions et exécution bornée sans fuite mémoire. |
+| **[PyGroove : Assistant Musical](https://portfolio.enriquekemayou.workers.dev/projects/pygroove-assistant-audio-2025)** | Développement Logiciel | Python · Tkinter · Pygame | Architecture multi-threadée séparant interface Tkinter, mixer Pygame, reconnaissance vocale SpeechRecognition et tags ID3. |
+| **[Shell Unix : Interpréteur C](https://portfolio.enriquekemayou.workers.dev/projects/interpreteur-commandes-unix-2025)** | Informatique Bas Niveau | C · Appels Système POSIX | Shell espace utilisateur gérant `fork`, `execvp`, `waitpid`, `pipe`, `dup2` et signaux (`SIGINT`, `SIGCHLD`) via `sigaction`. |
+| **[Simulateur Agricole C++](https://portfolio.enriquekemayou.workers.dev/projects/simulateur-agricole-poo-2024)** | Développement Logiciel | C++ · POO · Smart Pointers | Modélisation orientée objet, polymorphisme et prévention des cycles par `std::unique_ptr`, `shared_ptr` et `weak_ptr`. |
+| **[Snake : Moteur Arcade C++](https://portfolio.enriquekemayou.workers.dev/projects/moteur-jeu-snake-cpp-2024)** | Algorithmique | C++ · Game Loop | Découplage rendu/logique par pas temporel fixe (`delta-time`) et détection de collisions 2D sur grille. |
+| **[Analyse Financière Python](https://portfolio.enriquekemayou.workers.dev/projects/script-analyse-financiere-2024)** | Développement Logiciel | Python · Vectorisation | Pipeline d'ingestion de séries mensuelles, normalisation vectorisée et export automatique de graphiques. |
+| **[Robot Mobile Bluetooth](https://portfolio.enriquekemayou.workers.dev/projects/vehicule-embarque-bluetooth-2023)** | Systèmes Embarqués | Arduino C/C++ · CATIA V5 | Châssis imprimé 3D, isolation par optocoupleurs contre les chutes de tension moteur, commande PWM et liaison Bluetooth RX/TX. |
 
 ---
 
-## ⚡ Architecture Technique & Innovations du Portfolio
+## Architecture Technique du Portfolio
 
-Le portfolio n'est pas une vitrine statique : c'est une application d'ingénierie full-stack réactive, optimisée pour des temps de réponse sub-100ms et un score Core Web Vitals parfait.
+Application full-stack construite avec Next.js App Router et déployée sur Cloudflare avec base D1 et stockage R2 :
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        FRONTEND CLIENT (EDGE)                          │
 │                                                                        │
 │   Next.js 16 (App Router)  │  React 19  │  Tailwind CSS v4 (Oxide)     │
-│   Framer Motion (Physics)  │  Three.js (GPU Particle Canvas)           │
-│   DualBodyCursor (Fine)    │  SideSlider (Obsidian Mechatronic Bar)    │
+│   Framer Motion            │  <CursorFluid /> (Navier-Stokes WebGL)    │
+│   Three.js (EarthGlobe3D)  │  DualBodyCursor & SideSlider (Pointer)    │
 └───────────────────────────────────┬────────────────────────────────────┘
-                                    │ HTTPS / HTTP2 Edge Routing
+                                    │ HTTPS Edge Routing
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                     CLOUDFLARE EDGE PLATFORM                           │
 │                                                                        │
 │   Cloudflare Pages (@opennextjs/cloudflare runtime)                    │
-│   Cloudflare D1 (Serverless Distributed SQLite Engine)                 │
-│   Cloudflare R2 (Global Object Storage for Media Assets)               │
-│   Edge Security (Strict CSP Headers, Frame-Ancestors DENY, Rate-Limit) │
+│   Cloudflare D1 (SQLite distribuée : migrations 0001 à 0008)           │
+│   Cloudflare R2 (Stockage des médias projets)                          │
+│   En-têtes de sécurité (CSP, Frame-Ancestors DENY, Rate-Limit login)   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1. DualBodyCursor & Physique Cinématique
-- Détection fine de l'interface d'entrée : activé uniquement sur les périphériques de pointage de précision via `(pointer: fine)` ; strictement désactivé sur écrans tactiles, stylets et mobiles pour préserver l'ergonomie native de défilement.
-- Amortissement inertiel : interpolation continue entre position cible $(x, y)$ et position amortie par équation différentielle d'ordre 1 avec amortissement critique.
-- Curseur double corps : tête de visée centrale blanche haute précision et anneau suiveur cyan `#00D2FF` traduisant visuellement la dynamique d'une boucle fermée d'asservissement.
+### 1. Effets Visuels et Accessibilité
+- **Fond WebGL `<CursorFluid />` :** Simulation fluide Navier-Stokes (`src/components/animations/CursorFluid.tsx` + `webgl-fluid.js`) calibrée en cyan/cobalt avec résonance thématique au survol des cartes projets, initialisation différée hors du chemin critique et désactivation automatique sur `pointer: coarse` ou `prefers-reduced-motion: reduce`.
+- **DualBodyCursor & SideSlider :** Activés uniquement sur périphériques à pointeur fin (`(pointer: fine)`), désactivés sous `prefers-reduced-motion` et sur l'interface `/admin` afin de conserver les curseurs natifs de saisie.
+- **Globe 3D (`EarthGlobe3D`) :** Nuage de points 3D généré sous Three.js (`src/lib/graphics/earthCloud.ts`), localisé FR/EN.
 
-### 2. SideSlider Mécatronique
-- Barre de défilement latérale haute précision en verre obsidienne (`#050505`) et traceur cyan (`#00D2FF`).
-- Suivi bidirectionnel de position verticale avec calcul d'interpolation linéaire (`lerp`), capsule interactive draggable et micro-badge HUD monospace.
-- Présence continue et persistante sur l'ensemble de la page (y compris la section compétences) avec isolation stricte du pointeur (`cursor: none !important`) interdisant tout retour à la flèche OS classique.
-
-### 3. Stack Données & Déploiement Edge Serverless
-- **Next.js 16 App Router** : Rendu hybride (Server Components statiques et Client Components interactifs) éliminant tout décalage d'agencement (`CLS: 0.00`).
-- **Tailwind CSS v4** : Compilation directe via le moteur Rust Oxide, syntaxe moderne `@theme` et isolation complète des styles tiers.
-- **Cloudflare D1** : Base de données relationnelle SQLite distribuée sur le réseau Anycast mondial, gérée par des migrations SQL versionnées (`migrations/0001` à `0006`).
-- **Sécurité Industrielle** : Politique de sécurité de contenu stricte (`Content-Security-Policy`), en-têtes anti-clickjacking (`X-Frame-Options: DENY`), isolation cross-origin (`COOP` et `CORP`), et limitation de débit sur les routes d'authentification (`0004_login_rate_limit.sql`).
+### 2. Stack Données & Déploiement Edge Serverless
+- **Next.js 16 App Router :** Server Components statiques/SSR et Client Components interactifs.
+- **Tailwind CSS v4 :** Engine Rust Oxide avec variables `@theme` dans `src/app/globals.css`.
+- **Cloudflare D1 :** Base relationnelle SQLite versionnée par `migrations/0001_init_projects.sql` à `migrations/0008_sync_anti_slop_projects.sql`.
+- **Sécurité :** Politique `Content-Security-Policy` stricte, `X-Frame-Options: DENY`, `COOP` / `CORP`, et limitation de débit sur l'authentification admin (`0004_login_rate_limit.sql`).
 
 ---
 
-## 💎 Identité de Marque : The Isometric EN Monolith
+## Identité de Marque : The Isometric EN Monolith
 
-L'identité visuelle du portfolio repose sur **Le Prisme Architectural `EN` (`The Isometric EN Monolith`)**, conçu selon les référentiels open-source **`kaankiziltug/logo-design-skill`**, **`op7418/logo-generator-skill`** et **`neonwatty/logo-designer-skill`** :
+L'identité visuelle repose sur **Le Prisme Architectural `EN` (`The Isometric EN Monolith`)** (`src/components/ui/Logo.tsx`) :
 
 <div align="center">
   <img src="public/icon-192.png" width="96" height="96" alt="The Isometric EN Monolith Logo" />
 </div>
 
-- **Monogramme Architectural 3D Isométrique (`EN`)** : Un prisme hexagonal en perspective isométrique unifiant l'initiale **`E`** (Enrique) sur sa face gauche et l'initiale **`N`** (Ndjakou) sur sa face droite autour d'un pilier vertical central commun.
-- **Face Gauche (`E` — Cyan Télémétrie `#00D2FF`)** : Formée par l'arête sommitale gauche (`M12 2.5L3.5 7v10L12 21.5`), la traverse supérieure (`M3.5 7L12 11.5`) et la traverse médiane en porte-à-faux (`M3.5 12L9 15`) avec contre-formes ouvertes garantissant une lisibilité parfaite à `16×16` px.
-- **Face Droite (`N` — Blanc Pur `#FFFFFF`)** : Formée par l'arête de couronne droite (`M12 2.5L20.5 7`) et la structure en `N` (`M12 21.5v-10L20.5 17V7`), créant un contraste directionnel net sans aucune paréidolie oculaire ni cliché scolaire/industriel.
+- **Monogramme Isométrique (`EN`) :** Prisme hexagonal sur grille `24x24` unifiant la lettre **`E`** sur sa face gauche et la lettre **`N`** sur sa face droite autour d'un pilier central commun.
+- **Face Gauche (`E`, `#00D2FF`) :** Arête externe (`M12 2.5L3.5 7v10L12 21.5`), traverse supérieure (`M3.5 7L12 11.5`) et traverse médiane (`M3.5 12L9 15`).
+- **Face Droite (`N`, `#FFFFFF`) :** Couronne droite (`M12 2.5L20.5 7`) et tracé en `N` (`M12 21.5v-10L20.5 17V7`).
 
-### Suite Multi-Résolution, Onglets Navigateur & Carte de Partage OpenGraph
-Pour garantir une mise en valeur optimale dans les navigateurs (thèmes sombres comme clairs) et lors du partage de lien :
-- **Navigateurs Desktop (`16×16`, `32×32`, `48×48`)** : `favicon.ico` multi-résolution et `icon.svg` vectoriel encapsulés dans un badge squircle Obsidienne (`#050505`) doté d'une lueur radiale (`#0A1926`) et d'un liseré spéculaire (`#00D2FF` / `#FFFFFF`).
-- **iOS Safari / iPadOS** : `public/apple-touch-icon.png` (180×180 px PNG plein fond obsidienne `#050505`, zone de sécurité adaptée au masque squircle d'Apple).
-- **Android Chrome & PWA** : `public/icon-192.png` et `public/icon-512.png` accompagnés de versions maskables (`icon-maskable-192.png`, `icon-maskable-512.png`) respectant la safe-zone circulaire de 80 %.
-- **Prévisualisation Sociale OpenGraph & Twitter Card (`public/og-image.png`)** : Carte `1200×630` px (`1.91:1`, optimisée `< 200 Ko`) mettant en scène le Monolithe `EN`, les 4 piliers d'ingénierie multidisciplinaires et l'ambition R&D internationale.
+### Suite Multi-Résolution & OpenGraph
+- **Desktop :** `favicon.ico` (16, 32, 48 px) et `icon.svg`.
+- **iOS / Android PWA :** `public/apple-touch-icon.png` (`180x180`), `public/icon-192.png`, `public/icon-512.png`, et icônes adaptatives maskables.
+- **OpenGraph (`public/og-image.png`) :** Carte `1200x630` px dédiée au partage de liens.
 
 ---
 
-## 💻 Installation & Développement Local
+## Installation et Développement Local
 
 ### Prérequis
-- **Node.js** : version $\ge 20.0.0$
-- **npm** : version $\ge 10.0.0$
-- **Python** (optionnel, pour l'outillage de génération vectorielle) : $\ge 3.10$
+- **Node.js** >= 20.0.0
+- **npm** >= 10.0.0
+- **Python** >= 3.10 (optionnel, pour les scripts de génération d'icônes)
 
-### 1. Clonage du dépôt
+### 1. Clonage et installation
 ```bash
 git clone https://github.com/enrique-alex/portfolio.git
 cd portfolio
-```
-
-### 2. Installation des dépendances
-```bash
 npm install --legacy-peer-deps
 ```
 
-### 3. Lancement du serveur de développement
+### 2. Lancement en développement
 ```bash
 npm run dev
 ```
-L'application est accessible localement à l'adresse [http://localhost:3000](http://localhost:3000).
+Accessible sur [http://localhost:3000](http://localhost:3000).
 
-### 4. Exécution de la suite de tests
-La suite de tests automatisés valide la conformité géométrique des composants vectoriels, la configuration PWA, la sécurité des sessions et les algorithmes d'asservissement :
+### 3. Tests et vérifications
 ```bash
+npx tsc --noEmit
+npm run lint
+node scripts/verify-implementation.mjs
 npm test
 ```
 
-### 5. Build et prévisualisation Cloudflare Pages
+### 4. Build et prévisualisation Cloudflare
 ```bash
-# Compilation du worker OpenNext pour Cloudflare
 npm run build:cloudflare
-
-# Prévisualisation en environnement local simulé Cloudflare Workerd
 npm run preview
 ```
 
 ---
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
 portfolio/
-├── migrations/                     # Schémas relationnels Cloudflare D1 (0001 à 0006)
-│   ├── 0001_init_projects.sql
-│   ├── 0002_split_translations.sql
-│   ├── 0003_seed_projects.sql
-│   └── ...
-├── public/                         # Assets statiques & icônes multi-résolution
-│   ├── apple-touch-icon.png       # 180x180 PNG pour iOS Safari
-│   ├── icon-192.png               # 192x192 PNG standard Android PWA
-│   ├── icon-512.png               # 512x512 PNG haute définition PWA
-│   ├── icon-maskable-192.png      # 192x192 PNG maskable adaptive
-│   ├── icon-maskable-512.png      # 512x512 PNG maskable adaptive
-│   ├── favicon.ico                # ICO multi-résolution (16, 32, 48 px)
-│   ├── icon.svg                   # SVG vectoriel officiel
-│   └── image/projects/            # Médias et captures des bancs d'essai réels
-├── scripts/                        # Scripts d'automatisation et de build
-│   ├── generate-brand-icons.py    # Générateur d'icônes Chromium headless & Pillow
-│   ├── generate-seed-sql.ts       # Synchronisation des projets vers SQL D1
-│   └── generate-admin-secrets.mjs # Génération des clés de dérivation PBKDF2
+├── migrations/                     # Migrations SQL Cloudflare D1 (0001 à 0008)
+├── public/                         # Icônes multi-résolution, og-image.png et médias projets
+├── scripts/                        # Scripts de vérification, seed SQL et génération d'assets
 ├── src/
-│   ├── app/                       # Next.js 16 App Router
-│   │   ├── (site)/                # Routes publiques (accueil, vue projet [slug])
-│   │   ├── admin/                 # Console de gestion restreinte
-│   │   ├── api/                   # Serverless API routes (projets, uploads R2)
-│   │   ├── layout.tsx             # Layout racine, balises de métadonnées et CSP
-│   │   ├── manifest.ts            # Manifest WebApp PWA typé
-│   │   └── globals.css            # Styles maîtres Tailwind v4
-│   ├── components/                # Architecture de composants React 19
-│   │   ├── animations/            # DualBodyCursor, KineticCanvas, Preloader
-│   │   ├── sections/              # Hero, AcademicJourney, Projects, Contact
-│   │   ├── theme/                 # Providers (Theme, Language fr/en, Projects)
-│   │   └── ui/                    # Logo Isometric EN Monolith, SideSlider, Badges
-│   └── lib/                       # Utilitaires de session, cryptographie, D1 client
-└── test/                          # Suite de tests Vitest (unit & integration)
-    ├── unit/                      # Tests unitaires composants, logo, curseurs
-    └── integration/               # Tests d'intégration bases de données D1
+│   ├── app/                        # Next.js 16 App Router ((site), admin, api)
+│   ├── components/                 # animations, layout, sections, theme, ui, admin
+│   └── lib/                        # auth, db, graphics, hooks, validation, i18n, scroll
+└── test/                           # Suite Vitest (unit & integration Miniflare D1)
 ```
 
 ---
 
-## 📬 Contact & Coordonnées
+## Contact et Coordonnées
 
-- **Ingénieur** : Enrique Alex Ndjakou Kemayou
-- **École** : Polytech Lille — Département Génie Électrique & Informatique Industrielle
-- **Entreprise** : Minakem Dunkerque (Site chimique pharmaceutique SEVESO Seuil Haut)
-- **Portfolio en ligne** : [https://portfolio.enriquekemayou.workers.dev](https://portfolio.enriquekemayou.workers.dev)
-- **LinkedIn** : [linkedin.com/in/enrique-alex-ndjakou](https://www.linkedin.com/in/enrique-alex-ndjakou)
-- **GitHub** : [@enrique-alex](https://github.com/enrique-alex)
-- **Email** : [enriquekemayou@gmail.com](mailto:enriquekemayou@gmail.com)
+- **Ingénieur :** Enrique Alex Ndjakou Kemayou
+- **École :** Polytech Lille (Génie Électrique & Mécatronique, Promotion 2028)
+- **Entreprise :** Minakem Dunkerque (Site chimique pharmaceutique SEVESO Seuil Haut)
+- **Portfolio :** [https://portfolio.enriquekemayou.workers.dev](https://portfolio.enriquekemayou.workers.dev)
+- **LinkedIn :** [linkedin.com/in/alex-ndjakou](https://www.linkedin.com/in/alex-ndjakou/)
+- **GitHub :** [@enrique-alex](https://github.com/enrique-alex)
+- **Email :** [enriquekemayou@gmail.com](mailto:enriquekemayou@gmail.com)
 
 ---
 
 <div align="center">
-  <sub>Conçu et maintenu par Enrique Ndjakou · Polytech Lille / Minakem · 2026</sub>
+  <sub>Conçu et maintenu par Enrique Alex Ndjakou Kemayou · Polytech Lille / Minakem · 2026</sub>
 </div>

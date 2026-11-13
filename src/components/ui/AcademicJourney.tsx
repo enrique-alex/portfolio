@@ -46,7 +46,7 @@ export default function AcademicJourney() {
   const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <section ref={containerRef} id="academic" className="relative w-full max-w-7xl mx-auto py-32 px-4 sm:px-8 overflow-hidden z-10 scroll-mt-32">
+    <section ref={containerRef} id="academic" className="relative w-full max-w-7xl mx-auto py-24 lg:py-32 px-4 overflow-x-clip z-10 scroll-mt-32">
       
       {/* HEADER - Editorial Section 02 */}
       <motion.div 
@@ -58,17 +58,17 @@ export default function AcademicJourney() {
       >
         <div
           data-monitor="System.Process.Monitor"
-          className="flex items-center gap-3 mb-3 text-zinc-500 dark:text-zinc-400"
+          className="flex items-center gap-3 mb-3 text-zinc-600 dark:text-zinc-400"
         >
-          <GraduationCap className="h-4 w-4 text-brand-blue" />
-          <span className="font-mono text-[10px] font-semibold tracking-[0.28em] uppercase text-brand-blue">
+          <GraduationCap className="h-4 w-4 text-blue-600 dark:text-[#00D2FF]" aria-hidden="true" />
+          <span className="font-mono text-[11px] font-semibold tracking-[0.28em] uppercase text-blue-600 dark:text-[#00D2FF]">
             {t('academic.header.tag')}
           </span>
         </div>
         <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
           {t('academic.header.title')}
         </h2>
-        <p className="mt-4 font-mono text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-4 max-w-[65ch] font-mono text-sm text-zinc-600 dark:text-zinc-400">
           {t('academic.header.subtitle')}
         </p>
       </motion.div>
@@ -77,10 +77,10 @@ export default function AcademicJourney() {
         {/* PCB Trace Line (Ligne de Circuit Imprimé animée) */}
         <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 pointer-events-none z-0">
           {/* Piste de fond non alimentée */}
-          <div className="absolute inset-0 w-full bg-zinc-500/10 dark:bg-white/10 rounded-full" />
+          <div className="absolute inset-0 w-full bg-zinc-500/15 dark:bg-white/10 rounded-full" />
           {/* Piste alimentée par l'énergie du scroll */}
           <motion.div
-            className="absolute top-0 left-0 w-full h-full bg-brand-blue drop-shadow-[0_0_8px_rgba(0,210,255,0.65)] origin-top will-change-transform rounded-full"
+            className="absolute top-0 left-0 w-full h-full bg-brand-blue dark:bg-[#00D2FF] shadow-[0_0_8px_rgba(37,99,235,0.4)] dark:shadow-[0_0_10px_rgba(0,210,255,0.45)] origin-top will-change-transform rounded-full"
             style={{
               scaleY: shouldReduceMotion ? 1 : scaleY,
             }}
@@ -109,15 +109,15 @@ export default function AcademicJourney() {
                   transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28 }}
                   className={`flex-1 w-full max-w-full pl-14 sm:pl-20 md:pl-0 ${isEven ? "md:text-right" : "md:text-left"}`}
                 >
-                   <h3 className="text-3xl sm:text-5xl md:text-6xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter tabular-nums" 
+                   <span className="block text-3xl sm:text-5xl md:text-6xl lg:text-[6rem] font-black text-transparent outline-none tracking-tighter tabular-nums" 
                        style={{ WebkitTextStroke: "1.5px currentColor", color: "transparent" }}>
-                     <span className="text-zinc-900/20 dark:text-white/20 select-none">
+                     <span className="text-zinc-900/25 dark:text-white/25 select-none">
                        {item.year.split(" - ")[0]}
                      </span>
-                     <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-zinc-400 dark:text-zinc-600 sm:inline-block sm:ml-4" style={{ WebkitTextStroke: "0px" }}>
+                     <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-zinc-600 dark:text-zinc-400 sm:inline-block sm:ml-4" style={{ WebkitTextStroke: "0px" }}>
                         - {item.year.split(" - ")[1]}
                      </span>
-                   </h3>
+                   </span>
                 </motion.div>
 
                 {/* Point de connexion matériel (Node) */}
@@ -126,7 +126,7 @@ export default function AcademicJourney() {
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true, margin: "-10%" }}
                   transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 24, delay: 0.1 }}
-                  className="absolute left-8 md:left-1/2 w-4 h-4 rounded-full bg-zinc-900 border-2 border-brand-blue shadow-[0_0_12px_rgba(0,210,255,0.5)] -translate-x-1/2 mt-2 md:mt-0 dark:bg-[#050505]"
+                  className="absolute left-8 md:left-1/2 w-4 h-4 rounded-full bg-white border-2 border-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)] -translate-x-1/2 mt-2 md:mt-0 dark:bg-[#050505] dark:border-[#00D2FF] dark:shadow-[0_0_12px_rgba(0,210,255,0.5)]"
                 ></motion.div>
 
                 {/* Données d'Ingénierie - Titre & Détails */}
@@ -137,13 +137,13 @@ export default function AcademicJourney() {
                   transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28, delay: 0.08 }}
                   className={`flex-1 w-full max-w-full pl-14 sm:pl-20 md:pl-0 ${isEven ? "md:text-left" : "md:text-right"}`}
                 >
-                   <h4 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 leading-tight tracking-tight">
+                   <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 leading-tight tracking-tight">
                      {item.title}
-                   </h4>
-                   <p className="text-sm font-bold text-brand-blue tracking-widest uppercase mb-6">
+                   </h3>
+                   <p className="text-sm font-bold text-blue-600 dark:text-[#00D2FF] tracking-widest uppercase mb-6">
                      {item.school}
                    </p>
-                   <p className={`text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base md:text-lg max-w-lg ${!isEven ? "md:ml-auto" : ""}`}>
+                   <p className={`text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base md:text-lg max-w-[65ch] ${!isEven ? "md:ml-auto" : ""}`}>
                      {item.description}
                    </p>
                 </motion.div>

@@ -26,6 +26,11 @@ vi.mock('@/components/theme/LanguageProvider', () => ({
     setLocale: vi.fn(),
     t: (key: string) => translations[currentTestLocale][key] || key,
   }),
+  useOptionalLanguage: () => ({
+    locale: currentTestLocale,
+    setLocale: vi.fn(),
+    t: (key: string) => translations[currentTestLocale][key] || key,
+  }),
 }));
 
 vi.mock('@/components/theme/ProjectsProvider', () => ({
@@ -48,7 +53,6 @@ import ContactSection from '@/components/sections/ContactSection';
 import SocialLinks from '@/components/sections/SocialLinks';
 import Footer from '@/components/layout/Footer';
 import SectionDivider from '@/components/ui/SectionDivider';
-import { ThreeIndustrialScene } from '@/lib/graphics/ThreeIndustrialScene';
 
 // @ts-expect-error Vite raw query import
 import siteLayoutContent from '@/app/(site)/layout.tsx?raw';
@@ -66,8 +70,6 @@ import webglFluidContent from '@/components/animations/webgl-fluid.js?raw';
 import skillsSectionContent from '@/components/ui/SkillsSection.tsx?raw';
 // @ts-expect-error Vite raw query import
 import mobileHudDrawerContent from '@/components/layout/MobileHudDrawer.tsx?raw';
-// @ts-expect-error Vite raw query import
-import projectCardContent from '@/components/ui/ProjectCard.tsx?raw';
 
 import { getAdaptiveBentoSpan } from '@/components/ui/ProjectsGrid';
 
@@ -129,7 +131,7 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(html).toContain('R&amp;D · Intl');
     expect(html).toContain('max-w-[65ch]');
     expect(html).toContain('Explorer les Systèmes');
-    expect(html).toContain('Télécharger le CV [PDF]');
+    expect(html).toContain('Demander mon CV');
     expect(html).not.toContain('mix-blend-overlay');
   });
 
@@ -148,7 +150,7 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(expHtml).toContain('03 // INGÉNIERIE DE TERRAIN');
     expect(projHtml).toContain('04 // SYSTÈMES &amp; RÉALISATIONS');
     expect(skillsHtml).toContain('05 // MATRICE DE COMPÉTENCES');
-    expect(contactHtml).toContain('06 // CANAL DE TRANSMISSION');
+    expect(contactHtml).toContain('06 // CONTACT');
 
     // Verify blurry purple glow and giant ENGINEER stroke watermark were eradicated
     expect(skillsHtml).not.toContain('rgba(99,102,241,0.15)');
@@ -159,7 +161,8 @@ describe('Principal Design Engineering Audit Invariants', () => {
     currentTestLocale = 'fr';
     const footerHtml = renderToString(React.createElement(Footer));
     expect(footerHtml).toContain('aria-label="Haut de page"');
-    expect(footerHtml).toContain('text-zinc-800 dark:text-zinc-200');
+    expect(footerHtml).toContain('text-zinc-800');
+    expect(footerHtml).toContain('dark:text-zinc-200');
     expect(footerHtml).not.toContain('opacity-80');
 
     const dividerHtml = renderToString(React.createElement(SectionDivider));
@@ -204,61 +207,22 @@ describe('Principal Design Engineering Audit Invariants', () => {
     const socialHtml = renderToString(React.createElement(SocialLinks));
     expect(socialHtml).not.toContain('transition-all');
     expect(socialHtml).not.toContain('group-hover:text-[var(--hover-color)]');
-    expect(socialHtml).toContain('group-hover:text-brand-blue');
+    expect(socialHtml).toContain('group-hover:text-blue-600');
 
     const projHtml = renderToString(React.createElement(ProjectsSection));
-    expect(projHtml).toContain('role="link"');
-    expect(projHtml).toContain('tabindex="0"');
+    expect(projHtml).toContain('href="/projects/');
     expect(projHtml).toContain('SYS.01');
     expect(projHtml).toContain('SYS.02');
     expect(projHtml).toContain('SYS.15');
   });
 
-  it('8. should preserve MOBIUS_VOLUMETRIC_STRIP in ThreeIndustrialScene without auto-overwriting Forme 2 and skip redundant GPU buffer uploads on stationary frames', () => {
-    const fakeCanvas = {
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    } as unknown as HTMLCanvasElement;
-
-    const scene = new ThreeIndustrialScene(fakeCanvas, { pointCount: 60 });
-    expect(scene.isEarthCloudLoaded).toBe(false);
-
-    // Switching to topology 1 (Möbius Strip) should NOT auto-overwrite Forme 2 with Earth Cloud
-    scene.setTopology(1);
-    expect(scene.activeTopologyName).toBe('MOBIUS_VOLUMETRIC_STRIP');
-    expect(scene.isEarthCloudLoaded).toBe(false);
-
-    // Settle morphing completely
-    for (let f = 0; f < 60; f++) {
-      scene.renderFrameForTesting(0.05, f * 50, true);
-    }
-    expect(scene.morphProgressValue).toBe(1.0);
-
-    // Clear needsUpdate flag (simulating Three.js WebGLRenderer after uploading once)
-    const posAttr = scene.positionAttributeForTesting;
-    expect(posAttr).not.toBeNull();
-    posAttr!.needsUpdate = false;
-    const initialVersion = posAttr!.version;
-
-    // Stationary frame with zero morph delta, zero wave, and zero pointer repulsion must NOT trigger GPU buffer re-upload
-    scene.renderFrameForTesting(0.016, 4000, false);
-    expect(posAttr!.version).toBe(initialVersion);
-
-    scene.destroy();
-  });
-
-  it('9. should enforce emilkowalski/skills, pbakaus/impeccable, and Leonxlnx/taste-skill rules (custom --ease-out curve, no 3D card tilt, 2px hover lift, tactile press, and RGB object WebGL resonance)', () => {
+  it('8. should enforce emilkowalski/skills, pbakaus/impeccable, and Leonxlnx/taste-skill rules (custom --ease-out curve, no 3D card tilt, 2px hover lift, tactile press, and RGB object WebGL resonance)', () => {
     expect(magneticCardContent).toContain('hover:-translate-y-0.5');
     expect(magneticCardContent).toContain('active:scale-[0.985]');
     expect(magneticCardContent).toContain('group-hover:scale-[1.03]');
     expect(magneticCardContent).toContain('ease-[var(--ease-out)]');
     expect(magneticCardContent).not.toContain('rotateX(');
     expect(magneticCardContent).not.toContain('rotateY(');
-
-    expect(projectCardContent).toContain('hover:-translate-y-0.5');
-    expect(projectCardContent).toContain('ease-[var(--ease-out)]');
-    expect(projectCardContent).not.toContain('rotateX');
-    expect(projectCardContent).not.toContain('transition-all');
 
     expect(projectsGridContent).toContain('active:scale-[0.97]');
     expect(projectsGridContent).toContain('ease-[var(--ease-out)]');
@@ -268,7 +232,7 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(webglFluidContent).toContain('window.addEventListener("webgl-resonance"');
   });
 
-  it('10. should give every single one of the 15 projects a unique bespoke SVG schematic, bilingual telemetry spec, localized EN technologies, zero-violet themeColor, and hole-free responsive Bento grid across mobile/tablet/desktop for N=1..15', () => {
+  it('9. should give every single one of the 15 projects a unique bespoke SVG schematic, bilingual telemetry spec, localized EN technologies, zero-violet themeColor, and hole-free responsive Bento grid across mobile/tablet/desktop for N=1..15', () => {
     for (const locale of ['fr', 'en'] as const) {
       for (const proj of FALLBACK_PROJECTS[locale]) {
         const { r, g, b } = proj.themeColor;

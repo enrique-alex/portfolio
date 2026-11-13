@@ -9,7 +9,7 @@ import ContactSection from "@/components/sections/ContactSection";
 
 export default function Home() {
   return (
-    <main className="relative flex flex-col items-center justify-center overflow-x-clip w-full">
+    <main id="main-content" className="relative flex flex-col items-center justify-center overflow-x-clip w-full">
 
       {/* 
         Le Background Ambient

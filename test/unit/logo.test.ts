@@ -80,7 +80,7 @@ describe('Official Personal Brand Logo (The Isometric EN Monolith / Le Prisme Ar
 describe('Web App Manifest Configuration', () => {
   it('should export valid manifest configuration matching specification', () => {
     const data = manifest();
-    expect(data.name).toBe('Enrique Ndjakou | Ingénieur');
+    expect(data.name).toBe('Enrique Ndjakou | Élève Ingénieur');
     expect(data.short_name).toBe('EN');
     expect(data.theme_color).toBe('#050505');
     expect(data.background_color).toBe('#050505');
