@@ -65,11 +65,14 @@ vi.mock('framer-motion', () => ({
 import MobileNavDock, {
   resolveDockItemFromClientX,
   resolveDockScrubStateFromClientX,
+  computeLiquidLensGeometry,
   computeMobileDockBottomOffset,
 } from '@/components/layout/MobileNavDock';
 import MobileHudDrawer from '@/components/layout/MobileHudDrawer';
 import Footer from '@/components/layout/Footer';
 import { useLockBodyScroll } from '@/lib/hooks/useLockBodyScroll';
+// @ts-expect-error Vite raw query import
+import mobileNavDockContent from '@/components/layout/MobileNavDock.tsx?raw';
 
 describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
   describe('MobileNavDock', () => {
@@ -153,7 +156,7 @@ describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
       expect(htmlAbout).toContain('aria-current="page"');
     });
 
-    it('should apply sober Apple Liquid Glass styling with neutral specular borders (no neon cyan)', () => {
+    it('should apply Apple iOS 26/27 Liquid Glass styling in Dark Mode with obsidian glass, specular highlight, and subtle cyan DA refraction', () => {
       mockThemeState = { theme: 'dark', resolvedTheme: 'dark' };
       const html = renderToString(
         React.createElement(MobileNavDock, {
@@ -165,13 +168,20 @@ describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
         })
       );
 
+      expect(html).toContain('md:hidden');
+      expect(html).toContain('backdrop-blur-2xl');
+      expect(html).toContain('backdrop-saturate-180');
       expect(html).toContain('backdrop-filter:blur(20px) saturate(1.8)');
-      expect(html).toContain('border:1px solid rgba(255, 255, 255, 0.12)');
-      expect(html).toContain('rgba(10, 10, 14, 0.75)');
-      expect(html).not.toContain('rgba(0, 210, 255');
+      expect(html).toContain('dark:bg-[#0a0a0a]/75');
+      expect(html).toContain('dark:border-white/15');
+      expect(html).toContain('background-color:rgba(10, 10, 10, 0.75)');
+      expect(html).toContain('border:1px solid rgba(255, 255, 255, 0.15)');
+      expect(html).toContain('inset 0 1px 0 rgba(255, 255, 255, 0.18)');
+      expect(html).toContain('rgba(0, 210, 255,');
+      expect(html).toContain('data-testid="mobile-dock-active-pill"');
     });
 
-    it('should correctly adapt Apple Liquid Glass styling when theme is system with light or dark preference', () => {
+    it('should ensure crisp Light Mode optical separation and adapt when theme is system with light or dark preference', () => {
       mockThemeState = { theme: 'system', resolvedTheme: 'dark' };
       const htmlSystemDark = renderToString(
         React.createElement(MobileNavDock, {
@@ -182,7 +192,8 @@ describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
           hudTriggerRef: { current: null },
         })
       );
-      expect(htmlSystemDark).toContain('rgba(10, 10, 14, 0.75)');
+      expect(htmlSystemDark).toContain('rgba(10, 10, 10, 0.75)');
+      expect(htmlSystemDark).toContain('border:1px solid rgba(255, 255, 255, 0.15)');
 
       mockThemeState = { theme: 'light', resolvedTheme: 'light' };
       const htmlLight = renderToString(
@@ -194,9 +205,28 @@ describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
           hudTriggerRef: { current: null },
         })
       );
-      expect(htmlLight).toContain('rgba(255, 255, 255, 0.75)');
-      expect(htmlLight).toContain('border:1px solid rgba(0, 0, 0, 0.08)');
+      expect(htmlLight).toContain('bg-white/75');
+      expect(htmlLight).toContain('border-black/10');
+      expect(htmlLight).toContain('shadow-[0_10px_30px_rgba(0,0,0,0.12)]');
+      expect(htmlLight).toContain('background-color:rgba(255, 255, 255, 0.75)');
+      expect(htmlLight).toContain('border:1px solid rgba(0, 0, 0, 0.1)');
+      expect(htmlLight).toContain('0 10px 30px rgba(0, 0, 0, 0.12)');
+      expect(htmlLight).toContain('inset 0 1px 0 rgba(255, 255, 255, 0.9)');
+      expect(htmlLight).toContain('text-zinc-900');
+      expect(htmlLight).toContain('text-zinc-600');
+      expect(htmlLight).toContain('rgba(66, 133, 244,');
       mockThemeState = { theme: 'dark', resolvedTheme: 'dark' };
+    });
+
+    it('should enforce design-engineering invariants (zero transition-all, zero violet, tactile haptic vibrate(6), and reduced-motion support)', () => {
+      expect(mobileNavDockContent).not.toContain('transition-all');
+      expect(mobileNavDockContent).not.toContain('#8B5CF6');
+      expect(mobileNavDockContent).not.toContain('#7C3AED');
+      expect(mobileNavDockContent).not.toContain('indigo-');
+      expect(mobileNavDockContent).toContain('navigator.vibrate?.(6)');
+      expect(mobileNavDockContent).toContain('useReducedMotion');
+      expect(mobileNavDockContent).toContain('select-none');
+      expect(mobileNavDockContent).toContain('WebkitTouchCallout');
     });
 
     it('should elevate dock position when scrolling up so mobile browser bottom bar never clips it', () => {
@@ -317,6 +347,160 @@ describe('Mobile Navigation Architecture & iOS Dynamic Bar Ergonomics', () => {
       const farRight = resolveDockScrubStateFromClientX(450, sampleRects);
       expect(farRight?.clampedX).toBe(186);
       expect(farRight?.proximities[3]).toBe(1);
+    });
+  });
+
+  describe('computeLiquidLensGeometry (Continuous iOS 26/27 Liquid Lens Pill)', () => {
+    const variableRects = [
+      { item: { id: 'home', name: 'Accueil' }, left: 16, right: 108 }, // width 92, center 62
+      { item: { id: 'profile', name: 'À Propos' }, left: 112, right: 156 }, // width 44, center 134
+      { item: { id: 'academic', name: 'Parcours' }, left: 160, right: 204 }, // width 44, center 182
+      { item: { id: 'skills', name: 'Compétences' }, left: 208, right: 252 }, // width 44, center 230
+    ];
+
+    it('should smoothly interpolate centerX and morph pill width continuously across tabs without boundary jumps', () => {
+      const navLeft = 10;
+      const samples = [62, 80, 98, 116, 134, 158, 182, 230].map((x) =>
+        computeLiquidLensGeometry({
+          clientX: x,
+          navLeft,
+          navClientLeft: 1,
+          rects: variableRects,
+          isScrubbing: true,
+        })
+      );
+
+      // Should lock dead-center on tab 0 and tab 1 centers and morph width 92 -> 46 (minLensWidth)
+      expect(samples[0]?.centerX).toBe(62);
+      expect(samples[0]?.width).toBe(92);
+      expect(samples[4]?.centerX).toBe(134);
+      expect(samples[4]?.width).toBe(46);
+
+      // CenterX must increase strictly monotonically across the entire scrub path
+      for (let i = 1; i < samples.length; i++) {
+        expect(samples[i]!.centerX).toBeGreaterThan(samples[i - 1]!.centerX);
+      }
+    });
+
+    it('should apply immediate optical lift on press and velocity-based liquid stretch during fast scrubbing', () => {
+      const pressed = computeLiquidLensGeometry({
+        clientX: 134,
+        navLeft: 10,
+        rects: variableRects,
+        isPressed: true,
+        isScrubbing: false,
+      });
+      expect(pressed?.scaleX).toBe(1.07);
+      expect(pressed?.scaleY).toBe(1.07);
+
+      const slowScrub = computeLiquidLensGeometry({
+        clientX: 158,
+        navLeft: 10,
+        rects: variableRects,
+        isPressed: true,
+        isScrubbing: true,
+        velocityPxPerMs: 0,
+      });
+      expect(slowScrub?.scaleX).toBe(1.08);
+      expect(slowScrub?.scaleY).toBe(1.08);
+
+      const fastScrub = computeLiquidLensGeometry({
+        clientX: 158,
+        navLeft: 10,
+        rects: variableRects,
+        isPressed: true,
+        isScrubbing: true,
+        velocityPxPerMs: 1.5,
+      });
+      expect(fastScrub!.scaleX).toBeGreaterThan(1.12);
+      expect(fastScrub!.scaleY).toBeLessThan(1.08);
+    });
+
+    it('should disable scale deformation when prefers-reduced-motion is enabled and account for navScrollLeft', () => {
+      const reduced = computeLiquidLensGeometry({
+        clientX: 182,
+        navLeft: 10,
+        navClientLeft: 1,
+        navScrollLeft: 24,
+        rects: variableRects,
+        isPressed: true,
+        isScrubbing: true,
+        velocityPxPerMs: 2.0,
+        reducedMotion: true,
+      });
+      expect(reduced?.scaleX).toBe(1);
+      expect(reduced?.scaleY).toBe(1);
+      // Center 182 - width/2 (23) - navLeft (10) - clientLeft (1) + scrollLeft (24) = 172
+      expect(reduced?.localX).toBe(172);
+    });
+
+    it('should clamp within dock edges and safely return null on empty rects or invalid coordinates', () => {
+      const leftEdge = computeLiquidLensGeometry({
+        clientX: -40,
+        navLeft: 10,
+        navClientLeft: 1,
+        rects: variableRects,
+        isScrubbing: true,
+      });
+      // First local left: 16 - 10 - 1 = 5
+      expect(leftEdge?.localX).toBe(5);
+
+      const rightEdge = computeLiquidLensGeometry({
+        clientX: 600,
+        navLeft: 10,
+        navClientLeft: 1,
+        rects: variableRects,
+        isScrubbing: true,
+      });
+      // Last local right (252 - 10 - 1 = 241) - width (46) = 195
+      expect(rightEdge?.localX).toBe(195);
+
+      expect(
+        computeLiquidLensGeometry({
+          clientX: 100,
+          navLeft: 10,
+          rects: [],
+        })
+      ).toBeNull();
+      expect(
+        computeLiquidLensGeometry({
+          clientX: Number.NaN,
+          navLeft: 10,
+          rects: variableRects,
+        })
+      ).toBeNull();
+      expect(
+        computeLiquidLensGeometry({
+          clientX: 100,
+          navLeft: Number.POSITIVE_INFINITY,
+          rects: variableRects,
+        })
+      ).toBeNull();
+      expect(
+        computeLiquidLensGeometry({
+          clientX: 100,
+          navLeft: 10,
+          rects: [
+            { item: { id: 'bad', name: 'Bad' }, left: Number.NaN, right: 60 },
+            ...variableRects.slice(1),
+          ],
+        })
+      ).toBeNull();
+    });
+
+    it('should cap horizontal velocity stretch to avoid edge overhang while remaining responsive', () => {
+      const extremeScrub = computeLiquidLensGeometry({
+        clientX: 150,
+        navLeft: 10,
+        rects: variableRects,
+        velocityPxPerMs: 50,
+        isPressed: true,
+        isScrubbing: true,
+        reducedMotion: false,
+      });
+      expect(extremeScrub).not.toBeNull();
+      expect(extremeScrub!.scaleX).toBeGreaterThan(1.12);
+      expect(extremeScrub!.scaleX).toBeLessThanOrEqual(1.15);
     });
   });
 
