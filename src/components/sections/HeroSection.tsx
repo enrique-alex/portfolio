@@ -22,14 +22,14 @@ export default function HeroSection() {
   const { t } = useLanguage();
 
   return (
-    <section id="home" className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center px-4 overflow-x-clip">
+    <section id="home" className="relative flex min-h-[100dvh] w-full flex-col px-4 sm:px-6 lg:px-10 overflow-x-clip">
       
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20 pt-24 pb-24 lg:py-0">
+      <div className="mx-auto my-auto flex w-full max-w-7xl flex-col items-center justify-between gap-10 lg:flex-row lg:gap-12 xl:gap-16 pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-24 lg:pb-12 xl:pt-28 xl:pb-14">
         
         {/* COLONNE GAUCHE : Typographie & Informations */}
-        <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left z-10 w-full">
+        <div className="flex flex-1 min-w-0 flex-col items-center text-center lg:items-start lg:text-left z-10 w-full">
           {/* Titre Principal (Scramble Hardware Reveal) */}
-          <h1 className="z-10 w-full text-2xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4rem] tracking-tighter leading-[1.05] font-extrabold font-mono sm:font-sans">
+          <h1 className="z-10 w-full text-[clamp(1.6rem,6.4vw,2.25rem)] sm:text-[2.35rem] md:text-[2.75rem] lg:text-[clamp(2.25rem,3.05vw,3.05rem)] tracking-tight leading-[1.06] font-extrabold font-mono sm:font-sans">
             <span className="flex flex-col">
               <span 
                 ref={line1Ref}
@@ -47,8 +47,8 @@ export default function HeroSection() {
           </h1>
           
           {/* Badge "Telemetry Status" */}
-          <div className="mt-6 mb-2">
-            <div className="inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/85 px-4 py-2 text-xs font-mono uppercase tracking-widest text-zinc-800 backdrop-blur-md dark:border-white/10 dark:bg-[#0A0C10]/85 dark:text-zinc-200">
+          <div className="mt-4 lg:mt-5 mb-1">
+            <div className="inline-flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border border-black/10 bg-white/85 px-3.5 py-1.5 text-[11px] sm:text-xs font-mono uppercase tracking-widest text-zinc-800 backdrop-blur-md dark:border-white/10 dark:bg-[#0A0C10]/85 dark:text-zinc-200">
               <span className="relative flex h-2 w-2" aria-hidden="true">
                 <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
               </span>
@@ -58,7 +58,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <p className="mt-6 max-w-[65ch] text-base leading-relaxed text-zinc-600 md:text-lg dark:text-zinc-400">
+          <p className="mt-4 lg:mt-5 max-w-[65ch] text-[15px] leading-relaxed text-zinc-600 sm:text-base lg:text-[17px] dark:text-zinc-400">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">{t('hero.subtitle.line1')}</span><br/>
             {t('hero.subtitle.line2')}{' '}
             <span className="font-semibold text-blue-600 dark:text-[#00D2FF]">{t('hero.subtitle.company')}</span>
@@ -66,12 +66,12 @@ export default function HeroSection() {
           </p>
 
           {/* CTAs d'Exploration Tactiles */}
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+          <div className="mt-6 lg:mt-7 flex flex-col items-center justify-center gap-3.5 sm:flex-row lg:justify-start">
             <Magnetic intensity={0.22}>
               <button 
                 type="button"
                 onClick={() => scrollToElementById('projects')} 
-                className="group relative flex items-center gap-4 rounded-full bg-zinc-900 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-200 ease-[var(--ease-out)] hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505]"
+                className="group relative flex items-center gap-4 rounded-full bg-zinc-900 px-6 py-3.5 font-mono text-xs font-bold uppercase tracking-widest text-white active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-200 ease-[var(--ease-out)] hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505]"
               >
                 <span>{t('hero.cta.explore')}</span>
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 dark:bg-black/10 transition-transform duration-200 ease-[var(--ease-out)] group-hover:translate-y-0.5">
@@ -87,7 +87,7 @@ export default function HeroSection() {
                   e.preventDefault();
                   scrollToElementById('contact');
                 }}
-                className="group relative flex items-center gap-3 rounded-full border border-black/15 bg-white/80 px-7 py-4 font-mono text-xs font-bold uppercase tracking-widest text-zinc-900 backdrop-blur-md active:scale-[0.97] transition-[transform,border-color,background-color] duration-200 ease-[var(--ease-out)] hover:border-black/30 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:border-white/15 dark:bg-[#0A0C10]/85 dark:text-zinc-100 dark:hover:border-white/30 dark:hover:bg-white/10 dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505]"
+                className="group relative flex items-center gap-3 rounded-full border border-black/15 bg-white/80 px-6 py-3.5 font-mono text-xs font-bold uppercase tracking-widest text-zinc-900 backdrop-blur-md active:scale-[0.97] transition-[transform,border-color,background-color] duration-200 ease-[var(--ease-out)] hover:border-black/30 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:border-white/15 dark:bg-[#0A0C10]/85 dark:text-zinc-100 dark:hover:border-white/30 dark:hover:bg-white/10 dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505]"
               >
                 <Mail className="h-4 w-4 text-blue-600 dark:text-[#00D2FF] transition-transform duration-200 ease-[var(--ease-out)] group-hover:-translate-y-0.5" aria-hidden="true" />
                 <span>{t('hero.cta.cv')}</span>
@@ -96,7 +96,7 @@ export default function HeroSection() {
           </div>
 
           {/* Télémétrie & Indicateurs Clés d'Ingénierie Multidisciplinaire */}
-          <div className="mt-12 grid w-full max-w-xl grid-cols-1 sm:grid-cols-3 gap-4 border-t border-black/10 pt-6 text-left dark:border-white/10">
+          <div className="mt-7 lg:mt-8 grid w-full max-w-xl grid-cols-1 sm:grid-cols-3 gap-4 border-t border-black/10 pt-5 text-left dark:border-white/10">
             <div>
               <div className="font-mono text-lg font-bold tabular-nums text-zinc-900 dark:text-white sm:text-xl">15</div>
               <div className="font-mono text-[11px] uppercase tracking-wider text-zinc-600 dark:text-zinc-400">{t('hero.kpi.systems')}</div>
@@ -113,9 +113,9 @@ export default function HeroSection() {
         </div>
 
         {/* COLONNE DROITE : Cadre Optique de Précision & Télémétrie */}
-        <div className="relative flex w-full max-w-[280px] sm:max-w-[320px] lg:max-w-md flex-1 items-center justify-center z-10">
-          <Magnetic intensity={0.08}>
-            <div className="relative aspect-[3/4] w-full min-h-[360px] max-w-[310px] rounded-2xl border border-black/15 bg-white/80 p-2.5 shadow-2xl backdrop-blur-md dark:border-white/15 dark:bg-[#0A0C10]/90">
+        <div className="relative flex w-full max-w-[260px] sm:max-w-[288px] lg:w-[290px] xl:w-[310px] lg:flex-none items-center justify-center z-10">
+          <Magnetic intensity={0.08} className="w-full justify-center">
+            <div className="relative aspect-[3/4] w-full max-w-[290px] xl:max-w-[310px] rounded-2xl border border-black/15 bg-white/80 p-2.5 shadow-2xl backdrop-blur-md dark:border-white/15 dark:bg-[#0A0C10]/90">
               {/* Repères d'alignement optique (Fiducials) */}
               <span aria-hidden="true" className="pointer-events-none absolute -left-1.5 -top-1.5 h-3 w-3 border-l-2 border-t-2 border-blue-600 dark:border-[#00D2FF]" />
               <span aria-hidden="true" className="pointer-events-none absolute -right-1.5 -top-1.5 h-3 w-3 border-r-2 border-t-2 border-blue-600 dark:border-[#00D2FF]" />

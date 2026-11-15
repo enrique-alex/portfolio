@@ -12,7 +12,10 @@ vi.mock('next/link', () => ({
     React.createElement('a', { href, ...props }, children),
 }));
 
-let mockTheme = { theme: 'dark', resolvedTheme: 'dark' };
+let mockTheme: { theme: string | undefined; resolvedTheme: string | undefined } = {
+  theme: 'dark',
+  resolvedTheme: 'dark',
+};
 
 vi.mock('next-themes', () => ({
   useTheme: () => ({
@@ -80,8 +83,11 @@ vi.mock('framer-motion', () => ({
 import Navbar, {
   resolveActiveSectionOnScroll,
   isProgrammaticScrollLockActive,
+  resolveDesktopNavIndexFromClientX,
   type SectionBounds,
 } from '@/components/layout/Navbar';
+// @ts-expect-error Vite raw query import
+import navbarContent from '@/components/layout/Navbar.tsx?raw';
 
 describe('Navbar Accessibility, Scroll Synchronization & WCAG 2.5.3 (Label in Name)', () => {
   it('should ensure the brand logo link visible text matches its accessible name aria-label identically', () => {
@@ -126,6 +132,38 @@ describe('Navbar Accessibility, Scroll Synchronization & WCAG 2.5.3 (Label in Na
     const html = renderToString(React.createElement(Navbar));
     expect(html).toContain('href="/#contact"');
     expect(html).toContain('Me contacter');
+  });
+
+  it('should produce strictly identical header SSR HTML across undefined, light, and dark themes (zero React Hydration Mismatch)', () => {
+    const extractHeader = (html: string) => {
+      const match = html.match(/<header[\s\S]*?<\/header>/);
+      return match ? match[0] : '';
+    };
+
+    mockTheme = { theme: undefined, resolvedTheme: undefined };
+    const ssrHeader = extractHeader(renderToString(React.createElement(Navbar)));
+
+    mockTheme = { theme: 'light', resolvedTheme: 'light' };
+    const lightHeader = extractHeader(renderToString(React.createElement(Navbar)));
+
+    mockTheme = { theme: 'dark', resolvedTheme: 'dark' };
+    const darkHeader = extractHeader(renderToString(React.createElement(Navbar)));
+
+    expect(ssrHeader.length).toBeGreaterThan(100);
+    expect(lightHeader).toBe(ssrHeader);
+    expect(darkHeader).toBe(ssrHeader);
+  });
+
+  it('should enforce Desktop Liquid Glass kinematics, z-50 header priority, zero theme-dependent inline styles, and zero transition-all', () => {
+    expect(navbarContent).toContain('z-50');
+    expect(navbarContent).toContain('data-testid="desktop-nav-liquid-lens"');
+    expect(navbarContent).toContain('data-testid="desktop-nav-active-pill"');
+    expect(navbarContent).toContain('ResizeObserver');
+    expect(navbarContent).toContain('offsetLeft');
+    expect(navbarContent).toContain('offsetWidth');
+    expect(navbarContent).toContain('active:scale-[0.97]');
+    expect(navbarContent).not.toContain('transition-all');
+    expect(navbarContent).not.toMatch(/style=\{[\s\S]*?\bisDark\b/);
   });
 
   describe('resolveActiveSectionOnScroll (Deterministic Scroll Synchronization)', () => {
@@ -265,6 +303,39 @@ describe('Navbar Accessibility, Scroll Synchronization & WCAG 2.5.3 (Label in Na
           probeY: 280,
         })
       ).toBe(false);
+    });
+  });
+
+  describe('Desktop Liquid Glass Pointer Tracking, Zero Hover Shift & md Breakpoint Fit', () => {
+    const sampleRects = [
+      { left: 300, right: 374 },
+      { left: 378, right: 460 },
+      { left: 464, right: 544 },
+      { left: 548, right: 642 },
+    ];
+
+    it('should resolve direct hits and inter-link gaps smoothly without dead zones', () => {
+      expect(resolveDesktopNavIndexFromClientX(330, sampleRects)).toBe(0);
+      expect(resolveDesktopNavIndexFromClientX(420, sampleRects)).toBe(1);
+      // 4px gap between index 0 (right=374) and index 1 (left=378): 375 is closer to center 337 vs 419
+      expect(resolveDesktopNavIndexFromClientX(375, sampleRects)).toBe(0);
+      // Edge clamping inside nav padding
+      expect(resolveDesktopNavIndexFromClientX(296, sampleRects)).toBe(0);
+      expect(resolveDesktopNavIndexFromClientX(648, sampleRects)).toBe(3);
+      expect(resolveDesktopNavIndexFromClientX(100, [])).toBe(-1);
+      expect(resolveDesktopNavIndexFromClientX(Number.NaN, sampleRects)).toBe(-1);
+    });
+
+    it('should keep link label widths invariant on hover (absolute indicator only, never inline reflow) and track across nav via pointerMove + fonts.ready + md compact sizing', () => {
+      expect(navbarContent).toContain('onPointerMove={handleNavPointerMove}');
+      expect(navbarContent).toContain('useLayoutEffect');
+      expect(navbarContent).toContain('document.fonts?.ready');
+      expect(navbarContent).toContain('pillGeometry.snap');
+      // Active link underline indicator must be position:absolute so hovering siblings causes 0px width shift
+      expect(navbarContent).toContain('pointer-events-none absolute bottom-[3px] left-1/2');
+      // Compact md sizing prevents right-edge clipping at 768px tablet breakpoint
+      expect(navbarContent).toContain('px-1.5 lg:px-2.5 xl:px-3.5');
+      expect(navbarContent).toContain('text-[11.5px] lg:text-[13px] xl:text-sm');
     });
   });
 });

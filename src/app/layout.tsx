@@ -120,7 +120,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "if(typeof window!=='undefined'&&typeof window.__name==='undefined'){window.__name=function(t,v){return Object.defineProperty(t,'name',{value:v,configurable:true});}}",
+              "if(typeof window!=='undefined'&&typeof window.__name==='undefined'){window.__name=function(t,v){return Object.defineProperty(t,'name',{value:v,configurable:true});}};(function(){try{if(typeof window==='undefined')return;var p=window.location&&window.location.pathname||'';if(p!=='/'&&p.indexOf('/projects/')!==0)return;if(window.__preloaderDone===true)return;var ua=navigator.userAgent||'';if(/bot|googlebot|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|chrome-lighthouse/i.test(ua))return;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.setAttribute('data-en-boot','active');window.setTimeout(function(){document.documentElement.removeAttribute('data-en-boot');},4500);}catch(e){}})();",
           }}
         />
         <meta

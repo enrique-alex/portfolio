@@ -95,6 +95,7 @@ assert.ok(cssContent.includes('cursor: none !important;'), 'globals.css must hid
 assert.ok(cssContent.includes('.scrollbar-hide'), 'globals.css must define .scrollbar-hide');
 assert.ok(cssContent.includes('background: #050505;'), 'globals.css must style fallback scrollbar track with #050505');
 assert.ok(cssContent.includes('rgba(0, 210, 255'), 'globals.css must style fallback scrollbar thumb with cyan glow');
+assert.ok(cssContent.includes('html[data-en-boot="active"]'), 'globals.css must define pre-paint anti-flash boot rule');
 console.log('✓ 7. globals.css scrollbar isolation & DA rules passed');
 
 // ─── 8. Verify test suites ──────────────────────────────────

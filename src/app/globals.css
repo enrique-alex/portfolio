@@ -242,3 +242,14 @@ a {
 .section-contain {
   contain: layout style;
 }
+
+/* Voile pré-hydratation anti-flash (zéro FOUC / zéro flash Hero avant montage du Preloader) */
+html[data-en-boot="active"] body {
+  overflow: hidden;
+}
+html[data-en-boot="active"] main,
+html[data-en-boot="active"] header,
+html[data-en-boot="active"] footer,
+html[data-en-boot="active"] aside {
+  opacity: 0;
+}

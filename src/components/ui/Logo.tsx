@@ -8,6 +8,18 @@ export interface LogoProps extends SVGProps<SVGSVGElement> {
 }
 
 /**
+ * Canonical 5-path geometry for The Isometric EN Monolith (24x24 viewBox).
+ * Single source of truth shared between the static Logo mark and the Preloader choreography.
+ */
+export const ISOMETRIC_EN_MONOLITH_PATHS = {
+  eOuterContour: 'M12 2.5L3.5 7v10L12 21.5',
+  eUpperRidge: 'M3.5 7L12 11.5',
+  eMiddleCantilever: 'M3.5 12L9 15',
+  nUpperCrown: 'M12 2.5L20.5 7',
+  nInterlockingFace: 'M12 21.5v-10L20.5 17V7',
+} as const;
+
+/**
  * Official Personal Brand Logo — The Isometric EN Monolith / Le Prisme Architectural EN
  *
  * Synthesized from GitHub's top-starred logo design frameworks:
@@ -54,15 +66,15 @@ export function Logo({
     >
       {title ? <title id={titleId}>{title}</title> : null}
       {/* Left Isometric Face (E): Top-left ridge, left vertical pillar, bottom-left base */}
-      <path d="M12 2.5L3.5 7v10L12 21.5" />
+      <path d={ISOMETRIC_EN_MONOLITH_PATHS.eOuterContour} />
       {/* Left Isometric Face (E): Upper isometric crossbar / front-left roof ridge */}
-      <path d="M3.5 7L12 11.5" />
+      <path d={ISOMETRIC_EN_MONOLITH_PATHS.eUpperRidge} />
       {/* Left Isometric Face (E): Middle cantilevered crossbar */}
-      <path d="M3.5 12L9 15" />
+      <path d={ISOMETRIC_EN_MONOLITH_PATHS.eMiddleCantilever} />
       {/* Right Isometric Face (N): Upper-right crown ridge */}
-      <path d="M12 2.5L20.5 7" />
+      <path d={ISOMETRIC_EN_MONOLITH_PATHS.nUpperCrown} />
       {/* Right Isometric Face (N): Central vertical spine, diagonal bridge, right vertical pillar */}
-      <path d="M12 21.5v-10L20.5 17V7" />
+      <path d={ISOMETRIC_EN_MONOLITH_PATHS.nInterlockingFace} />
     </svg>
   );
 }

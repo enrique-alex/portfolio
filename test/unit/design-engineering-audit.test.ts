@@ -70,6 +70,8 @@ import webglFluidContent from '@/components/animations/webgl-fluid.js?raw';
 import skillsSectionContent from '@/components/ui/SkillsSection.tsx?raw';
 // @ts-expect-error Vite raw query import
 import mobileHudDrawerContent from '@/components/layout/MobileHudDrawer.tsx?raw';
+// @ts-expect-error Vite raw query import
+import heroSectionContent from '@/components/sections/HeroSection.tsx?raw';
 
 import { getAdaptiveBentoSpan } from '@/components/ui/ProjectsGrid';
 
@@ -133,6 +135,9 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(html).toContain('Explorer les Systèmes');
     expect(html).toContain('Demander mon CV');
     expect(html).not.toContain('mix-blend-overlay');
+    expect(heroSectionContent).toContain('lg:pt-24');
+    expect(heroSectionContent).toContain('clamp(');
+    expect(heroSectionContent).not.toContain('lg:py-0');
   });
 
   it('4. should render all 6 sections with unbroken sequential editorial tags (01 through 06)', () => {

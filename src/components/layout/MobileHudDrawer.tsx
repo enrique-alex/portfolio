@@ -149,7 +149,7 @@ export default function MobileHudDrawer({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center md:hidden">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center md:hidden">
           {/* BACKDROP FLUIDE & TACTILE */}
           <motion.div
             initial={{ opacity: 0 }}

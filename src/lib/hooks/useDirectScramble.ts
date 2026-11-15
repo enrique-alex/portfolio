@@ -89,12 +89,8 @@ export function useDirectScramble({
       return;
     }
 
-    // Si le boot est déjà terminé, démarrage immédiat avec texte final (LCP protégé)
-    if (
-      window.__preloaderDone ||
-      sessionStorage.getItem('plc_boot_done') === 'true' ||
-      sessionStorage.getItem('seen-preloader') === 'true'
-    ) {
+    // Si le boot runtime est déjà terminé (navigation interne SPA), affichage immédiat sans ré-animation
+    if (window.__preloaderDone === true) {
       setFinalText();
       return;
     }
