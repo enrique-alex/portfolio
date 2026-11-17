@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Project } from '@/lib/data';
@@ -10,7 +10,7 @@ import { useLanguage } from '@/components/theme/LanguageProvider';
 import { Locale } from '@/lib/i18n';
 
 // --- Signature télémétrique bilingue propre à chacun des 15 projets ---
-const PROJECT_SPECS: Record<Locale, Record<string, string>> = {
+export const PROJECT_SPECS: Record<Locale, Record<string, string>> = {
     fr: {
         'controle-hydraulique': 'HIL · Δt 10 ms',
         'cellule-robotique': 'TCP < 0.2 mm · I/O',
@@ -48,7 +48,7 @@ const PROJECT_SPECS: Record<Locale, Record<string, string>> = {
 };
 
 // --- Schéma technique vectoriel unique pour chacun des 15 projets (avec repli par catégorie) ---
-function ProjectSchematic({ projectId, category }: { projectId: string; category: string }) {
+export function ProjectSchematic({ projectId, category }: { projectId: string; category: string }) {
     switch (projectId) {
         case 'controle-hydraulique':
             // Bicuve hydraulique couplée + vanne d'interconnexion & boucle PID
@@ -262,6 +262,7 @@ export default function MagneticProjectCard({
     onClick?: (p: Project) => void;
 }) {
     const { locale, t } = useLanguage();
+    const shouldReduceMotion = useReducedMotion();
     const cardRef = useRef<HTMLAnchorElement>(null);
     const rectRef = useRef<DOMRect | null>(null);
     const [isHovered, setIsHovered] = useState(false);
@@ -384,12 +385,19 @@ export default function MagneticProjectCard({
                 </>
             )}
 
-            {/* 1. ACCENT VERTICAL GAUCHE + LIGNE SUPÉRIEURE CALIBRÉE */}
+            {/* 1. ACCENT VERTICAL GAUCHE + LIGNE D'HORIZON SPÉCULAIRE SUPÉRIEURE (React Bits Spotlight / Vengeance UI) */}
             <div 
                 className="absolute left-0 top-0 h-full w-[2.5px] origin-left transition-transform duration-300 group-hover:scale-x-150 z-[2]"
                 style={{ 
                     background: `linear-gradient(180deg, rgb(${rgbStr}), rgba(${rgbStr}, 0.15))`,
                     opacity: isTouchDevice ? 0.85 : (isHovered ? 1 : 0.65),
+                }}
+            />
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-px opacity-35 transition-opacity duration-300 group-hover:opacity-90"
+                style={{
+                    background: `linear-gradient(90deg, rgb(${rgbStr}) 0%, rgba(${rgbStr}, 0.35) 45%, transparent 90%)`,
                 }}
             />
 
@@ -399,11 +407,11 @@ export default function MagneticProjectCard({
                     className="absolute right-5 bottom-16 h-20 w-20 sm:h-24 sm:w-24 pointer-events-none z-0"
                     style={{ color: `rgb(${rgbStr})` }}
                     animate={{ 
-                        rotate: isTouchDevice ? 0 : (isHovered ? 4 : 0),
+                        rotate: isTouchDevice || shouldReduceMotion ? 0 : (isHovered ? 4 : 0),
                         opacity: isTouchDevice ? 0.22 : (isHovered ? 0.36 : 0.14),
-                        scale: isTouchDevice ? 1 : (isHovered ? 1.06 : 1)
+                        scale: isTouchDevice || shouldReduceMotion ? 1 : (isHovered ? 1.06 : 1)
                     }}
-                    transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 22 }}
                 >
                     <ProjectSchematic projectId={project.id} category={project.category} />
                 </motion.div>
@@ -414,7 +422,7 @@ export default function MagneticProjectCard({
                 <div
                     className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                     style={{
-                        background: `radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(${rgbStr}, 0.08), transparent 80%)`,
+                        background: `radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(${rgbStr}, 0.11), transparent 80%)`,
                     }}
                 />
             )}
@@ -422,11 +430,11 @@ export default function MagneticProjectCard({
             {/* CONTENU PRINCIPAL */}
             <div className={`relative z-10 flex h-full flex-col justify-between gap-4 ${hasCover ? 'text-white' : ''}`}>
                 <div className="flex flex-col">
-                    {/* 3. HEADER : Emblème Vectoriel Unique + Séquence SYS.XX + Année + Catégorie */}
+                    {/* 3. HEADER : Console Télémétrique Unifiée (Zéro empilement de boîtes) + Domaine */}
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                             <span
-                                className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border p-1 ${
+                                className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border p-1 transition-transform duration-200 ease-[var(--ease-out)] group-hover:scale-105 ${
                                     hasCover
                                         ? 'border-white/20 bg-black/65 text-white'
                                         : 'border-black/10 bg-black/[0.03] text-zinc-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-[rgb(var(--proj-rgb))]'
@@ -436,39 +444,50 @@ export default function MagneticProjectCard({
                                 <ProjectSchematic projectId={project.id} category={project.category} />
                             </span>
 
-                            {sequenceNumber && (
+                            <div
+                                className={`inline-flex items-center gap-2 rounded-lg border px-2.5 py-1 font-mono text-[11px] tabular-nums ${
+                                    hasCover
+                                        ? 'border-white/20 bg-black/65 text-white'
+                                        : 'border-black/10 bg-black/[0.03] text-zinc-800 dark:border-white/12 dark:bg-white/[0.04] dark:text-zinc-100'
+                                }`}
+                            >
+                                {project.isFeatured && (
+                                    <span
+                                        aria-hidden="true"
+                                        className="h-1.5 w-1.5 rounded-full flex-shrink-0"
+                                        style={{ backgroundColor: `rgb(${rgbStr})` }}
+                                    />
+                                )}
+                                {sequenceNumber && (
+                                    <span className="font-bold uppercase tracking-widest">
+                                        {`SYS.${sequenceNumber}`}
+                                    </span>
+                                )}
                                 <span
-                                    className={`font-mono text-[11px] font-bold tabular-nums uppercase tracking-widest px-2 py-0.5 rounded border ${
-                                        hasCover
-                                            ? 'border-white/25 bg-black/65 text-white'
-                                            : 'border-black/15 bg-black/[0.04] text-zinc-900 dark:border-white/15 dark:bg-white/[0.06] dark:text-zinc-100'
-                                    }`}
-                                >
-                                    {`SYS.${sequenceNumber}`}
+                                    aria-hidden="true"
+                                    className={`h-3 w-px ${hasCover ? 'bg-white/25' : 'bg-black/15 dark:bg-white/15'}`}
+                                />
+                                <span className={`font-semibold tracking-wider ${hasCover ? 'text-white/90' : 'text-zinc-600 dark:text-zinc-300'}`}>
+                                    {project.year}
                                 </span>
-                            )}
-
-                            <span className={`font-mono text-xs font-bold tabular-nums tracking-wider ${hasCover ? 'text-white/90' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                                {project.year}
-                            </span>
-
-                            {specLabel && (
-                                <span
-                                    className={`hidden sm:inline-block font-mono text-[11px] font-semibold tabular-nums tracking-wider px-2 py-0.5 rounded border ${
-                                        hasCover
-                                            ? 'border-white/15 bg-black/65 text-zinc-200'
-                                            : 'border-black/10 bg-black/[0.03] text-zinc-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300'
-                                    }`}
-                                >
-                                    {specLabel}
-                                </span>
-                            )}
+                                {specLabel && (
+                                    <>
+                                        <span
+                                            aria-hidden="true"
+                                            className={`hidden sm:inline-block h-3 w-px ${hasCover ? 'bg-white/25' : 'bg-black/15 dark:bg-white/15'}`}
+                                        />
+                                        <span className={`hidden sm:inline-block font-semibold tracking-wider ${hasCover ? 'text-zinc-200' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                                            {specLabel}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
                         </div>
 
-                        <span className={`max-w-[210px] sm:max-w-[260px] truncate rounded-md border px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider ${
+                        <span className={`max-w-[210px] sm:max-w-[250px] truncate rounded-md border px-2.5 py-1 font-mono text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider ${
                             hasCover 
                                 ? 'border-white/20 bg-black/65 text-white' 
-                                : 'border-black/10 bg-black/[0.03] text-zinc-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300'
+                                : 'border-black/10 bg-black/[0.025] text-zinc-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300'
                         }`}>
                             {project.category}
                         </span>
@@ -541,10 +560,10 @@ export default function MagneticProjectCard({
                                 : 'border-black/10 bg-black/[0.03] group-hover:border-black/25 dark:border-white/15 dark:bg-white/[0.04] dark:group-hover:border-white/30'
                         }`}
                         animate={{ 
-                            x: isTouchDevice ? 0 : (isHovered ? 3 : 0),
-                            scale: isTouchDevice ? 1 : (isHovered ? 1.08 : 1)
+                            x: isTouchDevice || shouldReduceMotion ? 0 : (isHovered ? 3 : 0),
+                            scale: isTouchDevice || shouldReduceMotion ? 1 : (isHovered ? 1.08 : 1)
                         }}
-                        transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+                        transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 24 }}
                     >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={hasCover ? 'text-white' : 'text-zinc-700 dark:text-zinc-200'}>
                             <line x1="5" y1="12" x2="19" y2="12" />

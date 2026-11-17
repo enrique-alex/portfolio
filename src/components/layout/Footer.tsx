@@ -63,7 +63,7 @@ export default function Footer() {
               type="button"
               onClick={scrollToTop}
               aria-label={t('footer.uplink')}
-              className="group flex flex-col items-center gap-2 rounded-xl p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
+              className="group flex flex-col items-center gap-2 rounded-xl p-1 active:scale-[0.97] transition-transform duration-150 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF]"
             >
               <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-black/15 bg-black/5 dark:border-white/15 dark:bg-white/5">
                 <div

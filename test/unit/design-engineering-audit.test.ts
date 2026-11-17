@@ -73,7 +73,7 @@ import mobileHudDrawerContent from '@/components/layout/MobileHudDrawer.tsx?raw'
 // @ts-expect-error Vite raw query import
 import heroSectionContent from '@/components/sections/HeroSection.tsx?raw';
 
-import { getAdaptiveBentoSpan } from '@/components/ui/ProjectsGrid';
+import { getAdaptiveBentoSpan, paginateProjectsDeck, DECK_PAGE_SIZE } from '@/components/ui/ProjectsGrid';
 
 describe('Principal Design Engineering Audit Invariants', () => {
   it('1. should eradicate generic AI copywriting clichés ("passionné par", "Waiting for incoming signals", "Séquence d\'Amorçage") in both FR and EN while highlighting multidisciplinary engineering & international mobility', () => {
@@ -296,6 +296,80 @@ describe('Principal Design Engineering Audit Invariants', () => {
     expect(projectsGridContent).toContain('grid-flow-row-dense');
     expect(projectsGridContent).toContain('auto-rows-[minmax(360px,auto)]');
     expect(projectsGridContent).toContain('getAdaptiveBentoSpan');
+  });
+
+  it('10. should enforce zero-infinite-scroll scalable Projects architecture (paginated Bento Deck <= 6 cards/page, System Matrix view mode, Flagship filter, and O(1) quick-jump rail across N=0..30+ projects)', () => {
+    // Edge case 1: empty input
+    expect(paginateProjectsDeck([])).toEqual([]);
+    expect(paginateProjectsDeck([], 0)).toEqual([]);
+
+    // Edge case 2: 15 fallback projects -> 3 bounded pages of [6, 6, 3]
+    const pages15 = paginateProjectsDeck(FALLBACK_PROJECTS.fr, DECK_PAGE_SIZE);
+    expect(DECK_PAGE_SIZE).toBe(6);
+    expect(pages15.length).toBe(3);
+    expect(pages15[0].length).toBe(6);
+    expect(pages15[1].length).toBe(6);
+    expect(pages15[2].length).toBe(3);
+
+    // Edge case 2b: Deck 01 (where all 6 cards are isFeatured) must NOT stack 6 full-width rows on Tablet
+    // and must pack each Desktop row pair (0,1), (2,3), (4,5) to exactly 3 columns so visual order stays SYS.01..SYS.06
+    const deck01Spans = pages15[0].map((_, idx) => getAdaptiveBentoSpan(idx, pages15[0]).spanClasses);
+    const deck01TabletWideCount = deck01Spans.filter((s) => s.includes('md:col-span-2')).length;
+    expect(deck01TabletWideCount).toBeLessThanOrEqual(2);
+
+    const desktopWidthOf = (span: string) =>
+      span.includes('lg:col-span-3') ? 3 : span.includes('lg:col-span-2') ? 2 : 1;
+    // Each consecutive pair (0,1), (2,3), (4,5) on Deck 01 forms a complete 3-col row ([2,1], [1,2], [2,1])
+    expect(desktopWidthOf(deck01Spans[0]) + desktopWidthOf(deck01Spans[1])).toBe(3);
+    expect(desktopWidthOf(deck01Spans[2]) + desktopWidthOf(deck01Spans[3])).toBe(3);
+    expect(desktopWidthOf(deck01Spans[4]) + desktopWidthOf(deck01Spans[5])).toBe(3);
+    expect(deck01Spans[0]).toContain('lg:col-span-2');
+    expect(deck01Spans[3]).toContain('lg:col-span-2');
+    expect(deck01Spans[4]).toContain('lg:col-span-2');
+
+    // Edge case 3: 30 simulated projects -> 5 bounded pages of 6 cards each, each page 100% hole-free on Tablet & Desktop
+    const simulated30 = [...FALLBACK_PROJECTS.fr, ...FALLBACK_PROJECTS.fr];
+    const pages30 = paginateProjectsDeck(simulated30, DECK_PAGE_SIZE);
+    expect(pages30.length).toBe(5);
+    pages30.forEach((page, pageIdx) => {
+      expect(page.length).toBeLessThanOrEqual(DECK_PAGE_SIZE);
+      let tabletCells = 0;
+      let desktopCells = 0;
+      page.forEach((_, idx) => {
+        const { spanClasses } = getAdaptiveBentoSpan(idx, page);
+        tabletCells += spanClasses.includes('md:col-span-2') ? 2 : 1;
+        desktopCells += spanClasses.includes('lg:col-span-3')
+          ? 3
+          : spanClasses.includes('lg:col-span-2')
+          ? 2
+          : 1;
+      });
+      expect(tabletCells % 2, `Deck page ${pageIdx} has tablet hole`).toBe(0);
+      expect(desktopCells % 3, `Deck page ${pageIdx} has desktop hole`).toBe(0);
+    });
+
+    // Verify SSR rendering of Command Bar (Flagship filter, Bento Deck / System Matrix view switcher, Deck 01/03 counter, and Mobile horizontal snap carousel)
+    currentTestLocale = 'fr';
+    const projFrHtml = renderToString(React.createElement(ProjectsSection));
+    expect(projFrHtml).toContain('Architectures Phares');
+    expect(projFrHtml).toContain('Vitrine Bento');
+    expect(projFrHtml).toContain('Index Système');
+    expect(projFrHtml).toContain('DECK 01 / 03');
+    expect(projFrHtml).toContain('SYS.01–SYS.06');
+    expect(projFrHtml).toContain('max-md:snap-x');
+
+    currentTestLocale = 'en';
+    const projEnHtml = renderToString(React.createElement(ProjectsSection));
+    expect(projEnHtml).toContain('Flagship Systems');
+    expect(projEnHtml).toContain('Bento Deck');
+    expect(projEnHtml).toContain('System Matrix');
+    expect(projEnHtml).toContain('DECK 01 / 03');
+    currentTestLocale = 'fr';
+
+    // Verify post-commit Quick-Jump synchronization, FR<->EN category filter persistence, and WebGL resonance cleanup
+    expect(projectsGridContent).toContain('pendingJump');
+    expect(projectsGridContent).toContain('activeCategoryProjectId');
+    expect(projectsGridContent).toContain("new CustomEvent('webgl-resonance', { detail: { color: null } })");
   });
 });
 

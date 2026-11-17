@@ -47,7 +47,7 @@ export default function CopyEmail() {
         type="button"
         onClick={() => void handleCopy('enriquekemayou@gmail.com')}
         aria-label={isCopied ? t('contact.copy.copied') : t('contact.copy.ariaCopy')}
-        className="group flex w-full items-center justify-between rounded-lg border border-black/10 bg-white px-4 py-3 transition-colors hover:border-blue-600 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:border-white/10 dark:bg-[#050505]/70 dark:hover:border-[#00D2FF] dark:hover:bg-[#0A0C10] dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505]"
+        className="group flex w-full items-center justify-between rounded-lg border border-black/10 bg-white px-4 py-3 active:scale-[0.97] transition-[transform,border-color,background-color,color] duration-150 ease-[var(--ease-out)] hover:border-blue-600 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:border-white/10 dark:bg-[#050505]/70 dark:hover:border-[#00D2FF] dark:hover:bg-[#0A0C10] dark:focus-visible:ring-[#00D2FF] dark:focus-visible:ring-offset-[#050505]"
       >
         <span className="font-mono text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-[#00D2FF]">
           {isCopied ? t('contact.copy.copied') : 'enriquekemayou@gmail.com'}

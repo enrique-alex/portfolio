@@ -231,7 +231,7 @@ export default function ContactForm() {
             <button 
               type="submit"
               disabled={isSubmitting || submitStatus === 'success'}
-              className={`group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl px-6 py-3.5 font-semibold active:scale-[0.98] transition-[transform,background-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:focus-visible:ring-offset-[#050505] ${
+              className={`group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl px-6 py-3.5 font-semibold active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-200 ease-[var(--ease-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F9FA] dark:focus-visible:ring-offset-[#050505] ${
                 submitStatus === 'success' 
                 ? 'bg-emerald-700 text-white focus-visible:ring-emerald-600 dark:bg-emerald-600' 
                 : submitStatus === 'error'

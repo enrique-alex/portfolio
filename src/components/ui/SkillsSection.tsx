@@ -387,7 +387,7 @@ export default function SkillsSection() {
                     }}
                     onClick={() => setActiveCategory(cat.id)}
                     aria-pressed={isActive}
-                    className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-transform duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF] lg:w-full overflow-hidden ${
+                    className={`group relative flex flex-shrink-0 flex-col items-start rounded-2xl px-5 py-4 text-left transition-transform duration-200 ease-[var(--ease-out)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-[#00D2FF] lg:w-full overflow-hidden ${
                       isActive 
                         ? 'text-zinc-900 dark:text-white'
                         : 'bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
