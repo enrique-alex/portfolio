@@ -1,4 +1,4 @@
-import { constantTimeEqual } from "@/lib/auth/password";
+import { timingSafeEqualStrings } from "@/lib/auth/password";
 
 export const SESSION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 heures en ms
 
@@ -136,7 +136,7 @@ export async function verifySessionCookie(cookieValue: string, sessionSecret: st
     const expectedSignature = arrayBufferToBase64url(expectedSignatureBuffer);
 
     // Comparaison en temps constant pour prévenir les timing attacks
-    if (!constantTimeEqual(expectedSignature, receivedSignature)) {
+    if (!(await timingSafeEqualStrings(expectedSignature, receivedSignature))) {
       return false;
     }
 

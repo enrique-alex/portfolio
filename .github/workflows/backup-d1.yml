@@ -16,20 +16,20 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v5
 
-      # 2. Configuration minimale de Node.js pour exécuter wrangler via npx
-      - name: Configuration de Node.js
+      # 2. Configuration minimale de Node.js 24 (aligné sur CI & Workers Builds)
+      - name: Configuration de Node.js 24
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
 
-      # 3. Export de la base D1 de production vers un fichier SQL local
+      # 3. Export de la base D1 de production vers un fichier SQL local (wrangler épinglé sur 4.125.0)
       - name: Export de la base D1 (production)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           echo "Démarrage de l'export de la base D1 'portfolio-db'..."
-          npx wrangler d1 export portfolio-db --remote --output=backup.sql
+          npx --yes wrangler@4.125.0 d1 export portfolio-db --remote --output=backup.sql
 
       # 4. Vérification du fichier et génération du nom horodaté (sans exposer le contenu)
       - name: Vérification du fichier et génération du nom horodaté
@@ -59,7 +59,7 @@ jobs:
         run: |
           BACKUP_FILE="${{ steps.backup_meta.outputs.filename }}"
           echo "Upload vers le bucket R2 privé 'portfolio-backups/${BACKUP_FILE}'..."
-          npx wrangler r2 object put "portfolio-backups/${BACKUP_FILE}" --file=backup.sql --remote
+          npx --yes wrangler@4.125.0 r2 object put "portfolio-backups/${BACKUP_FILE}" --file=backup.sql --remote
           echo "Upload terminé avec succès."
 
       # 6. Confirmation finale dans les logs

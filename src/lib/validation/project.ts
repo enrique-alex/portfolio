@@ -1,4 +1,4 @@
-// Cette valeur doit rester synchronisée avec R2_PUBLIC_URL dans wrangler.toml si elle change un jour (ex: migration vers domaine personnalisé)
+// Cette valeur doit rester synchronisée avec R2_PUBLIC_URL dans wrangler.jsonc si elle change un jour (ex: migration vers domaine personnalisé)
 const R2_PUBLIC_URL_PATTERN = 'pub-f2abb97fd5a44520b79d8e56bf020956\\.r2\\.dev';
 
 export interface ProjectFormInput {

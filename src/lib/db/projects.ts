@@ -83,18 +83,31 @@ function mapRowToProject(row: D1ProjectRow): Project {
   };
 }
 
-export async function getProjects(locale: Locale): Promise<Project[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let db: any;
+/**
+ * Récupère le binding D1 `portfolio_db` si le contexte Cloudflare est disponible.
+ * Retourne `undefined` en mode développement local sans proxy Wrangler ou en test unitaire.
+ */
+function getProjectsDatabase(): D1Database | undefined {
   try {
     const { env } = getCloudflareContext();
-    db = env.portfolio_db;
+    return env.portfolio_db;
   } catch {
-    // Ignore error in next dev
+    return undefined;
   }
+}
+
+export async function getProjects(locale: Locale): Promise<Project[]> {
+  const db = getProjectsDatabase();
 
   if (!db) {
-    console.warn("[projects] Base D1 'portfolio_db' non trouvée (mode dev local). Utilisation des projets de secours.");
+    console.warn(
+      JSON.stringify({
+        level: "warn",
+        scope: "db.projects",
+        operation: "getProjects",
+        message: "Base D1 'portfolio_db' indisponible, utilisation des projets de secours",
+      })
+    );
     return FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
   }
 
@@ -107,23 +120,24 @@ export async function getProjects(locale: Locale): Promise<Project[]> {
   `;
 
   try {
-    const { results } = (await db.prepare(query).bind(locale).all()) as { results: D1ProjectRow[] };
+    const { results } = await db.prepare(query).bind(locale).all<D1ProjectRow>();
     return results.map(mapRowToProject);
-  } catch (error) {
-    console.warn("[projects] Erreur lors de la requête D1 getProjects. Utilisation des projets de secours:", error);
+  } catch (error: unknown) {
+    console.warn(
+      JSON.stringify({
+        level: "warn",
+        scope: "db.projects",
+        operation: "getProjects",
+        message: "Erreur requête D1, utilisation des projets de secours",
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
     return FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
   }
 }
 
 export async function getProjectBySlug(slug: string, locale: Locale): Promise<Project | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let db: any;
-  try {
-    const { env } = getCloudflareContext();
-    db = env.portfolio_db;
-  } catch {
-    // Ignore error in next dev
-  }
+  const db = getProjectsDatabase();
 
   if (!db) {
     const list = FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
@@ -138,15 +152,24 @@ export async function getProjectBySlug(slug: string, locale: Locale): Promise<Pr
   `;
 
   try {
-    const project = (await db.prepare(query).bind(slug, locale).first()) as D1ProjectRow | null;
+    const project = await db.prepare(query).bind(slug, locale).first<D1ProjectRow>();
 
     if (!project) {
       return null;
     }
 
     return mapRowToProject(project);
-  } catch (error) {
-    console.warn("[projects] Erreur lors de la requête D1 getProjectBySlug. Utilisation des projets de secours:", error);
+  } catch (error: unknown) {
+    console.warn(
+      JSON.stringify({
+        level: "warn",
+        scope: "db.projects",
+        operation: "getProjectBySlug",
+        slug,
+        message: "Erreur requête D1, utilisation des projets de secours",
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
     const list = FALLBACK_PROJECTS[locale] || FALLBACK_PROJECTS.fr;
     return list.find((p) => p.slug === slug) || null;
   }

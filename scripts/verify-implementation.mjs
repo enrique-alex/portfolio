@@ -54,12 +54,32 @@ assert.ok(/\/og-image\.png\?v=7/.test(layoutContent), 'layout.tsx must contain /
 assert.ok(layoutContent.includes('width: 1200'), 'layout.tsx must specify standard 1200px OpenGraph width');
 assert.ok(layoutContent.includes('height: 630'), 'layout.tsx must specify standard 630px OpenGraph height');
 assert.ok(layoutContent.includes("themeColor: '#050505'"), 'layout.tsx viewport must define themeColor #050505');
-assert.ok(layoutContent.includes('https://enrique-alex.pages.dev'), 'layout.tsx must resolve https://enrique-alex.pages.dev when CF_PAGES is active');
+assert.ok(layoutContent.includes('getSiteUrl()'), 'layout.tsx must resolve canonical site URL via getSiteUrl()');
+
+const siteUrlPath = path.resolve('src/lib/site-url.ts');
+assert.ok(fs.existsSync(siteUrlPath), 'src/lib/site-url.ts must exist');
+const siteUrlContent = fs.readFileSync(siteUrlPath, 'utf-8');
+assert.ok(siteUrlContent.includes('NEXT_PUBLIC_SITE_URL'), 'site-url.ts must honor NEXT_PUBLIC_SITE_URL');
+assert.ok(siteUrlContent.includes('https://portfolio.enriquekemayou.workers.dev'), 'site-url.ts must default to https://portfolio.enriquekemayou.workers.dev');
+
+const analyticsPath = path.resolve('src/lib/analytics.ts');
+assert.ok(fs.existsSync(analyticsPath), 'src/lib/analytics.ts must exist');
+const analyticsContent = fs.readFileSync(analyticsPath, 'utf-8');
+assert.ok(analyticsContent.includes('NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN'), 'analytics.ts must honor NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN');
+assert.ok(analyticsContent.includes('https://static.cloudflareinsights.com/beacon.min.js'), 'analytics.ts must reference Cloudflare Web Analytics beacon.min.js');
+assert.ok(layoutContent.includes('getCloudflareWebAnalyticsBeaconConfig()'), 'layout.tsx must integrate Cloudflare Web Analytics via getCloudflareWebAnalyticsBeaconConfig()');
+
+const nextConfigContent = fs.readFileSync(path.resolve('next.config.ts'), 'utf-8');
+const publicHeadersContent = fs.readFileSync(path.resolve('public/_headers'), 'utf-8');
+assert.ok(nextConfigContent.includes('https://static.cloudflareinsights.com'), 'next.config.ts CSP must allow static.cloudflareinsights.com in script-src');
+assert.ok(nextConfigContent.includes('https://cloudflareinsights.com'), 'next.config.ts CSP must allow cloudflareinsights.com in connect-src');
+assert.ok(publicHeadersContent.includes('https://static.cloudflareinsights.com'), 'public/_headers CSP must allow static.cloudflareinsights.com in script-src');
+assert.ok(publicHeadersContent.includes('https://cloudflareinsights.com'), 'public/_headers CSP must allow cloudflareinsights.com in connect-src');
 
 const manifestPath = path.resolve('src/app/manifest.ts');
 const manifestContent = fs.readFileSync(manifestPath, 'utf-8');
 assert.ok(/\/icon\.svg\?v=7/.test(manifestContent), 'manifest.ts must contain /icon.svg?v=7');
-console.log('✓ 4. Cache-busting icons, CF_PAGES domain resolution & OpenGraph 1200x630 metadata passed');
+console.log('✓ 4. Cache-busting icons, Workers canonical domain resolution & OpenGraph 1200x630 metadata passed');
 
 // ─── 5. Verify SideSlider.tsx & persistent general visibility ───
 const sideSliderPath = path.resolve('src/components/ui/SideSlider.tsx');

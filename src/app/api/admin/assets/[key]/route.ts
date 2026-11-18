@@ -1,13 +1,22 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request, { params }: { params: Promise<{ key: string }> }) {
+const VALID_ASSET_KEY_REGEX = /^[a-zA-Z0-9._-]+\.(webp|png|jpe?g)$/;
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ key: string }> }
+) {
   try {
     const { key } = await params;
+
+    if (!VALID_ASSET_KEY_REGEX.test(key)) {
+      return new NextResponse("Invalid asset key", { status: 400 });
+    }
+
     const { env } = getCloudflareContext();
     const bucket = env.portfolio_images;
-    
-    // Récupération de l'objet depuis le bucket (local ou distant)
+
     const object = await bucket.get(key);
 
     if (!object) {
@@ -17,8 +26,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
     const headers = new Headers();
     object.writeHttpMetadata(headers as unknown as Headers);
     headers.set("etag", object.httpEtag);
-    
-    // Fallback explicite pour le content-type si non écrit par writeHttpMetadata
+    headers.set("cache-control", "private, max-age=3600");
+
     if (object.httpMetadata?.contentType) {
       headers.set("content-type", object.httpMetadata.contentType);
     }
@@ -27,8 +36,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
       status: 200,
       headers,
     });
-  } catch (err) {
-    console.error("Erreur lecture R2:", err);
+  } catch (error: unknown) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        scope: "api.admin.assets",
+        message: "Erreur lecture objet R2",
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

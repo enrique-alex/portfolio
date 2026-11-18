@@ -110,6 +110,37 @@ export function constantTimeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
+interface WorkersSubtleCrypto extends SubtleCrypto {
+  timingSafeEqual?: (a: ArrayBuffer | ArrayBufferView, b: ArrayBuffer | ArrayBufferView) => boolean;
+}
+
+/**
+ * Compare deux chaînes en temps constant sans fuite de longueur en hachant
+ * d'abord les deux entrées en SHA-256 (32 octets fixes), puis en utilisant
+ * `crypto.subtle.timingSafeEqual` lorsque disponible (runtime Cloudflare Workers).
+ */
+export async function timingSafeEqualStrings(a: string, b: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const [digestA, digestB] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(a)),
+    crypto.subtle.digest("SHA-256", encoder.encode(b)),
+  ]);
+
+  const subtle = crypto.subtle as WorkersSubtleCrypto;
+  if (typeof subtle.timingSafeEqual === "function") {
+    return subtle.timingSafeEqual(digestA, digestB);
+  }
+
+  // Fallback constant-time pour les environnements Node sans SubtleCrypto.timingSafeEqual
+  const bytesA = new Uint8Array(digestA);
+  const bytesB = new Uint8Array(digestB);
+  let mismatch = 0;
+  for (let i = 0; i < bytesA.length; i++) {
+    mismatch |= bytesA[i] ^ bytesB[i];
+  }
+  return mismatch === 0;
+}
+
 /**
  * Vérifie si un mot de passe en clair correspond au hash enregistré.
  * 
@@ -121,5 +152,5 @@ export function constantTimeEqual(a: string, b: string): boolean {
  */
 export async function verifyPassword(password: string, saltHex: string, expectedHashHex: string, iterations: number = 100000): Promise<boolean> {
   const actualHashHex = await hashPassword(password, saltHex, iterations);
-  return constantTimeEqual(actualHashHex, expectedHashHex);
+  return timingSafeEqualStrings(actualHashHex, expectedHashHex);
 }

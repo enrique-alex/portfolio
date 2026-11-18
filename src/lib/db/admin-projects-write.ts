@@ -341,26 +341,132 @@ export async function restoreProject(db: D1Database, id: string): Promise<boolea
   return true;
 }
 
-export async function purgeExpiredProjects(db: D1Database): Promise<number> {
+interface PurgeCandidateRow {
+  id: string;
+  cover_image: string | null;
+  gallery: string | null;
+}
+
+const DEFAULT_R2_DEV_ORIGIN_REGEX = /^https:\/\/pub-[a-z0-9]+\.r2\.dev\/([^/?#]+)$/;
+const R2_DELETE_BATCH_SIZE = 1000;
+
+/**
+ * Extrait la clé objet R2 depuis une URL publique R2, en ignorant les assets locaux (`/image/...`).
+ */
+export function extractR2KeyFromUrl(
+  url: string | null | undefined,
+  r2PublicUrl?: string
+): string | null {
+  if (!url || typeof url !== "string" || !url.startsWith("https://")) {
+    return null;
+  }
+
+  let candidateKey: string | null = null;
+
+  if (r2PublicUrl) {
+    const normalizedBase = r2PublicUrl.replace(/\/+$/, "");
+    const prefix = `${normalizedBase}/`;
+    if (url.startsWith(prefix)) {
+      candidateKey = url.slice(prefix.length);
+    }
+  } else {
+    const match = DEFAULT_R2_DEV_ORIGIN_REGEX.exec(url);
+    if (match) {
+      candidateKey = match[1];
+    }
+  }
+
+  if (!candidateKey || candidateKey.includes("/") || candidateKey.includes("..")) {
+    return null;
+  }
+
+  return candidateKey;
+}
+
+function collectR2KeysFromRow(
+  row: Pick<PurgeCandidateRow, "cover_image" | "gallery">,
+  target: Set<string>,
+  r2PublicUrl?: string
+): void {
+  const coverKey = extractR2KeyFromUrl(row.cover_image, r2PublicUrl);
+  if (coverKey) {
+    target.add(coverKey);
+  }
+
+  if (row.gallery) {
+    try {
+      const parsed = JSON.parse(row.gallery);
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (typeof item === "string") {
+            const galleryKey = extractR2KeyFromUrl(item, r2PublicUrl);
+            if (galleryKey) {
+              target.add(galleryKey);
+            }
+          }
+        }
+      }
+    } catch {
+      // Ignore un JSON de galerie corrompu pendant le nettoyage
+    }
+  }
+}
+
+export async function purgeExpiredProjects(
+  db: D1Database,
+  bucket?: R2Bucket,
+  r2PublicUrl?: string
+): Promise<number> {
   const expired = await db
-    .prepare("SELECT id FROM projects WHERE deleted_at IS NOT NULL AND deleted_at < datetime('now', '-90 days')")
-    .all<{ id: string }>();
+    .prepare(
+      "SELECT id, cover_image, gallery FROM projects WHERE deleted_at IS NOT NULL AND deleted_at < datetime('now', '-90 days')"
+    )
+    .all<PurgeCandidateRow>();
 
-  const ids = expired.results?.map(r => r.id) || [];
-
-  if (ids.length === 0) {
+  const rows = expired.results || [];
+  if (rows.length === 0) {
     return 0;
   }
 
+  const candidateR2Keys = new Set<string>();
   const statements = [];
-  for (const id of ids) {
-    statements.push(db.prepare("DELETE FROM project_translations WHERE project_id = ?").bind(id));
-    statements.push(db.prepare("DELETE FROM projects WHERE id = ?").bind(id));
+  for (const row of rows) {
+    collectR2KeysFromRow(row, candidateR2Keys, r2PublicUrl);
+    statements.push(db.prepare("DELETE FROM project_translations WHERE project_id = ?").bind(row.id));
+    statements.push(db.prepare("DELETE FROM projects WHERE id = ?").bind(row.id));
   }
 
   await db.batch(statements);
 
-  return ids.length;
+  if (bucket && candidateR2Keys.size > 0) {
+    try {
+      const remaining = await db
+        .prepare("SELECT cover_image, gallery FROM projects WHERE cover_image IS NOT NULL OR gallery IS NOT NULL")
+        .all<Pick<PurgeCandidateRow, "cover_image" | "gallery">>();
+
+      const retainedR2Keys = new Set<string>();
+      for (const row of remaining.results || []) {
+        collectR2KeysFromRow(row, retainedR2Keys, r2PublicUrl);
+      }
+
+      const keysToDelete = Array.from(candidateR2Keys).filter((key) => !retainedR2Keys.has(key));
+      for (let i = 0; i < keysToDelete.length; i += R2_DELETE_BATCH_SIZE) {
+        const chunk = keysToDelete.slice(i, i + R2_DELETE_BATCH_SIZE);
+        await bucket.delete(chunk);
+      }
+    } catch (error: unknown) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          scope: "db.purgeExpiredProjects",
+          message: "Erreur lors du nettoyage des objets R2 orphelins",
+          error: error instanceof Error ? error.message : String(error),
+        })
+      );
+    }
+  }
+
+  return rows.length;
 }
 
 export interface TrashedProjectItem {

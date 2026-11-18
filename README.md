@@ -10,7 +10,7 @@
 [![React](https://img.shields.io/badge/React%2019-Strict-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript%205-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS%20v4-Oxide%20Engine-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages%20%7C%20D1%20%7C%20R2-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://cloudflare.com)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers%20%7C%20D1%20%7C%20R2-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://cloudflare.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 <br />
@@ -84,7 +84,7 @@ Application full-stack construite avec Next.js App Router et déployée sur Clou
 ┌────────────────────────────────────────────────────────────────────────┐
 │                     CLOUDFLARE EDGE PLATFORM                           │
 │                                                                        │
-│   Cloudflare Pages (@opennextjs/cloudflare runtime)                    │
+│   Cloudflare Workers (@opennextjs/cloudflare runtime)                  │
 │   Cloudflare D1 (SQLite distribuée : migrations 0001 à 0008)           │
 │   Cloudflare R2 (Stockage des médias projets)                          │
 │   En-têtes de sécurité (CSP, Frame-Ancestors DENY, Rate-Limit login)   │

@@ -19,12 +19,18 @@ export async function GET(request: Request) {
 
     return NextResponse.json<Project[]>(projects, {
       headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=300",
       },
     });
-  } catch (error) {
-    // Log détaillé côté serveur uniquement
-    console.error("Erreur lors de la récupération des projets depuis D1 :", error);
+  } catch (error: unknown) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        scope: "api.projects",
+        message: "Erreur lors de la récupération des projets depuis D1",
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
 
     return NextResponse.json<ErrorResponse>(
       { error: "Une erreur est survenue lors de la récupération des projets." },

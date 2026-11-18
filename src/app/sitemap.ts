@@ -1,14 +1,12 @@
-import { MetadataRoute } from 'next'
-import { getProjects } from '@/lib/db/projects'
+import { MetadataRoute } from 'next';
+import { getProjects } from '@/lib/db/projects';
+import { getSiteUrl } from '@/lib/site-url';
+
+export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await getProjects('fr');
-  
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.CF_PAGES === '1'
-      ? 'https://enrique-alex.pages.dev'
-      : 'https://portfolio.enriquekemayou.workers.dev');
+  const baseUrl = getSiteUrl();
 
   const projectUrls = projects.map((project) => ({
     url: `${baseUrl}/projects/${project.slug}`,
@@ -25,5 +23,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     ...projectUrls,
-  ]
+  ];
 }

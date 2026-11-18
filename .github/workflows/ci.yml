@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Validation & Tests (Vitest, TSC, Lint)
+    name: Validation, Tests & Build Cloudflare (Lint, TSC, Vitest, OpenNext)
     runs-on: ubuntu-latest
 
     steps:
@@ -19,28 +19,44 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v5
 
-      # 2. Configuration de l'environnement Node.js (LTS 22)
-      - name: Configuration de Node.js 22 (LTS)
+      # 2. Configuration de l'environnement Node.js (aligné sur Cloudflare Workers Builds : Node 24)
+      - name: Configuration de Node.js 24
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       # 3. Installation stricte et reproductible des dépendances
       - name: Installation des dépendances (npm ci)
         run: npm ci
 
-      # 4. Vérification du style de code et des règles ESLint (0 erreur)
+      # 4. Génération des types Cloudflare et vérification de non-dérive
+      - name: Vérification des types Cloudflare (cf-typegen)
+        run: npm run cf-typegen
+
+      # 5. Vérification du style de code et des règles ESLint (0 erreur)
       - name: Validation ESLint (lint)
         run: npm run lint
 
-      # 5. Vérification de typage statique TypeScript (zéro erreur tolérée)
+      # 6. Vérification de typage statique TypeScript (app + tests, zéro erreur tolérée)
       - name: Vérification TypeScript (tsc)
-        run: npx tsc --noEmit
+        run: |
+          npx tsc --noEmit
+          npx tsc --noEmit -p test/tsconfig.json
 
-      # 6. Exécution de la suite complète de tests Vitest + D1 isolé (workerd)
+      # 7. Vérification des invariants marque, SEO et accessibilité
+      - name: Vérification des invariants (verify-implementation)
+        run: node scripts/verify-implementation.mjs
+
+      # 8. Exécution de la suite complète de tests Vitest + D1/R2 isolés (workerd)
       - name: Exécution des tests (Vitest)
         run: npm test
+
+      # 9. Build OpenNext Cloudflare + validation Wrangler dry-run
+      - name: Build OpenNext Cloudflare & Dry-Run Wrangler
+        run: |
+          npm run build:cloudflare
+          npx wrangler deploy --dry-run --outdir=.wrangler/dry-run
 
   deploy:
     name: Migrations D1 Production (Cloudflare)
@@ -53,11 +69,11 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v5
 
-      # 2. Configuration de l'environnement Node.js (LTS 22)
-      - name: Configuration de Node.js 22 (LTS)
+      # 2. Configuration de l'environnement Node.js (aligné sur Cloudflare Workers Builds : Node 24)
+      - name: Configuration de Node.js 24
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       # 3. Installation des dépendances

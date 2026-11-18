@@ -12,7 +12,7 @@ export default async function TrashPage() {
   const db = env.portfolio_db;
 
   // Purge paresseuse silencieuse
-  await purgeExpiredProjects(db);
+  await purgeExpiredProjects(db, env.portfolio_images, env.R2_PUBLIC_URL);
   const trashedProjects = await getTrashedProjects(db);
 
   return (

@@ -5,6 +5,7 @@ import {
   generateSalt,
   generateSessionSecret,
   constantTimeEqual,
+  timingSafeEqualStrings,
 } from "@/lib/auth/password";
 
 describe("Password and Cryptographic Utilities", () => {
@@ -150,6 +151,15 @@ describe("Password and Cryptographic Utilities", () => {
       const secret1 = generateSessionSecret();
       const secret2 = generateSessionSecret();
       expect(secret1).not.toBe(secret2);
+    });
+  });
+
+  describe("timingSafeEqualStrings", () => {
+    it("should match identical strings and reject mismatches regardless of length", async () => {
+      expect(await timingSafeEqualStrings("secret-token-123", "secret-token-123")).toBe(true);
+      expect(await timingSafeEqualStrings("", "")).toBe(true);
+      expect(await timingSafeEqualStrings("short", "much-longer-string")).toBe(false);
+      expect(await timingSafeEqualStrings("secret-token-123", "secret-token-124")).toBe(false);
     });
   });
 });

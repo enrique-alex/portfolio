@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig(async () => {
   const migrationsPath = path.join(process.cwd(), "migrations");
 
-  // Assure la présence des fichiers et dossiers attendus par wrangler.toml en environnement CI
+  // Assure la présence des fichiers et dossiers attendus par wrangler.jsonc en environnement CI
   const openNextDir = path.join(process.cwd(), ".open-next");
   const assetsDir = path.join(openNextDir, "assets");
   const workerFile = path.join(openNextDir, "worker.js");
@@ -26,7 +26,7 @@ export default defineConfig(async () => {
     const migrations = await readD1Migrations(migrationsPath);
     plugins.push(
       cloudflareTest({
-        wrangler: { configPath: "./wrangler.toml" },
+        wrangler: { configPath: "./wrangler.jsonc" },
         miniflare: {
           bindings: { TEST_MIGRATIONS: migrations },
         },

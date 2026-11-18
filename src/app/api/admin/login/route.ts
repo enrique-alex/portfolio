@@ -57,15 +57,38 @@ export async function POST(request: Request): Promise<NextResponse<ErrorResponse
     const hash = env.ADMIN_PASSWORD_HASH;
     const sessionSecret = env.SESSION_SECRET;
 
+    if (!db || !salt || !hash || !sessionSecret) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          scope: "api.admin.login",
+          message: "Secrets ou binding D1 manquants pour l'authentification admin",
+          hasDb: Boolean(db),
+          hasSalt: Boolean(salt),
+          hasHash: Boolean(hash),
+          hasSessionSecret: Boolean(sessionSecret),
+        })
+      );
+      return NextResponse.json<ErrorResponse>(
+        { error: "Configuration d'authentification incomplète." },
+        { status: 500 }
+      );
+    }
+
     // --- Identification de l'IP client ---
     const identifier = request.headers.get("CF-Connecting-IP") ?? "unknown";
 
     // --- Vérification du rate limit ---
     const rateLimitResult = await checkRateLimit(db, identifier);
     if (!rateLimitResult.allowed) {
-      // Log l'IP verrouillée sans jamais mentionner le mot de passe soumis
       console.error(
-        `[auth] Tentative bloquée par rate limit - IP: ${identifier}, retry après: ${rateLimitResult.retryAfterSeconds}s`
+        JSON.stringify({
+          level: "warn",
+          scope: "api.admin.login",
+          event: "rate_limit_blocked",
+          ip: identifier,
+          retryAfterSeconds: rateLimitResult.retryAfterSeconds ?? 900,
+        })
       );
       return NextResponse.json<ErrorResponse>(
         { error: "Trop de tentatives. Veuillez réessayer plus tard." },
@@ -82,8 +105,15 @@ export async function POST(request: Request): Promise<NextResponse<ErrorResponse
     const isValid = await verifyPassword(password, salt, hash);
 
     if (!isValid) {
-      // Log l'échec sans jamais inclure le mot de passe soumis
-      console.error(`[auth] Échec d'authentification - IP: ${identifier}, date: ${new Date().toISOString()}`);
+      console.error(
+        JSON.stringify({
+          level: "warn",
+          scope: "api.admin.login",
+          event: "auth_failed",
+          ip: identifier,
+          timestamp: new Date().toISOString(),
+        })
+      );
       await recordFailedAttempt(db, identifier);
       return NextResponse.json<ErrorResponse>(
         { error: "Identifiants invalides." },
@@ -106,9 +136,15 @@ export async function POST(request: Request): Promise<NextResponse<ErrorResponse
     );
 
     return response;
-  } catch (error) {
-    // Log l'erreur interne sans jamais exposer de stack trace au client
-    console.error("[auth] Erreur interne lors de l'authentification:", error);
+  } catch (error: unknown) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        scope: "api.admin.login",
+        message: "Erreur interne lors de l'authentification",
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
     return NextResponse.json<ErrorResponse>(
       { error: "Une erreur interne est survenue." },
       { status: 500 }

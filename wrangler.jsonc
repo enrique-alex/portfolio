@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "portfolio",
+  "main": ".open-next/worker.js",
+  // Date maximale supportée par le binaire workerd épinglé (2026-08-27, >= 2026-08-04)
+  "compatibility_date": "2026-08-27",
+  "compatibility_flags": ["nodejs_compat"],
+  // Requis par OpenNext/React pour éviter les erreurs __name sur les bundles minifiés
+  "keep_names": false,
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.1
+    }
+  },
+  "vars": {
+    "R2_PUBLIC_URL": "https://pub-f2abb97fd5a44520b79d8e56bf020956.r2.dev"
+  },
+  "secrets": {
+    "required": [
+      "ADMIN_PASSWORD_SALT",
+      "ADMIN_PASSWORD_HASH",
+      "SESSION_SECRET"
+    ]
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "portfolio_db",
+      "database_name": "portfolio-db",
+      "database_id": "96fa978e-2ad1-4171-84a1-76fa1846e12e"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "bucket_name": "portfolio-images",
+      "binding": "portfolio_images"
+    }
+  ]
+}

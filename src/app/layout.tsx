@@ -3,6 +3,8 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { LanguageProvider } from "@/components/theme/LanguageProvider";
 import { ProjectsProvider } from "@/components/theme/ProjectsProvider";
 import DualBodyCursor from "@/components/animations/DualBodyCursor";
+import { getCloudflareWebAnalyticsBeaconConfig } from "@/lib/analytics";
+import { getSiteUrl } from "@/lib/site-url";
 import type { Viewport } from 'next';
 
 export const viewport: Viewport = {
@@ -12,11 +14,7 @@ export const viewport: Viewport = {
   themeColor: '#050505',
 };
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.CF_PAGES === '1'
-    ? 'https://enrique-alex.pages.dev'
-    : 'https://portfolio.enriquekemayou.workers.dev');
+const SITE_URL = getSiteUrl();
 
 export const metadata = {
   icons: {
@@ -103,6 +101,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const cfAnalytics = getCloudflareWebAnalyticsBeaconConfig();
+
   return (
     // suppressHydrationWarning est indispensable avec next-themes pour éviter le flash au chargement
     <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
@@ -123,10 +123,6 @@ export default function RootLayout({
               "if(typeof window!=='undefined'&&typeof window.__name==='undefined'){window.__name=function(t,v){return Object.defineProperty(t,'name',{value:v,configurable:true});}};(function(){try{if(typeof window==='undefined')return;var p=window.location&&window.location.pathname||'';if(p!=='/'&&p.indexOf('/projects/')!==0)return;if(window.__preloaderDone===true)return;var ua=navigator.userAgent||'';if(/bot|googlebot|crawler|spider|robot|crawling|lighthouse|pagespeed|ptst|chrome-lighthouse/i.test(ua))return;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.setAttribute('data-en-boot','active');window.setTimeout(function(){document.documentElement.removeAttribute('data-en-boot');},4500);}catch(e){}})();",
           }}
         />
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; connect-src 'self' https://api.web3forms.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://pub-f2abb97fd5a44520b79d8e56bf020956.r2.dev; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
-        />
       </head>
       <body className="bg-[#F8F9FA] text-zinc-900 dark:bg-[#050505] dark:text-[#EDEDED] antialiased selection:bg-blue-600/20 selection:text-blue-700 dark:selection:bg-[#00D2FF]/20 dark:selection:text-[#00D2FF] overflow-x-clip w-full max-w-full" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
@@ -137,6 +133,13 @@ export default function RootLayout({
             </ProjectsProvider>
           </LanguageProvider>
         </ThemeProvider>
+        {cfAnalytics && (
+          <script
+            defer
+            src={cfAnalytics.src}
+            data-cf-beacon={cfAnalytics.dataCfBeacon}
+          />
+        )}
       </body>
     </html>
   );
