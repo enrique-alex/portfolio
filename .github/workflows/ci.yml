@@ -30,34 +30,29 @@ jobs:
       - name: Installation des dépendances (npm ci)
         run: npm ci
 
-      # 4. Génération des types Cloudflare et vérification de non-dérive
-      - name: Vérification des types Cloudflare (cf-typegen)
-        run: |
-          npm run cf-typegen
-          git diff --exit-code worker-configuration.d.ts
-
-      # 5. Vérification du style de code et des règles ESLint (0 erreur)
+      # 4. Vérification du style de code et des règles ESLint (0 erreur)
       - name: Validation ESLint (lint)
         run: npm run lint
 
-      # 6. Vérification de typage statique TypeScript (app + tests, zéro erreur tolérée)
+      # 5. Vérification de typage statique TypeScript (app + tests, zéro erreur tolérée)
       - name: Vérification TypeScript (tsc)
         run: |
           npx tsc --noEmit
           npx tsc --noEmit -p test/tsconfig.json
 
-      # 7. Vérification des invariants marque, SEO et accessibilité
+      # 6. Vérification des invariants marque, SEO et accessibilité
       - name: Vérification des invariants (verify-implementation)
         run: node scripts/verify-implementation.mjs
 
-      # 8. Exécution de la suite complète de tests Vitest + D1/R2 isolés (workerd)
+      # 7. Exécution de la suite complète de tests Vitest + D1/R2 isolés (workerd)
       - name: Exécution des tests (Vitest)
         run: npm test
 
-      # 9. Build OpenNext Cloudflare + validation Wrangler dry-run
-      - name: Build OpenNext Cloudflare & Dry-Run Wrangler
+      # 8. Build OpenNext Cloudflare, vérification de non-dérive des types & Dry-Run Wrangler
+      - name: Build OpenNext Cloudflare, cf-typegen --check & Dry-Run Wrangler
         run: |
           npm run build:cloudflare
+          npx wrangler types --env-interface=CloudflareEnv --check
           npx wrangler deploy --dry-run --outdir=.wrangler/dry-run
 
   deploy:
