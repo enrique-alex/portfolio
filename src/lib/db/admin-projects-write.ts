@@ -347,40 +347,117 @@ interface PurgeCandidateRow {
   gallery: string | null;
 }
 
-const DEFAULT_R2_DEV_ORIGIN_REGEX = /^https:\/\/pub-[a-z0-9]+\.r2\.dev\/([^/?#]+)$/;
+const DEFAULT_R2_DEV_HOSTNAME_REGEX = /^pub-[a-z0-9]+\.r2\.dev$/;
+const VALID_R2_ASSET_KEY_REGEX = /^[a-zA-Z0-9_-][a-zA-Z0-9._-]*\.(webp|png|jpe?g)$/;
+const RAW_DOT_SEGMENT_REGEX = /(?:^|\/)(?:\.|%2e){1,2}(?:\/|$)/i;
 const R2_DELETE_BATCH_SIZE = 1000;
 
 /**
+ * Valide qu'une clé d'asset R2 est un nom de fichier image plat sûr
+ * (sans traversée `..`, sans point initial, sans séparateur de chemin).
+ */
+export function isValidR2AssetKey(key: string): boolean {
+  return (
+    typeof key === "string" &&
+    !key.includes("..") &&
+    VALID_R2_ASSET_KEY_REGEX.test(key)
+  );
+}
+
+/**
  * Extrait la clé objet R2 depuis une URL publique R2, en ignorant les assets locaux (`/image/...`).
+ * Parse via URL() pour normaliser la casse d'origine, ignorer les query/fragments (`?v=2`),
+ * et rejeter toute traversée brute ou encodée (`..`, `%2e%2e`, `%2f`).
  */
 export function extractR2KeyFromUrl(
   url: string | null | undefined,
   r2PublicUrl?: string
 ): string | null {
-  if (!url || typeof url !== "string" || !url.startsWith("https://")) {
+  if (!url || typeof url !== "string") {
     return null;
   }
 
-  let candidateKey: string | null = null;
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl.toLowerCase().startsWith("https://")) {
+    return null;
+  }
 
-  if (r2PublicUrl) {
-    const normalizedBase = r2PublicUrl.replace(/\/+$/, "");
-    const prefix = `${normalizedBase}/`;
-    if (url.startsWith(prefix)) {
-      candidateKey = url.slice(prefix.length);
+  // Rejette les segments `.` ou `..` avant que WHATWG URL() ne les normalise
+  const authorityAndPath = trimmedUrl.slice("https://".length).split(/[?#]/, 1)[0];
+  const firstSlash = authorityAndPath.indexOf("/");
+  if (firstSlash === -1) {
+    return null;
+  }
+  const rawPathname = authorityAndPath.slice(firstSlash);
+  if (RAW_DOT_SEGMENT_REGEX.test(rawPathname) || rawPathname.includes("\\")) {
+    return null;
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(trimmedUrl);
+  } catch {
+    return null;
+  }
+
+  if (parsedUrl.protocol !== "https:") {
+    return null;
+  }
+
+  let rawRelativePath: string | null = null;
+  const trimmedBase = r2PublicUrl?.trim();
+
+  if (trimmedBase) {
+    let parsedBase: URL;
+    try {
+      parsedBase = new URL(trimmedBase);
+    } catch {
+      return null;
     }
+
+    if (parsedBase.protocol !== "https:" || parsedUrl.origin !== parsedBase.origin) {
+      return null;
+    }
+
+    const basePath = parsedBase.pathname.replace(/\/+$/, "");
+    const expectedPrefix = `${basePath}/`;
+    if (!parsedUrl.pathname.startsWith(expectedPrefix)) {
+      return null;
+    }
+
+    rawRelativePath = parsedUrl.pathname.slice(expectedPrefix.length);
   } else {
-    const match = DEFAULT_R2_DEV_ORIGIN_REGEX.exec(url);
-    if (match) {
-      candidateKey = match[1];
+    if (!DEFAULT_R2_DEV_HOSTNAME_REGEX.test(parsedUrl.hostname)) {
+      return null;
     }
+    rawRelativePath = parsedUrl.pathname.replace(/^\//, "");
   }
 
-  if (!candidateKey || candidateKey.includes("/") || candidateKey.includes("..")) {
+  if (!rawRelativePath || rawRelativePath.includes("/")) {
     return null;
   }
 
-  return candidateKey;
+  let decodedKey: string;
+  try {
+    decodedKey = decodeURIComponent(rawRelativePath);
+  } catch {
+    return null;
+  }
+
+  if (
+    !decodedKey ||
+    decodedKey === "." ||
+    decodedKey === ".." ||
+    decodedKey.startsWith(".") ||
+    decodedKey.includes("/") ||
+    decodedKey.includes("\\") ||
+    decodedKey.includes("..") ||
+    /\s/.test(decodedKey)
+  ) {
+    return null;
+  }
+
+  return decodedKey;
 }
 
 function collectR2KeysFromRow(

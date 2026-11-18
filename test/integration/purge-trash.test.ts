@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { env } from "cloudflare:test";
 import {
   extractR2KeyFromUrl,
+  isValidR2AssetKey,
   purgeExpiredProjects,
 } from "@/lib/db/admin-projects-write";
 
@@ -72,13 +73,43 @@ describe("Trash Purge & Orphan R2 Cleanup Integration", () => {
   beforeEach(cleanup);
   afterEach(cleanup);
 
-  it("extractR2KeyFromUrl should only extract valid single-segment R2 keys", () => {
+  it("extractR2KeyFromUrl should safely extract single-segment R2 keys across edge cases", () => {
     expect(extractR2KeyFromUrl(`${R2_BASE}/abc-123.webp`, R2_BASE)).toBe("abc-123.webp");
-    expect(extractR2KeyFromUrl(`${R2_BASE}/abc-123.webp`, `${R2_BASE}/`)).toBe("abc-123.webp");
+    expect(extractR2KeyFromUrl(`${R2_BASE}/abc-123.webp`, `  ${R2_BASE}/  `)).toBe("abc-123.webp");
+    // Query strings & fragments stripped consistently with and without r2PublicUrl
+    expect(extractR2KeyFromUrl(`${R2_BASE}/abc-123.webp?v=2#hero`, R2_BASE)).toBe("abc-123.webp");
+    expect(extractR2KeyFromUrl(`${R2_BASE}/abc-123.webp?v=2#hero`)).toBe("abc-123.webp");
+    // Origin host matching is case-insensitive
+    expect(
+      extractR2KeyFromUrl(
+        "https://PUB-F2ABB97FD5A44520B79D8E56BF020956.R2.DEV/abc-123.webp",
+        R2_BASE
+      )
+    ).toBe("abc-123.webp");
+    // Reject local paths, foreign origins, raw traversal, and percent-encoded traversal
     expect(extractR2KeyFromUrl("/image/projects/local.webp", R2_BASE)).toBeNull();
     expect(extractR2KeyFromUrl("https://evil.example.com/abc.png", R2_BASE)).toBeNull();
     expect(extractR2KeyFromUrl(`${R2_BASE}/../secret.png`, R2_BASE)).toBeNull();
+    expect(extractR2KeyFromUrl(`${R2_BASE}/./secret.png`, R2_BASE)).toBeNull();
+    expect(extractR2KeyFromUrl(`${R2_BASE}/%2e%2e/secret.png`, R2_BASE)).toBeNull();
+    expect(extractR2KeyFromUrl(`${R2_BASE}/%2e%2e`, R2_BASE)).toBeNull();
+    expect(extractR2KeyFromUrl(`${R2_BASE}/foo%2fbar.png`, R2_BASE)).toBeNull();
+    expect(extractR2KeyFromUrl(`${R2_BASE}/.hidden.png`, R2_BASE)).toBeNull();
+    expect(extractR2KeyFromUrl(`${R2_BASE}/nested/path.png`, R2_BASE)).toBeNull();
     expect(extractR2KeyFromUrl(null, R2_BASE)).toBeNull();
+  });
+
+  it("isValidR2AssetKey should reject dot-prefixed and double-dot keys while accepting valid image keys", () => {
+    expect(isValidR2AssetKey("d3632451-1346-4cdf-9bed-dbb8463a03e9.webp")).toBe(true);
+    expect(isValidR2AssetKey("cover_01.png")).toBe(true);
+    expect(isValidR2AssetKey("photo.jpg")).toBe(true);
+    expect(isValidR2AssetKey("photo.jpeg")).toBe(true);
+    expect(isValidR2AssetKey("..png")).toBe(false);
+    expect(isValidR2AssetKey(".hidden.png")).toBe(false);
+    expect(isValidR2AssetKey("foo..bar.webp")).toBe(false);
+    expect(isValidR2AssetKey("../secret.png")).toBe(false);
+    expect(isValidR2AssetKey("script.svg")).toBe(false);
+    expect(isValidR2AssetKey("")).toBe(false);
   });
 
   it("should purge expired projects (>90 days) and delete orphan R2 objects while preserving recent/shared objects", async () => {
@@ -110,7 +141,7 @@ describe("Trash Purge & Orphan R2 Cleanup Integration", () => {
     await insertTestProject({
       id: "purge-active-3",
       slug: "purge-active-3",
-      coverImage: `${R2_BASE}/shared-still-used.png`,
+      coverImage: `${R2_BASE}/shared-still-used.png?v=2`,
       gallery: null,
       deletedAtModifier: null,
     });

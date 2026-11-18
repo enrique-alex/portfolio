@@ -15,12 +15,12 @@ import rootLayoutRaw from "@/app/layout.tsx?raw";
 
 function extractNextConfigCsp(source: string): string {
   const match = source.match(
-    /key:\s*["']Content-Security-Policy["'],\s*value:\s*"([^"]+)"/s
+    /key:\s*["']Content-Security-Policy["'],\s*value:\s*(?:"([^"]+)"|'([^']+)'|`([^`]+)`)/s
   );
   if (!match) {
     throw new Error("Unable to locate Content-Security-Policy in next.config.ts");
   }
-  return match[1];
+  return (match[1] ?? match[2] ?? match[3]).trim();
 }
 
 function extractPublicHeadersCsp(source: string): string {

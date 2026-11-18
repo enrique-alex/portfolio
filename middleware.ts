@@ -34,13 +34,31 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   // Récupération du secret de session depuis le contexte Cloudflare
-  let sessionSecret: string;
+  let sessionSecret: string | undefined;
   try {
     const { env } = getCloudflareContext();
     sessionSecret = env.SESSION_SECRET;
-  } catch (error) {
-    console.error("[middleware] Impossible d'accéder au contexte Cloudflare:", error);
+  } catch (error: unknown) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        scope: "middleware.auth",
+        message: "Impossible d'accéder au contexte Cloudflare",
+        error: error instanceof Error ? error.message : String(error),
+      })
+    );
     // Si le contexte n'est pas disponible, on refuse l'accès par sécurité
+    return handleUnauthenticated(request, pathname);
+  }
+
+  if (!sessionSecret || sessionSecret.trim().length === 0) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        scope: "middleware.auth",
+        message: "Secret SESSION_SECRET manquant dans l'environnement Cloudflare",
+      })
+    );
     return handleUnauthenticated(request, pathname);
   }
 

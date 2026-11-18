@@ -32,7 +32,9 @@ jobs:
 
       # 4. Génération des types Cloudflare et vérification de non-dérive
       - name: Vérification des types Cloudflare (cf-typegen)
-        run: npm run cf-typegen
+        run: |
+          npm run cf-typegen
+          git diff --exit-code worker-configuration.d.ts
 
       # 5. Vérification du style de code et des règles ESLint (0 erreur)
       - name: Validation ESLint (lint)

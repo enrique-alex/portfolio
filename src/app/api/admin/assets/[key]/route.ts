@@ -1,7 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
-
-const VALID_ASSET_KEY_REGEX = /^[a-zA-Z0-9._-]+\.(webp|png|jpe?g)$/;
+import { isValidR2AssetKey } from "@/lib/db/admin-projects-write";
 
 export async function GET(
   _request: Request,
@@ -10,12 +9,23 @@ export async function GET(
   try {
     const { key } = await params;
 
-    if (!VALID_ASSET_KEY_REGEX.test(key)) {
+    if (!isValidR2AssetKey(key)) {
       return new NextResponse("Invalid asset key", { status: 400 });
     }
 
     const { env } = getCloudflareContext();
     const bucket = env.portfolio_images;
+
+    if (!bucket) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          scope: "api.admin.assets",
+          message: "Binding R2 'portfolio_images' manquant",
+        })
+      );
+      return new NextResponse("Internal Error", { status: 500 });
+    }
 
     const object = await bucket.get(key);
 
@@ -27,6 +37,7 @@ export async function GET(
     object.writeHttpMetadata(headers as unknown as Headers);
     headers.set("etag", object.httpEtag);
     headers.set("cache-control", "private, max-age=3600");
+    headers.set("x-content-type-options", "nosniff");
 
     if (object.httpMetadata?.contentType) {
       headers.set("content-type", object.httpMetadata.contentType);

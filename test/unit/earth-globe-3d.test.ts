@@ -118,4 +118,15 @@ describe('EarthGlobe3D - Standalone Interactive Earth Globe Component', () => {
     const html = renderToString(React.createElement(EarthGlobe3D));
     expect(html).toContain('27.3°N, 8.2°E');
   });
+
+  it('should format geodesic distance deterministically independent of host Number.prototype.toLocaleString', () => {
+    const toLocaleSpy = vi
+      .spyOn(Number.prototype, 'toLocaleString')
+      .mockReturnValue('HOST_LOCALE_DRIFT');
+
+    const html = renderToString(React.createElement(EarthGlobe3D));
+    expect(html).toContain('5\u202f262 KM');
+    expect(html).not.toContain('HOST_LOCALE_DRIFT');
+    expect(toLocaleSpy).not.toHaveBeenCalled();
+  });
 });

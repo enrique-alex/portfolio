@@ -27,8 +27,21 @@ function computePointSize(pointCount: number): number {
   return 0.60 * avgSpacing;
 }
 
+/**
+ * Formate la distance géodésique de manière déterministe et indépendante de l'ICU hôte
+ * afin d'éviter toute divergence SSR Cloudflare Workers (`en-US`) / navigateur (`fr-FR`)
+ * qui provoquerait une erreur d'hydratation React #418 sur la page d'accueil.
+ */
+function formatGeodesicDistance(distanceKm: number, locale: 'fr' | 'en'): string {
+  const separator = locale === 'en' ? ',' : '\u202f';
+  return Math.round(distanceKm)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+}
+
 export default function EarthGlobe3D({ className = '', onCoordinatesChange }: EarthGlobe3DProps) {
   const { locale, t } = useOptionalLanguage();
+  const formattedDistance = formatGeodesicDistance(GEODESIC_DISTANCE_KM, locale);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -533,7 +546,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
             </span>
           </div>
           <span className="font-mono text-[11px] tabular-nums tracking-wider text-zinc-600 dark:text-zinc-400">
-            {`${GEODESIC_DISTANCE_KM.toLocaleString()} KM · ${t('globe.coordinates')}`}
+            {`${formattedDistance} KM · ${t('globe.coordinates')}`}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -578,7 +591,7 @@ export default function EarthGlobe3D({ className = '', onCoordinatesChange }: Ea
             <span>LILLE-DUNKERQUE [FR] · 50°38&apos;N 03°03&apos;E</span>
           </div>
           <div className="mt-0.5 border-t border-white/10 pt-1 text-[11px] text-zinc-300 flex items-center justify-between gap-3">
-            <span>{GEODESIC_DISTANCE_KM.toLocaleString()} KM</span>
+            <span>{`${formattedDistance} KM`}</span>
             <span className="text-zinc-400">Δσ = 47.3°</span>
           </div>
         </div>

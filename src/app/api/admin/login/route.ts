@@ -41,7 +41,14 @@ export async function POST(request: Request): Promise<NextResponse<ErrorResponse
       );
     }
 
-    const { password } = body as LoginRequestBody;
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "Corps de requête invalide." },
+        { status: 400 }
+      );
+    }
+
+    const { password } = body as Partial<LoginRequestBody>;
 
     if (!password || typeof password !== "string" || password.trim().length === 0) {
       return NextResponse.json<ErrorResponse>(
